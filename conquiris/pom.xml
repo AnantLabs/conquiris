@@ -10,8 +10,11 @@
   <packaging>pom</packaging>
   <name>Conquiris :: Parent POM</name>
   <version>0.0.1-SNAPSHOT</version>
+  <modules>
+  	<module>conquiris-lucene</module>
+  </modules>
   <properties>
-  	<luceneVersion>2.9.0</luceneVersion>
+  	<luceneVersion>2.9.1</luceneVersion>
 		<dcVersion>0.0.1-SNAPSHOT</dcVersion>
 	</properties>
 </project>
