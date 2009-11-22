@@ -20,17 +20,30 @@ import java.io.IOException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Scorer;
+import org.apache.lucene.util.OpenBitSet;
 
 /**
- * A collector that simply counts the number of hits. This collector is not thread-safe and may not
- * be reused in different searches.
+ * A collector that simply stores the doc ids of the hits not taking scores into account. The hits
+ * are stored in a OpenBitSet. This collector is not thread-safe and may not be reused in different
+ * searches.
  * @author Andres Rodriguez
  */
-public class CountingCollector extends Collector {
-	private int totalHits = 0;
+public class AllCollector extends Collector {
+	/** Doc Ids. */
+	private final OpenBitSet docIds = new OpenBitSet();
+	/** Current reader base. */
+	private int docBase = 0;
 
 	/** Constructor. */
-	public CountingCollector() {
+	public AllCollector() {
+	}
+
+	/**
+	 * Returns the doc ids of the hits.
+	 * @return A bit set with the doc ids.
+	 */
+	public OpenBitSet getDocIds() {
+		return docIds;
 	}
 
 	/*
@@ -48,7 +61,7 @@ public class CountingCollector extends Collector {
 	 */
 	@Override
 	public void collect(int doc) throws IOException {
-		totalHits++;
+		docIds.set(docBase + doc);
 	}
 
 	/*
@@ -66,13 +79,6 @@ public class CountingCollector extends Collector {
 	 */
 	@Override
 	public void setNextReader(IndexReader reader, int docBase) throws IOException {
-	}
-
-	/**
-	 * Returns the total number of hits.
-	 * @return The total number of hits.
-	 */
-	public final int getTotalHits() {
-		return totalHits;
+		this.docBase = docBase;
 	}
 }
