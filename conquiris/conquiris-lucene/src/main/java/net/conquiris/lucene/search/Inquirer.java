@@ -20,16 +20,16 @@ import java.io.IOException;
 import net.conquiris.api.Result;
 
 /**
- * Interface for inquiries.
+ * Interface for inquirers.
  * @author Andres Rodriguez
- * @param <T> Result type.
  */
-public interface Inquiry<T extends Result> {
+public interface Inquirer {
 	/**
-	 * Performs the inquiry.
-	 * @param inquirable Inquirable object to use.
-	 * @return A result builder (must not be {@code null}).
-	 * @throws IOException If an error occurs.
+	 * Performs an inquiry.
+	 * @param <T> Result type.
+	 * @param inquiry Inquiry to perform.
+	 * @return The inquiry result.
+	 * @throws IOException if an error occurs.
 	 */
-	ResultBuilder<T> perform(Inquirable inquirable) throws IOException;
+	<T extends Result> T perform(Inquiry<T> inquiry) throws IOException;
 }

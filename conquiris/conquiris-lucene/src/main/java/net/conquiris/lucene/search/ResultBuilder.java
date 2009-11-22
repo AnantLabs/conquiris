@@ -26,7 +26,7 @@ public interface ResultBuilder<T extends Result> {
 	/**
 	 * Builds the result.
 	 * @param time Elapsed time.
-	 * @return The result.
+	 * @return The result (must not be {@code null}).
 	 */
 	T build(long time);
 }
