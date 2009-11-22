@@ -14,5 +14,15 @@
       <version>${luceneVersion}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+    	<groupId>com.google.collections</groupId>
+    	<artifactId>google-collections</artifactId>
+    	<version>1.0-rc4</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.conquiris</groupId>
+    	<artifactId>conquiris-api</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>
