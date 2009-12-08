@@ -26,7 +26,6 @@ import java.util.List;
 
 import net.conquiris.api.Grouping;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
@@ -96,7 +95,7 @@ public class GroupingTest {
 	private <T> void leaf(Grouping<T> g, int hits) {
 		leaf(g, hits, null);
 	}
-	
+
 	@Test
 	public void one() throws IOException {
 		builder = new GroupingBuilder<Integer>(list(1, 1), 0, null, null);
@@ -128,4 +127,42 @@ public class GroupingTest {
 		leaf(get(g1, 2), 1);
 	}
 
+	@Test(dependsOnMethods = "three")
+	public void l4one() {
+		builder = new GroupingBuilder<Integer>(list(1, 1, 1, 1), 0, null, null);
+		Grouping<Integer> g = build(1);
+		sizes(keys(g, 1), 1);
+		Grouping<Integer> g1 = get(g, 1);
+		sizes(keys(g1, 1), 1);
+		Grouping<Integer> g2 = get(g1, 1);
+		sizes(keys(g2, 1), 1);
+		Grouping<Integer> g3 = get(g2, 1);
+		sizes(keys(g3, 1), 1);
+		leaf(get(g3, 1), 1);
+	}
+
+	@Test(dependsOnMethods = "l4one", expectedExceptions=IllegalArgumentException.class)
+	public void l4twoBad() {
+		builder.add(list(1, 2), null, null);
+	}
+
+	@Test(dependsOnMethods = "l4one")
+	public void l4two() {
+		builder.add(list(1, 2, 1, 1), null, null);
+		Grouping<Integer> g = build(2);
+		sizes(keys(g, 1), 2);
+		Grouping<Integer> g1 = get(g, 1);
+		sizes(keys(g1, 1, 2), 1, 1);
+		Grouping<Integer> g2 = get(g1, 1);
+		sizes(keys(g2, 1), 1);
+		Grouping<Integer> g3 = get(g2, 1);
+		sizes(keys(g3, 1), 1);
+		leaf(get(g3, 1), 1);
+		g2 = get(g1, 2);
+		sizes(keys(g2, 1), 1);
+		g3 = get(g2, 1);
+		sizes(keys(g3, 1), 1);
+		leaf(get(g3, 1), 1);
+	}
+	
 }
