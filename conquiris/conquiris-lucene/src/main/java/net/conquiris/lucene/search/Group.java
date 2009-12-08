@@ -13,17 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.api;
+package net.conquiris.lucene.search;
+
+import java.util.List;
+
+import org.apache.lucene.document.Document;
 
 /**
- * Interface for grouped search results.
+ * Interface for group payload calculators.
  * @author Andres Rodriguez
  * @param <T> Payload type.
  */
-public interface GroupResult<T> extends Result {
+public interface Group<T> {
 	/**
-	 * Returns the first grouping level.
-	 * @return The first grouping level.
+	 * Performs the payload calculation.
+	 * @param path Group values.
+	 * @param document Current document.
+	 * @param hits Hits so far (including this).
+	 * @param previous Current payload value ({@code null} for the first hit).
+	 * @return New payload value.
 	 */
-	Grouping<T> getFirst();
+	T perform(List<String> path, Document document, int hits, T previous);
 }

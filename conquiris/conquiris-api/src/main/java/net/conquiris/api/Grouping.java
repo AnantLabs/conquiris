@@ -15,39 +15,26 @@
  */
 package net.conquiris.api;
 
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Base interface for grouped search results.
  * @author Andres Rodriguez
- * @param T Payload type.
+ * @param <T> Payload type.
  */
-public interface Grouping<T> {
+public interface Grouping<T> extends Map<String, Grouping<T>> {
 	/**
 	 * Returns the number of hits of int this group.
 	 * @return The number of hits.
 	 */
 	int getHits();
-	
+
 	/**
 	 * Returns whether this is the last grouping.
 	 * @return True if this the last grouping.
 	 */
 	boolean isLast();
-	
-	/**
-	 * Returns the grouping value.
-	 * @return The grouping value.
-	 */
-	String getValue();
-	
-	/**
-	 * Returns the next grouping level.
-	 * @return The next grouping level.
-	 * @throws IllegalStateException if this is the last grouping.
-	 */
-	Set<Grouping<T>> getNext();
-	
+
 	/**
 	 * Returns the grouping payload.
 	 * @return The grouping payload.
