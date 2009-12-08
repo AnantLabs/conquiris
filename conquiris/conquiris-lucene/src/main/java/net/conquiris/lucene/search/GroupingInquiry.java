@@ -24,33 +24,39 @@ import org.apache.lucene.search.Query;
  * Basic counting inquiry.
  * @author Andres Rodriguez
  */
-public final class CountingInquiry extends AbstractInquiry<CountingResult> {
+public final class GroupingInquiry implements Inquiry<CountingResult> {
+	/** Lucene query. */
+	private final Query query;
+	/** Lucene filter. */
+	private final Filter filter;
+	
 	/**
 	 * Factory method.
 	 * @param query Lucene query.
 	 */
-	public static CountingInquiry of(Query query) {
-		return new CountingInquiry(query, null);
+	public static GroupingInquiry of(Query query) {
+		return new GroupingInquiry(query, null);
 	}
-
+	
 	/**
 	 * Factory method.
 	 * @param query Lucene query.
 	 * @param filter Lucene filter.
 	 */
-	public static CountingInquiry of(Query query, Filter filter) {
-		return new CountingInquiry(query, filter);
+	public static GroupingInquiry of(Query query, Filter filter) {
+		return new GroupingInquiry(query, filter);
 	}
-
+	
 	/**
 	 * Constructor.
 	 * @param query Lucene query.
 	 * @param filter Lucene filter.
 	 */
-	private CountingInquiry(Query query, Filter filter) {
-		super(query, filter);
+	private GroupingInquiry(Query query, Filter filter) {
+		this.query = query;
+		this.filter = filter;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see net.conquiris.lucene.search.Inquiry#perform(net.conquiris.lucene.search.Inquirable)
@@ -59,7 +65,7 @@ public final class CountingInquiry extends AbstractInquiry<CountingResult> {
 	public ResultBuilder<CountingResult> perform(Inquirable inquirable) throws IOException {
 		final CountingCollector collector = new CountingCollector();
 		// Perform the query
-		inquirable.search(getQuery(), getFilter(), collector);
+		inquirable.search(query, filter, collector);
 		// Return the builder
 		return new ResultBuilder<CountingResult>() {
 			@Override
@@ -68,22 +74,4 @@ public final class CountingInquiry extends AbstractInquiry<CountingResult> {
 			}
 		};
 	}
-
-	public static final class Builder extends AbstractBuilder<CountingResult, CountingInquiry, Builder> {
-		Builder() {
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see
-		 * net.conquiris.lucene.search.AbstractInquiry.AbstractBuilder#build(org.apache.lucene.search
-		 * .Query, org.apache.lucene.search.Filter)
-		 */
-		@Override
-		protected CountingInquiry build(Query query, Filter filter) {
-			return new CountingInquiry(query, filter);
-		}
-
-	}
-
 }
