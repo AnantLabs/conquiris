@@ -41,6 +41,14 @@ public final class CountingInquiry extends AbstractInquiry<CountingResult> {
 	public static CountingInquiry of(Query query, Filter filter) {
 		return new CountingInquiry(query, filter);
 	}
+	
+	/**
+	 * Builder factory.
+	 * @return A new builder.
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
 
 	/**
 	 * Constructor.
