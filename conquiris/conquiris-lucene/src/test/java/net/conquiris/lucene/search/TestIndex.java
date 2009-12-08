@@ -25,8 +25,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.RAMDirectory;
 
 /**
@@ -77,5 +79,9 @@ final class TestIndex {
 		} finally {
 			searcher.close();
 		}
+	}
+	
+	TermQuery term(int f, int v) {
+		return new TermQuery(new Term(field(f), value(v)));
 	}
 }
