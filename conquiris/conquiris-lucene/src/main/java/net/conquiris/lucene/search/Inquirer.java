@@ -27,9 +27,9 @@ import org.apache.lucene.search.Searcher;
  * Basic and support methods for inquirers.
  * @author Andres Rodriguez
  */
-public final class Inquirers {
+public final class Inquirer {
 	/** Not instantiable. */
-	private Inquirers() {
+	private Inquirer() {
 		throw new AssertionError();
 	}
 
