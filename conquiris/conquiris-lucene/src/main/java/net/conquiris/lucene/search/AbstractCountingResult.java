@@ -15,30 +15,31 @@
  */
 package net.conquiris.lucene.search;
 
-import net.conquiris.api.Result;
-
 /**
- * Basic skeletal class for results. It only stores elapsed time.
+ * Basic skeletal class for results that stores elapsed timeand total number of hits.
  * @author Andres Rodriguez
  */
-public abstract class AbstractResult implements Result {
-	/** The elapsed time in milliseconds. */
-	private final long time;
+public abstract class AbstractCountingResult extends AbstractResult {
+	/** The total number of hits of the performed query. */
+	private final int totalHits;
 
 	/**
 	 * Constructor.
 	 * @param time The elapsed time in milliseconds.
+	 * @param totalHits The total number of hits of the performed query.
 	 */
-	protected AbstractResult(long time) {
-		this.time = time;
+	protected AbstractCountingResult(long time, int totalHits) {
+		super(time);
+		this.totalHits = totalHits;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.conquiris.api.Result#getTime()
+	 * @see net.conquiris.api.Result#getTotalHits()
 	 */
 	@Override
-	public final long getTime() {
-		return time;
+	public final int getTotalHits() {
+		return totalHits;
 	}
+
 }
