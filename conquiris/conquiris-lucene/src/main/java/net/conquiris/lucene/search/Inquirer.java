@@ -24,7 +24,7 @@ import net.conquiris.api.Result;
 import org.apache.lucene.search.Searcher;
 
 /**
- * Basic and support methods for inquirers.
+ * Inquirer singleton object.
  * @author Andres Rodriguez
  */
 public final class Inquirer {
