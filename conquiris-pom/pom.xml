@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.conquiris.maven</groupId>
+	<artifactId>conquiris-pom</artifactId>
+	<version>3.3.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Conquiris :: Parent POM</name>
+	<parent>
+		<groupId>net.derquinse</groupId>
+		<artifactId>derquinse-pom</artifactId>
+		<version>6</version>
+	</parent>
+	<url>http://code.google.com/p/conquiris/</url>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:svn:http://conquiris.googlecode.com/svn/trunk/conquiris-pom</connection>
+		<developerConnection>scm:svn:https://conquiris.googlecode.com/svn/trunk/conquiris-pom</developerConnection>
+		<url>http://code.google.com/p/conquiris/source/browse/#svn/trunk/conquiris-pom</url>
+	</scm>
+	<properties>
+		<luceneVersion>3.3.0</luceneVersion>
+	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-core</artifactId>
+				<version>${luceneVersion}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>
