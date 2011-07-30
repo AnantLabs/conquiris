@@ -15,32 +15,34 @@
  */
 package net.conquiris.qs;
 
-import com.google.common.primitives.Floats;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
 /**
- * Float QS tokens.
+ * Base class for query QS tokens.
  * @author Andres Rodriguez
  */
-public final class FloatToken {
-	/** Token value. */
-	private final float value;
+public abstract class QueryToken {
+	/** Token arguments. */
+	private final ImmutableList<Token> arguments;
 
 	/**
 	 * Constructor.
-	 * @param value Token value.
+	 * @param arguments Query arguments.
+	 * @throws NullPointerException if any of the arguments is null.
 	 */
-	FloatToken(float value) {
-		this.value = value;
+	protected QueryToken(Iterable<? extends Token> arguments) {
+		this.arguments = ImmutableList.copyOf(arguments);
 	}
 
-	/** Returns the token value. */
-	public float getValue() {
-		return value;
+	/** Returns the query arguments. */
+	public ImmutableList<Token> getArguments() {
+		return arguments;
 	}
 
 	@Override
 	public int hashCode() {
-		return Floats.hashCode(value);
+		return Objects.hashCode(getClass(), arguments);
 	}
 
 	@Override
@@ -48,9 +50,10 @@ public final class FloatToken {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof FloatToken) {
-			return value == ((FloatToken) obj).value;
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
 		}
-		return false;
+		return arguments.equals(((QueryToken) obj).arguments);
 	}
+
 }

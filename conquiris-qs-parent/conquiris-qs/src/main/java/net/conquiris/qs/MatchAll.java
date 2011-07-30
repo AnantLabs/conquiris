@@ -15,42 +15,30 @@
  */
 package net.conquiris.qs;
 
-import com.google.common.primitives.Floats;
+import com.google.common.collect.ImmutableList;
 
 /**
- * Float QS tokens.
+ * Special match all documents query QS tokens.
  * @author Andres Rodriguez
  */
-public final class FloatToken {
-	/** Token value. */
-	private final float value;
+public final class MatchAll extends QueryToken {
+	private static final MatchAll INSTANCE = new MatchAll();
 
 	/**
 	 * Constructor.
-	 * @param value Token value.
 	 */
-	FloatToken(float value) {
-		this.value = value;
-	}
-
-	/** Returns the token value. */
-	public float getValue() {
-		return value;
+	private MatchAll() {
+		super(ImmutableList.<Token> of());
 	}
 
 	@Override
 	public int hashCode() {
-		return Floats.hashCode(value);
+		return getClass().hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj instanceof FloatToken) {
-			return value == ((FloatToken) obj).value;
-		}
-		return false;
+		return this == INSTANCE;
 	}
+
 }

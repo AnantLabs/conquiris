@@ -27,7 +27,7 @@ import com.google.common.base.CharMatcher;
 public final class StringToken {
 	/** Character matcher to use. */
 	private static final CharMatcher MATCHER = CharMatcher.WHITESPACE.or(CharMatcher.JAVA_ISO_CONTROL);
-	
+
 	/**
 	 * Cleans a string value for a string token.
 	 * @param string Input string.
@@ -41,10 +41,10 @@ public final class StringToken {
 		checkArgument(string.length() > 0, "Empty string tokens not allowed");
 		return string;
 	}
-	
+
 	/** Token value. */
 	private final String value;
-	
+
 	/**
 	 * Constructor.
 	 * @param value Token value.
@@ -54,10 +54,25 @@ public final class StringToken {
 	StringToken(String value) {
 		this.value = clean(value);
 	}
-	
+
 	/** Returns the token value. */
 	public String getValue() {
 		return value;
 	}
 
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof StringToken) {
+			return value.equals(((StringToken) obj).value);
+		}
+		return false;
+	}
 }

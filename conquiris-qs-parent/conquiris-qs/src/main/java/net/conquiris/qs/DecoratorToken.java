@@ -15,32 +15,34 @@
  */
 package net.conquiris.qs;
 
-import com.google.common.primitives.Floats;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Objects;
 
 /**
- * Float QS tokens.
+ * Decorator QS tokens.
  * @author Andres Rodriguez
  */
-public final class FloatToken {
-	/** Token value. */
-	private final float value;
+public abstract class DecoratorToken {
+	/** Decorator argument. */
+	private final QueryToken argument;
 
 	/**
 	 * Constructor.
-	 * @param value Token value.
+	 * @param argument Decorator argument.
 	 */
-	FloatToken(float value) {
-		this.value = value;
+	protected DecoratorToken(QueryToken argument) {
+		this.argument = checkNotNull(argument);
 	}
 
-	/** Returns the token value. */
-	public float getValue() {
-		return value;
+	/** Returns the decorator argument. */
+	public QueryToken getArgument() {
+		return argument;
 	}
 
 	@Override
 	public int hashCode() {
-		return Floats.hashCode(value);
+		return Objects.hashCode(getClass(), argument);
 	}
 
 	@Override
@@ -48,9 +50,10 @@ public final class FloatToken {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof FloatToken) {
-			return value == ((FloatToken) obj).value;
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
 		}
-		return false;
+		return argument.equals(((DecoratorToken) obj).argument);
 	}
+
 }
