@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>conquiris-pom</artifactId>
+		<groupId>net.conquiris.maven</groupId>
+		<version>3.3.0-SNAPSHOT</version>
+	</parent>
+	<groupId>net.conquiris.qs</groupId>
+	<artifactId>conquiris-qs-parent</artifactId>
+	<version>3.3.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Conquiris QS :: Parent POM</name>
+	<scm>
+		<connection>scm:svn:http://conquiris.googlecode.com/svn/trunk/conquiris-qs-parent</connection>
+		<developerConnection>scm:svn:https://conquiris.googlecode.com/svn/trunk/conquiris-qs-parent</developerConnection>
+		<url>http://code.google.com/p/conquiris/source/browse/#svn/trunk/conquiris-qs-parent</url>
+	</scm>
+	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+		</dependency>
+	</dependencies>
+	<modules>
+		<module>conquiris-qs</module>
+	</modules>
+</project>
