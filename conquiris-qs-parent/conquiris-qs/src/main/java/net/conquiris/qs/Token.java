@@ -15,6 +15,8 @@
  */
 package net.conquiris.qs;
 
+import java.io.IOException;
+
 /**
  * Base class for QS tokens.
  * @author Andres Rodriguez
@@ -23,5 +25,25 @@ public abstract class Token {
 	/** Constructor. */
 	Token() {
 	}
+
+	/**
+	 * Writes the token to an appendable character stream.
+	 * @param first Whether this token is the first token.
+	 * @param qs Query service to use for name resolution.
+	 * @param a Appendable to use.
+	 */
+	final void write(boolean first, QS qs, Appendable a) throws IOException {
+		if (!first) {
+			a.append(' ');
+		}
+		write(qs, a);
+	}
+
+	/**
+	 * Internal writing method. Must no be called directly.
+	 * @param qs Query service to use for name resolution.
+	 * @param a Appendable to use.
+	 */
+	abstract void write(QS qs, Appendable a) throws IOException;
 
 }

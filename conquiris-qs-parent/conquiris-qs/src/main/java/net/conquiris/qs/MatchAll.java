@@ -15,6 +15,8 @@
  */
 package net.conquiris.qs;
 
+import java.io.IOException;
+
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -24,13 +26,23 @@ import com.google.common.collect.ImmutableList;
 public final class MatchAll extends QueryToken {
 	private static final MatchAll INSTANCE = new MatchAll();
 
+	/** Returns the single instance. */
+	public static MatchAll get() {
+		return INSTANCE;
+	}
+
 	/**
 	 * Constructor.
 	 */
 	private MatchAll() {
 		super(ImmutableList.<Token> of());
 	}
-
+	
+	@Override
+	void write(QS qs, Appendable a) throws IOException {
+		a.append("()");
+	}
+	
 	@Override
 	public int hashCode() {
 		return getClass().hashCode();

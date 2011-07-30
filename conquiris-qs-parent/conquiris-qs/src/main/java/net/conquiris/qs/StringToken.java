@@ -24,7 +24,7 @@ import com.google.common.base.CharMatcher;
  * String QS tokens.
  * @author Andres Rodriguez
  */
-public final class StringToken {
+public final class StringToken extends Token {
 	/** Character matcher to use. */
 	private static final CharMatcher MATCHER = CharMatcher.WHITESPACE.or(CharMatcher.JAVA_ISO_CONTROL);
 
@@ -58,6 +58,11 @@ public final class StringToken {
 	/** Returns the token value. */
 	public String getValue() {
 		return value;
+	}
+	
+	@Override
+	void write(QS qs, Appendable a) {
+		// TODO Auto-generated method stub
 	}
 
 	@Override

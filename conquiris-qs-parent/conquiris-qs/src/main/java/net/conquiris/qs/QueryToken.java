@@ -15,6 +15,8 @@
  */
 package net.conquiris.qs;
 
+import java.io.IOException;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 
@@ -22,7 +24,7 @@ import com.google.common.collect.ImmutableList;
  * Base class for query QS tokens.
  * @author Andres Rodriguez
  */
-public abstract class QueryToken {
+public abstract class QueryToken extends Token {
 	/** Token arguments. */
 	private final ImmutableList<Token> arguments;
 
@@ -38,6 +40,29 @@ public abstract class QueryToken {
 	/** Returns the query arguments. */
 	public ImmutableList<Token> getArguments() {
 		return arguments;
+	}
+
+	/**
+	 * Returns an argument with a specific token type.
+	 * @param i Argument index.
+	 * @param type Argument type.
+	 * @return The requested argument.
+	 * @throws IndexOutOfBoundsException if the index is incorrect.
+	 */
+	public <T extends Token> T getArgument(int i, Class<T> type) {
+		return type.cast(arguments.get(i));
+	}
+
+	@Override
+	void write(QS qs, Appendable a) throws IOException {
+		a.append('(');
+		// TODO append key
+		a.append(' ');
+		// Append arguments
+		for (Token t : arguments) {
+			t.write(false, qs, a);
+		}
+		a.append(')');
 	}
 
 	@Override

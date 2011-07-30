@@ -15,49 +15,31 @@
  */
 package net.conquiris.qs;
 
-import java.io.IOException;
-
-import com.google.common.primitives.Floats;
+import com.google.common.collect.ImmutableList;
 
 /**
- * Float QS tokens.
+ * Boost QS tokens.
  * @author Andres Rodriguez
  */
-final class FloatToken extends Token {
-	/** Token value. */
-	private final float value;
+public final class BoostToken extends QueryToken {
+	static final String KEY = "b";
 
 	/**
 	 * Constructor.
-	 * @param value Token value.
+	 * @param value Boost value.
+	 * @param query Boosted query.
 	 */
-	FloatToken(float value) {
-		this.value = value;
+	public BoostToken(float value, QueryToken query) {
+		super(ImmutableList.<Token> of(new FloatToken(value), query));
 	}
 
 	/** Returns the token value. */
 	public float getValue() {
-		return value;
+		return getArgument(0, FloatToken.class).getValue();
 	}
 
-	@Override
-	void write(QS qs, Appendable a) throws IOException {
-		a.append(Float.toString(value));
-	}
-
-	@Override
-	public int hashCode() {
-		return Floats.hashCode(value);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj instanceof FloatToken) {
-			return value == ((FloatToken) obj).value;
-		}
-		return false;
+	/** Returns the boosted query. */
+	public QueryToken getQuery() {
+		return getArgument(1, QueryToken.class);
 	}
 }

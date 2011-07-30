@@ -17,43 +17,44 @@ package net.conquiris.qs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import java.io.IOException;
 
 /**
- * Decorator QS tokens.
+ * QS main parsing and serializing class.
  * @author Andres Rodriguez
  */
-public abstract class DecoratorToken extends Token {
-	/** Decorator argument. */
-	private final QueryToken argument;
-
-	/**
-	 * Constructor.
-	 * @param argument Decorator argument.
-	 */
-	protected DecoratorToken(QueryToken argument) {
-		this.argument = checkNotNull(argument);
+public final class QS {
+	private QueryToken checkQuery(QueryToken query) {
+		return checkNotNull(query, "Null query");
 	}
 
-	/** Returns the decorator argument. */
-	public QueryToken getArgument() {
-		return argument;
+	/** Default constructor. */
+	QS() {
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(getClass(), argument);
+	public void write(QueryToken query, Appendable a) throws IOException {
+		doWrite(checkNotNull(query), a);
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
+	public void doWrite(QueryToken query, Appendable a) throws IOException {
+		query.write(true, null, a);
+		// TODO
+	}
+
+	public String write(QueryToken query) {
+		checkQuery(query);
+		StringBuilder b = new StringBuilder();
+		try {
+			write(query, b);
+		} catch (IOException e) {
+			// Should not happen
 		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		return argument.equals(((DecoratorToken) obj).argument);
+		return b.toString();
+	}
+
+	public QueryToken parse(String string) {
+		// TODO;
+		return MatchAll.get();
 	}
 
 }
