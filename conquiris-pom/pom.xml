@@ -9,16 +9,9 @@
 	<parent>
 		<groupId>net.derquinse</groupId>
 		<artifactId>derquinse-pom</artifactId>
-		<version>6</version>
+		<version>7-SNAPSHOT</version>
 	</parent>
 	<url>http://code.google.com/p/conquiris/</url>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
 	<scm>
 		<connection>scm:svn:http://conquiris.googlecode.com/svn/trunk/conquiris-pom</connection>
 		<developerConnection>scm:svn:https://conquiris.googlecode.com/svn/trunk/conquiris-pom</developerConnection>
@@ -27,6 +20,10 @@
 	<properties>
 		<luceneVersion>3.3.0</luceneVersion>
 	</properties>
+	<issueManagement>
+		<system>Google Code</system>
+		<url>http://code.google.com/p/conquiris/issues/list</url>
+	</issueManagement>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -36,4 +33,36 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagBase>https://conquiris.googlecode.com/svn/tags/</tagBase>
+					<goals>deploy</goals>
+					<preparationGoals>clean verify</preparationGoals>
+				</configuration>
+			</plugin>
+		</plugins>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
+	</build>
+	<repositories>
+		<repository>
+			<id>derquinse-m2</id>
+			<name>Derquinse Maven 2 Repository</name>
+			<url>http://derquinse-m2.googlecode.com/svn/trunk/m2</url>
+		</repository>
+		<repository>
+			<id>derquinse-m2-snapshots</id>
+			<name>Derquinse Maven 2 Snapshots Repository</name>
+			<url>http://derquinse-m2.googlecode.com/svn/trunk/m2-snapshots/</url>
+		</repository>
+	</repositories>
 </project>
