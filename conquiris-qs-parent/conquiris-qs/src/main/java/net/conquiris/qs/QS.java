@@ -39,7 +39,7 @@ import com.google.common.collect.Iterables;
 @ThreadSafe
 public final class QS {
 	private static final QS EMPTY = new QS(ImmutableBiMap.<Class<? extends QueryToken>, String> of());
-	private static final QS DEFAULT = new Builder(EMPTY).build();
+	private static final QS DEFAULT = new Builder(EMPTY).put(QSBoost.class).put(QSTerm.class).build();
 
 	/** Query tokens map. */
 	private final ImmutableBiMap<Class<? extends QueryToken>, String> queries;

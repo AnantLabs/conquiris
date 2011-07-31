@@ -16,38 +16,29 @@
 package net.conquiris.qs;
 
 /**
- * Single term query tokens.
+ * Boost query token.
  * @author Andres Rodriguez
  */
-@QueryKey(TermToken.KEY)
-public final class TermToken extends QueryToken {
-	static final String KEY = "t";
+@QueryKey(QSBoost.KEY)
+public final class QSBoost extends QueryToken {
+	static final String KEY = "b";
 
 	/**
 	 * Constructor.
-	 * @param field Term field.
-	 * @param value Term value.
+	 * @param value Boost value.
+	 * @param query Boosted query.
 	 */
-	public TermToken(StringToken field, StringToken value) {
-		super(tokens(field, value));
+	public QSBoost(float value, QueryToken query) {
+		super(tokens(FloatToken.of(value), query));
 	}
 
-	/**
-	 * Constructor.
-	 * @param field Term field.
-	 * @param value Term value.
-	 */
-	public TermToken(String field, String value) {
-		super(strings(field, value));
+	/** Returns the token value. */
+	public float getValue() {
+		return getArgument(0, FloatToken.class).getValue();
 	}
 
-	/** Returns the field value. */
-	public String getField() {
-		return getArgument(0, StringToken.class).getValue();
-	}
-
-	/** Returns the term value. */
-	public String getValue() {
-		return getArgument(1, StringToken.class).getValue();
+	/** Returns the boosted query. */
+	public QueryToken getQuery() {
+		return getArgument(1, QueryToken.class);
 	}
 }

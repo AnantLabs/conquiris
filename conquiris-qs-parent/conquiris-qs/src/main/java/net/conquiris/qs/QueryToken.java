@@ -24,7 +24,6 @@ import java.util.Arrays;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 
 /**
  * Base class for query QS tokens.
