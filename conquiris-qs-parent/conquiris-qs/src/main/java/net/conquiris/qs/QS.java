@@ -19,11 +19,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 
+import com.google.common.collect.ImmutableBiMap;
+
 /**
  * QS main parsing and serializing class.
  * @author Andres Rodriguez
  */
 public final class QS {
+	/** Query tokens map. */
+	private final ImmutableBiMap<String, QueryToken> tokens = ImmutableBiMap.of();
+	
+	
 	private QueryToken checkQuery(QueryToken query) {
 		return checkNotNull(query, "Null query");
 	}
