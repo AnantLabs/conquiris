@@ -13,32 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@ParametersAreNonnullByDefault
 package net.conquiris.qs;
 
-/**
- * Boost query token.
- * @author Andres Rodriguez
- */
-@QueryKey(BoostToken.KEY)
-public final class BoostToken extends QueryToken {
-	static final String KEY = "b";
+import javax.annotation.ParametersAreNonnullByDefault;
 
-	/**
-	 * Constructor.
-	 * @param value Boost value.
-	 * @param query Boosted query.
-	 */
-	public BoostToken(float value, QueryToken query) {
-		super(tokens(FloatToken.of(value), query));
-	}
-
-	/** Returns the token value. */
-	public float getValue() {
-		return getArgument(0, FloatToken.class).getValue();
-	}
-
-	/** Returns the boosted query. */
-	public QueryToken getQuery() {
-		return getArgument(1, QueryToken.class);
-	}
-}

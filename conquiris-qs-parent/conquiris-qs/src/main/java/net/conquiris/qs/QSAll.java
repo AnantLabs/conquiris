@@ -17,32 +17,35 @@ package net.conquiris.qs;
 
 import java.io.IOException;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.google.common.collect.ImmutableList;
 
 /**
- * Special match all documents query QS tokens.
+ * Special match all documents query tokens.
  * @author Andres Rodriguez
  */
-public final class MatchAll extends QueryToken {
-	private static final MatchAll INSTANCE = new MatchAll();
+@ThreadSafe
+public final class QSAll extends QueryToken {
+	private static final QSAll INSTANCE = new QSAll();
 
 	/** Returns the single instance. */
-	public static MatchAll get() {
+	public static QSAll get() {
 		return INSTANCE;
 	}
 
 	/**
 	 * Constructor.
 	 */
-	private MatchAll() {
+	private QSAll() {
 		super(ImmutableList.<Token> of());
 	}
-	
+
 	@Override
 	void write(QS qs, Appendable a) throws IOException {
 		a.append("()");
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return getClass().hashCode();

@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Function;
 
 /**
  * String QS tokens.
@@ -27,6 +28,22 @@ import com.google.common.base.CharMatcher;
 public final class StringToken extends Token {
 	/** Character matcher to use. */
 	private static final CharMatcher MATCHER = CharMatcher.WHITESPACE.or(CharMatcher.JAVA_ISO_CONTROL);
+	
+	/** String to StringToken function. */
+	public static final Function<String, StringToken> STRING2TOKEN = new Function<String, StringToken>() {
+		public StringToken apply(String input) {
+			return StringToken.of(input);
+		}
+	};
+
+	/**
+	 * Builds a token with the specified value.
+	 * @param value Token value.
+	 * @returns The requested token.
+	 */
+	public static StringToken of(String value) {
+		return new StringToken(value);
+	}
 
 	/**
 	 * Cleans a string value for a string token.
@@ -51,7 +68,7 @@ public final class StringToken extends Token {
 	 * @throws NullPointerException if the argument is null.
 	 * @throws IllegalArgumentException if the resulting string is empty.
 	 */
-	StringToken(String value) {
+	private StringToken(String value) {
 		this.value = clean(value);
 	}
 
@@ -59,7 +76,7 @@ public final class StringToken extends Token {
 	public String getValue() {
 		return value;
 	}
-	
+
 	@Override
 	void write(QS qs, Appendable a) {
 		// TODO Auto-generated method stub

@@ -28,10 +28,19 @@ final class FloatToken extends Token {
 	private final float value;
 
 	/**
+	 * Builds a token with the specified value.
+	 * @param value Token value.
+	 * @returns The requested token.
+	 */
+	static FloatToken of(float value) {
+		return new FloatToken(value);
+	}
+
+	/**
 	 * Constructor.
 	 * @param value Token value.
 	 */
-	FloatToken(float value) {
+	private FloatToken(float value) {
 		this.value = value;
 	}
 

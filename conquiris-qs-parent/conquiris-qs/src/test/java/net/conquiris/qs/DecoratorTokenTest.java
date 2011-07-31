@@ -33,8 +33,8 @@ public class DecoratorTokenTest {
 	/** Generics test. */
 	@Test
 	public void generic() {
-		TimeUnitToken t = new TimeUnitToken(TimeUnit.SECONDS, MatchAll.get());
-		assertEquals(t.getArgument(), MatchAll.get());
+		TimeUnitToken t = new TimeUnitToken(TimeUnit.SECONDS, QSAll.get());
+		assertEquals(t.getArgument(), QSAll.get());
 		assertEquals(t.getQualifier(), TimeUnit.SECONDS);
 	}
 }

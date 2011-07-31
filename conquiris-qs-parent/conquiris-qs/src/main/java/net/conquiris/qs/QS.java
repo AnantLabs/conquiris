@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -33,11 +32,11 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Iterables;
 
 /**
- * QS query dictionary. Used for converting QueryTokens to strings and parsing strings to QueryTokens.
+ * QS query dictionary. Used for converting QueryTokens to strings and parsing strings to
+ * QueryTokens.
  * @author Andres Rodriguez
  */
 @ThreadSafe
-@ParametersAreNonnullByDefault
 public final class QS {
 	private static final QS EMPTY = new QS(ImmutableBiMap.<Class<? extends QueryToken>, String> of());
 	private static final QS DEFAULT = new Builder(EMPTY).build();
@@ -111,7 +110,7 @@ public final class QS {
 
 	public QueryToken parse(String string) {
 		// TODO;
-		return MatchAll.get();
+		return QSAll.get();
 	}
 
 	/**

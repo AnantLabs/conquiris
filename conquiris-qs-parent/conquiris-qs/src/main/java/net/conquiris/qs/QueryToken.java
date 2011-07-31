@@ -15,10 +15,16 @@
  */
 package net.conquiris.qs;
 
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
+import java.util.Arrays;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 /**
  * Base class for query QS tokens.
@@ -27,6 +33,44 @@ import com.google.common.collect.ImmutableList;
 public abstract class QueryToken extends Token {
 	/** Token arguments. */
 	private final ImmutableList<Token> arguments;
+
+	/**
+	 * Helper method to call the constructor.
+	 * @param t Token.
+	 * @return Constructor argument.
+	 */
+	protected static Iterable<Token> tokens(Token t) {
+		return ImmutableList.of(t);
+	}
+
+	/**
+	 * Helper method to call the constructor.
+	 * @param tokens Array of tokens.
+	 * @return Constructor argument.
+	 */
+	protected static Iterable<Token> tokens(Token... tokens) {
+		return asList(tokens);
+	}
+
+	/**
+	 * Helper method to call the constructor.
+	 * @param a Iterable of tokens.
+	 * @param b Array of tokens.
+	 * @return Constructor argument.
+	 */
+	protected static Iterable<Token> tokens(Iterable<? extends Token> a, Token... b) {
+		return concat(a, tokens(b));
+	}
+	
+	/**
+	 * Helper method to call the constructor.
+	 * @param tokens Array of strings.
+	 * @return Constructor argument.
+	 */
+	protected static Iterable<StringToken> strings(String... strings) {
+		return transform(Arrays.asList(strings), StringToken.STRING2TOKEN);
+	}
+	
 
 	/**
 	 * Constructor.
