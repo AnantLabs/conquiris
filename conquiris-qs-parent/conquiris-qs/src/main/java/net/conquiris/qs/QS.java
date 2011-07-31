@@ -23,16 +23,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Iterables;
 
 /**
- * QS main parsing and serializing class.
+ * QS query dictionary. Used for converting QueryTokens to strings and parsing strings to QueryTokens.
  * @author Andres Rodriguez
  */
+@ThreadSafe
+@ParametersAreNonnullByDefault
 public final class QS {
 	private static final QS EMPTY = new QS(ImmutableBiMap.<Class<? extends QueryToken>, String> of());
 	private static final QS DEFAULT = new Builder(EMPTY).build();
@@ -126,6 +131,10 @@ public final class QS {
 			return (current != null) ? current : previous.queries;
 		}
 
+		private BiMap<Class<? extends QueryToken>, String> workMap() {
+			return HashBiMap.create(checkMap());
+		}
+
 		private void checkEntry(BiMap<Class<? extends QueryToken>, String> map, Class<? extends QueryToken> queryType,
 				String key) {
 			checkNotNull(queryType);
@@ -134,11 +143,11 @@ public final class QS {
 			checkArgument(!map.containsValue(key), "Duplicate query key [%s]", key);
 		}
 
-		private BiMap<Class<? extends QueryToken>, String> current() {
-			if (current == null) {
-				current = HashBiMap.create(previous.queries);
-			}
-			return current;
+		private String getQueryKey(Class<? extends QueryToken> queryType) {
+			checkNotNull(queryType);
+			QueryKey key = queryType.getAnnotation(QueryKey.class);
+			checkArgument(key != null, "Query type [%s] has no QueryKey annotation", queryType.getName());
+			return key.value();
 		}
 
 		/**
@@ -151,8 +160,22 @@ public final class QS {
 		 */
 		public Builder put(Class<? extends QueryToken> queryType, String key) {
 			checkEntry(checkMap(), queryType, key);
-			current().put(queryType, key);
+			if (current == null) {
+				current = HashBiMap.create(previous.queries);
+			}
+			current.put(queryType, key);
 			return this;
+		}
+
+		/**
+		 * Adds a query type to the QS dictionary. The key is obtained from the QueryKey annotation.
+		 * @param queryType Query type.
+		 * @return This builder.
+		 * @throws IllegalArgumentException if the key is invalid or the key and/or query type are
+		 *           already being used.
+		 */
+		public Builder put(Class<? extends QueryToken> queryType) {
+			return put(queryType, getQueryKey(queryType));
 		}
 
 		/**
@@ -163,15 +186,39 @@ public final class QS {
 		 * @throws IllegalArgumentException if any of keys is invalid or any of the keys and/or querys
 		 *           type are already being used.
 		 */
-		public Builder put(@Nullable Map<Class<? extends QueryToken>, String> queries) {
+		public Builder putAll(@Nullable Map<Class<? extends QueryToken>, String> queries) {
 			if (queries == null || queries.isEmpty()) {
 				return this;
 			}
-			BiMap<Class<? extends QueryToken>, String> map = checkMap();
+			BiMap<Class<? extends QueryToken>, String> map = workMap();
 			for (Entry<Class<? extends QueryToken>, String> e : queries.entrySet()) {
 				checkEntry(map, e.getKey(), e.getValue());
+				map.put(e.getKey(), e.getValue());
 			}
-			current().putAll(queries);
+			current = map;
+			return this;
+		}
+
+		/**
+		 * Adds a collection of query types to the QS dictionary. The keys are obtained from the
+		 * QueryKey annotation in each class. If an exception is thrown no modification is made to the
+		 * dictionary.
+		 * @param queries Query types to add. If {@code null} or empty no action is performed.
+		 * @return This builder.
+		 * @throws IllegalArgumentException if any of keys is invalid or any of the keys and/or querys
+		 *           type are already being used.
+		 */
+		public Builder putAll(@Nullable Iterable<Class<? extends QueryToken>> queries) {
+			if (queries == null || Iterables.isEmpty(queries)) {
+				return this;
+			}
+			BiMap<Class<? extends QueryToken>, String> map = workMap();
+			for (Class<? extends QueryToken> type : queries) {
+				String k = getQueryKey(type);
+				checkEntry(map, type, k);
+				map.put(type, k);
+			}
+			current = map;
 			return this;
 		}
 
