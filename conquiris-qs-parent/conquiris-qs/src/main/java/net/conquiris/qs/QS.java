@@ -15,6 +15,7 @@
  */
 package net.conquiris.qs;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
@@ -27,9 +28,8 @@ import com.google.common.collect.ImmutableBiMap;
  */
 public final class QS {
 	/** Query tokens map. */
-	private final ImmutableBiMap<String, QueryToken> tokens = ImmutableBiMap.of();
-	
-	
+	private final ImmutableBiMap<Class<? extends QueryToken>, String> tokens = ImmutableBiMap.of();
+
 	private QueryToken checkQuery(QueryToken query) {
 		return checkNotNull(query, "Null query");
 	}
@@ -38,13 +38,24 @@ public final class QS {
 	QS() {
 	}
 
+	/**
+	 * Returns the query key.
+	 * @param query Query.
+	 * @return The requested key.
+	 * @throws IllegalArgumentException if the query type is unknown.
+	 */
+	String getQueryKey(QueryToken query) {
+		String key = tokens.get(query.getClass());
+		checkArgument(key != null, "Unknown query type [%s]", query.getClass());
+		return key;
+	}
+
 	public void write(QueryToken query, Appendable a) throws IOException {
 		doWrite(checkNotNull(query), a);
 	}
 
-	public void doWrite(QueryToken query, Appendable a) throws IOException {
-		query.write(true, null, a);
-		// TODO
+	private void doWrite(QueryToken query, Appendable a) throws IOException {
+		query.write(true, this, a);
 	}
 
 	public String write(QueryToken query) {

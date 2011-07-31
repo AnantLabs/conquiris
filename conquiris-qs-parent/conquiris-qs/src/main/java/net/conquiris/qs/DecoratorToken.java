@@ -53,8 +53,11 @@ public abstract class DecoratorToken<T extends Enum<T>> extends Token {
 
 	@Override
 	final void write(QS qs, Appendable a) throws IOException {
-		// TODO Auto-generated method stub
-
+		a.append('(');
+		a.append(qualifier.name());
+		a.append(' ');
+		argument.write(false, qs, a);
+		a.append(')');
 	}
 
 	@Override

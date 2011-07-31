@@ -56,9 +56,8 @@ public abstract class QueryToken extends Token {
 	@Override
 	void write(QS qs, Appendable a) throws IOException {
 		a.append('(');
-		// TODO append key
+		a.append(qs.getQueryKey(this));
 		a.append(' ');
-		// Append arguments
 		for (Token t : arguments) {
 			t.write(false, qs, a);
 		}
