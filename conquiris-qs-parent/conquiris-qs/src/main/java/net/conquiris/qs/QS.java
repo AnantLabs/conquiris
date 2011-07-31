@@ -137,7 +137,7 @@ public final class QS {
 		private void checkEntry(BiMap<Class<? extends QueryToken>, String> map, Class<? extends QueryToken> queryType,
 				String key) {
 			checkNotNull(queryType);
-			checkNotNull(key);
+			QSStrings.checkKey(key);
 			checkArgument(!map.containsKey(queryType), "Duplicate query type [%s]", queryType.getName());
 			checkArgument(!map.containsValue(key), "Duplicate query key [%s]", key);
 		}
@@ -150,12 +150,12 @@ public final class QS {
 		}
 
 		/**
-		 * Adds a query type to the QS dictionary.
+		 * Adds a query type to the dictionary.
 		 * @param queryType Query type.
 		 * @param key Key to use.
 		 * @return This builder.
-		 * @throws IllegalArgumentException if the key is invalid or the key and/or query type are
-		 *           already being used.
+		 * @throws IllegalKeyException if the key contains invalid characters.
+		 * @throws IllegalArgumentException if the the key and/or query type are already being used.
 		 */
 		public Builder put(Class<? extends QueryToken> queryType, String key) {
 			checkEntry(checkMap(), queryType, key);
@@ -170,8 +170,8 @@ public final class QS {
 		 * Adds a query type to the QS dictionary. The key is obtained from the QueryKey annotation.
 		 * @param queryType Query type.
 		 * @return This builder.
-		 * @throws IllegalArgumentException if the key is invalid or the key and/or query type are
-		 *           already being used.
+		 * @throws IllegalKeyException if the key contains invalid characters.
+		 * @throws IllegalArgumentException if the the key and/or query type are already being used.
 		 */
 		public Builder put(Class<? extends QueryToken> queryType) {
 			return put(queryType, getQueryKey(queryType));
@@ -182,8 +182,9 @@ public final class QS {
 		 * modification is made to the dictionary.
 		 * @param queries Query types to add. If {@code null} or empty no action is performed.
 		 * @return This builder.
-		 * @throws IllegalArgumentException if any of keys is invalid or any of the keys and/or querys
-		 *           type are already being used.
+		 * @throws IllegalKeyException if any of the key contains invalid characters.
+		 * @throws IllegalArgumentException if any of the keys and/or query types are already being
+		 *           used.
 		 */
 		public Builder putAll(@Nullable Map<Class<? extends QueryToken>, String> queries) {
 			if (queries == null || queries.isEmpty()) {
@@ -204,8 +205,9 @@ public final class QS {
 		 * dictionary.
 		 * @param queries Query types to add. If {@code null} or empty no action is performed.
 		 * @return This builder.
-		 * @throws IllegalArgumentException if any of keys is invalid or any of the keys and/or querys
-		 *           type are already being used.
+		 * @throws IllegalKeyException if any of the key contains invalid characters.
+		 * @throws IllegalArgumentException if any of the keys and/or query types are already being
+		 *           used.
 		 */
 		public Builder putAll(@Nullable Iterable<Class<? extends QueryToken>> queries) {
 			if (queries == null || Iterables.isEmpty(queries)) {

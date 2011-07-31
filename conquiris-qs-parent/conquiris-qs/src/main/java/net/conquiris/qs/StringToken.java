@@ -18,7 +18,6 @@ package net.conquiris.qs;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 
 /**
@@ -26,9 +25,6 @@ import com.google.common.base.Function;
  * @author Andres Rodriguez
  */
 public final class StringToken extends Token {
-	/** Character matcher to use. */
-	private static final CharMatcher MATCHER = CharMatcher.WHITESPACE.or(CharMatcher.JAVA_ISO_CONTROL);
-	
 	/** String to StringToken function. */
 	public static final Function<String, StringToken> STRING2TOKEN = new Function<String, StringToken>() {
 		public StringToken apply(String input) {
@@ -40,23 +36,11 @@ public final class StringToken extends Token {
 	 * Builds a token with the specified value.
 	 * @param value Token value.
 	 * @returns The requested token.
+	 * @throws NullPointerException if the argument is null.
+	 * @throws IllegalArgumentException if the provided value is empty.
 	 */
 	public static StringToken of(String value) {
 		return new StringToken(value);
-	}
-
-	/**
-	 * Cleans a string value for a string token.
-	 * @param string Input string.
-	 * @return String value to use.
-	 * @throws NullPointerException if the argument is null.
-	 * @throws IllegalArgumentException if the resulting string is empty.
-	 */
-	static String clean(String string) {
-		checkNotNull(string, "Null string tokens not allowed");
-		string = MATCHER.trimFrom(string);
-		checkArgument(string.length() > 0, "Empty string tokens not allowed");
-		return string;
 	}
 
 	/** Token value. */
@@ -66,10 +50,12 @@ public final class StringToken extends Token {
 	 * Constructor.
 	 * @param value Token value.
 	 * @throws NullPointerException if the argument is null.
-	 * @throws IllegalArgumentException if the resulting string is empty.
+	 * @throws IllegalArgumentException if the provided value is empty.
 	 */
 	private StringToken(String value) {
-		this.value = clean(value);
+		checkNotNull(value, "Null string tokens not allowed");
+		checkArgument(value.length() > 0, "Empty string tokens not allowed");
+		this.value = value;
 	}
 
 	/** Returns the token value. */
