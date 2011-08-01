@@ -78,7 +78,7 @@ public final class QS {
 	}
 
 	/**
-	 * Returns the query key.
+	 * Returns the query key for a query token.
 	 * @param query Query.
 	 * @return The requested key.
 	 * @throws IllegalArgumentException if the query type is unknown.
@@ -87,6 +87,18 @@ public final class QS {
 		String key = queries.get(query.getClass());
 		checkArgument(key != null, "Unknown query type [%s]", query.getClass().getName());
 		return key;
+	}
+
+	/**
+	 * Returns the query token type for a query key.
+	 * @param key Query key.
+	 * @return The requested token type.
+	 * @throws IllegalArgumentException if the query key is unknown.
+	 */
+	Class<? extends QueryToken> getQueryToken(String key) {
+		Class<? extends QueryToken> query = queries.inverse().get(key);
+		checkArgument(key != null, "Unknown query key [%s]", key);
+		return query;
 	}
 
 	public void write(QueryToken query, Appendable a) throws IOException {
