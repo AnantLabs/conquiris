@@ -23,6 +23,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 /**
@@ -30,6 +31,9 @@ import com.google.common.collect.Lists;
  * @author Andres Rodriguez
  */
 final class QueryConstructor {
+	/** Allowed argument types. */
+	private static final ImmutableSet<Class<?>> ALLOWED = ImmutableSet.<Class<?>>of(StringToken.class, FloatToken.class, QueryToken.class);
+	
 	/** Argument kind. */
 	private enum Kind {
 		SINGLE, ARRAY;
@@ -71,6 +75,10 @@ final class QueryConstructor {
 	}
 
 	private static Class<? extends Token> checkType(Class<?> type) {
+		if (ALLOWED.contains(type)) {
+			return type.asSubclass(Token.class);
+		}
+		checkArgument(Token.class.isAssignableFrom(type));
 		// TODO
 		return null;
 	}
