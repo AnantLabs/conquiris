@@ -8,8 +8,8 @@
 	<name>Conquiris :: Parent POM</name>
 	<parent>
 		<groupId>net.derquinse</groupId>
-		<artifactId>derquinse-pom</artifactId>
-		<version>7-SNAPSHOT</version>
+		<artifactId>derquinse-common-project-parent</artifactId>
+		<version>1.0.5-SNAPSHOT</version>
 	</parent>
 	<url>http://code.google.com/p/conquiris/</url>
 	<scm>
