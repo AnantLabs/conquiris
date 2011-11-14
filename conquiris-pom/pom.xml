@@ -6,10 +6,11 @@
 	<version>3.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
+	<description>Conquiris :: Parent POM</description>
 	<parent>
 		<groupId>net.derquinse</groupId>
 		<artifactId>derquinse-common-project-parent</artifactId>
-		<version>1.0.8</version>
+		<version>1.0.9</version>
 	</parent>
 	<url>http://code.google.com/p/conquiris/</url>
 	<scm>
@@ -18,7 +19,6 @@
 		<url>http://code.google.com/p/conquiris/source/browse/#svn/trunk/conquiris-pom</url>
 	</scm>
 	<properties>
-		<luceneVersion>3.4.0</luceneVersion>
 		<releaseTagBase>https://conquiris.googlecode.com/svn/tags/</releaseTagBase>
 	</properties>
 	<issueManagement>
@@ -30,17 +30,17 @@
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-core</artifactId>
-				<version>${luceneVersion}</version>
+				<version>3.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analyzers</artifactId>
-				<version>${luceneVersion}</version>
+				<version>3.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-highlighter</artifactId>
-				<version>${luceneVersion}</version>
+				<version>3.4.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
