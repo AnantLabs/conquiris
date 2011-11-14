@@ -32,6 +32,16 @@
 				<artifactId>lucene-core</artifactId>
 				<version>${luceneVersion}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-analyzers</artifactId>
+				<version>${luceneVersion}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-highlighter</artifactId>
+				<version>${luceneVersion}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>
