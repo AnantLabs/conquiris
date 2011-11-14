@@ -1,31 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<parent>
-		<artifactId>derquinse-pom</artifactId>
-		<groupId>net.derquinse</groupId>
-		<version>2</version>
-	</parent>
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.conquiris.maven</groupId>
+		<artifactId>conquiris-pom</artifactId>
+		<version>3.4.0-SNAPSHOT</version>
+	</parent>
 	<groupId>net.conquiris</groupId>
 	<artifactId>conquiris</artifactId>
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>3.4.0-SNAPSHOT</version>
 	<modules>
-		<module>conquiris-lucene</module>
 		<module>conquiris-api</module>
+		<module>conquiris-core</module>
 	</modules>
-	<properties>
-		<luceneVersion>3.0.0</luceneVersion>
-		<dcVersion>0.0.1-SNAPSHOT</dcVersion>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>5.10</version>
-			<classifier>jdk15</classifier>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>
