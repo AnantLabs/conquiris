@@ -15,8 +15,11 @@
  */
 package net.conquiris.api.search;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * Result representing a single item.
+ * @param <T> Item type.
  * @author Andres Rodriguez
  */
 public class Item<T> extends Result {
@@ -39,9 +42,18 @@ public class Item<T> extends Result {
 
 	public Item(final int totalHits, final float maxScore, final long time, T item) {
 		super(totalHits, maxScore, time);
+		if (totalHits > 0) {
+			checkArgument(item != null, "No item provided");
+		} else {
+			checkArgument(item == null, "Superfluous item provided");
+		}
 		this.item = item;
 	}
 
+	/**
+	 * Returns the item. Will be null iff totalHits = 0
+	 * @return The found item.
+	 */
 	public T getItem() {
 		return item;
 	}

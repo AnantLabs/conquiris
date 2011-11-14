@@ -15,8 +15,13 @@
  */
 package net.conquiris.api.search;
 
+/**
+ * Exception thrown when there's an error accessing an index during search.
+ * @author Andres Rodriguez
+ */
 public class IndexNotAvailableException extends SearchException {
-	private static final long serialVersionUID = -6724608654863833076L;
+	/** Serial UID. */
+	private static final long serialVersionUID = 8747053440837118639L;
 
 	public IndexNotAvailableException(Throwable cause) {
 		super("Exception accessing index", cause);

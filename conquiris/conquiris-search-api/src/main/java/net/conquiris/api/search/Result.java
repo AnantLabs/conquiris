@@ -22,29 +22,36 @@ import java.io.Serializable;
  * @author Andres Rodriguez
  */
 public class Result implements Serializable {
-	private static final long serialVersionUID = 87563292090748315L;
+	/** Serial UID. */
+	private static final long serialVersionUID = 8616534195601811296L;
 	/** Total hits of the query. */
 	private final int totalHits;
 	/** Maximum score. */
 	private final float maxScore;
-	/** Time taken by the query. */
+	/** Time taken by the query (ms). */
 	private final long time;
 
+	/**
+	 * Constructor.
+	 * @param totalHits Number of hits.
+	 * @param maxScore Maximum score.
+	 * @param time Time taken by the query (ms).
+	 */
 	public Result(final int totalHits, final float maxScore, final long time) {
 		this.totalHits = totalHits;
 		this.maxScore = maxScore;
 		this.time = time;
 	}
 
-	public float getMaxScore() {
+	public final float getMaxScore() {
 		return maxScore;
 	}
 
-	public long getTime() {
+	public final long getTime() {
 		return time;
 	}
 
-	public int getTotalHits() {
+	public final int getTotalHits() {
 		return totalHits;
 	}
 }
