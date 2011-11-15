@@ -11,13 +11,21 @@
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
 	<version>3.4.0-SNAPSHOT</version>
+
+	<scm>
+		<connection>scm:svn:http://conquiris.googlecode.com/svn/trunk/conquiris</connection>
+		<developerConnection>scm:svn:https://conquiris.googlecode.com/svn/trunk/conquiris</developerConnection>
+		<url>http://code.google.com/p/conquiris/source/browse/#svn/trunk/conquiris</url>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.derquinse</groupId>
 			<artifactId>derquinse-common-test-support</artifactId>
 		</dependency>
 	</dependencies>
+
 	<modules>
-		<module>conquiris-search-api</module>
+		<module>conquiris-api</module>
 	</modules>
 </project>
