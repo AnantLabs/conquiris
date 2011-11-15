@@ -15,8 +15,8 @@
  */
 package net.conquiris.api.search;
 
-import static net.conquiris.api.search.Result.count;
-import static net.conquiris.api.search.Result.emptyCount;
+import static net.conquiris.api.search.CountResult.empty;
+import static net.conquiris.api.search.CountResult.of;
 import net.derquinse.common.test.EqualityTests;
 import net.derquinse.common.test.HessianSerializabilityTests;
 import net.derquinse.common.test.SerializabilityTests;
@@ -27,21 +27,21 @@ import org.testng.annotations.Test;
  * Tests for Result.
  * @author Andres Rodriguez
  */
-public class ResultTest {
+public class CountResultTest {
 
 	/** Equality. */
 	@Test
 	public void equality() {
-		EqualityTests.many(emptyCount(), emptyCount(), emptyCount());
-		EqualityTests.many(count(1, 0.0f, 10), count(1, 0.0f, 10), count(1, 0.0f, 10));
+		EqualityTests.many(empty(), empty(), empty());
+		EqualityTests.many(of(1, 0.0f, 10), of(1, 0.0f, 10), of(1, 0.0f, 10));
 	}
 
 	/** Serializability. */
 	@Test
 	public void serializability() {
-		SerializabilityTests.check(emptyCount());
-		HessianSerializabilityTests.both(emptyCount());
-		SerializabilityTests.check(count(1, 0.0f, 10));
-		HessianSerializabilityTests.both(count(1, 0.0f, 10));
+		SerializabilityTests.check(empty());
+		HessianSerializabilityTests.both(empty());
+		SerializabilityTests.check(of(1, 0.0f, 10));
+		HessianSerializabilityTests.both(of(1, 0.0f, 10));
 	}
 }

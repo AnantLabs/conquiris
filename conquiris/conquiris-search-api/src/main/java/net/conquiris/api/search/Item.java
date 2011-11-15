@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @param <T> Item type.
  * @author Andres Rodriguez
  */
-public class Item<T> extends Result {
+public final class Item<T> extends Result {
 	private static final long serialVersionUID = 3033574198812373505L;
 	/** Empty item. */
 	private static final Item<Object> EMPTY = new Item<Object>(0, 0.0f, 0L, null);

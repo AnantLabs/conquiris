@@ -11,6 +11,12 @@
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
 	<version>3.4.0-SNAPSHOT</version>
+	<dependencies>
+		<dependency>
+			<groupId>net.derquinse</groupId>
+			<artifactId>derquinse-common-test-support</artifactId>
+		</dependency>
+	</dependencies>
 	<modules>
 		<module>conquiris-search-api</module>
 	</modules>
