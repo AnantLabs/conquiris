@@ -35,7 +35,7 @@ public final class CountResult extends Result {
 	 * @param maxScore Maximum score.
 	 * @param time Time taken by the query (ms).
 	 */
-	public static CountResult of(final int totalHits, final float maxScore, final long time) {
+	public static CountResult of(int totalHits, float maxScore, long time) {
 		return new CountResult(totalHits, maxScore, time);
 	}
 
@@ -50,7 +50,7 @@ public final class CountResult extends Result {
 	 * @param maxScore Maximum score.
 	 * @param time Time taken by the query (ms).
 	 */
-	CountResult(final int totalHits, final float maxScore, final long time) {
+	private CountResult(final int totalHits, final float maxScore, final long time) {
 		super(totalHits, maxScore, time);
 	}
 
@@ -72,10 +72,10 @@ public final class CountResult extends Result {
 		/** Time taken by the query (ms). */
 		private final long time;
 
-		public SerializationProxy(CountResult s) {
-			this.totalHits = s.getTotalHits();
-			this.maxScore = s.getMaxScore();
-			this.time = s.getTime();
+		public SerializationProxy(CountResult r) {
+			this.totalHits = r.getTotalHits();
+			this.maxScore = r.getMaxScore();
+			this.time = r.getTime();
 		}
 
 		private Object readResolve() {
