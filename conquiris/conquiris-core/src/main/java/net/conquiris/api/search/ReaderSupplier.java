@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright (C) the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.lucene.search;
+package net.conquiris.api.search;
 
-import net.conquiris.api.Result;
+import com.google.common.base.Supplier;
 
 /**
- * Interface for result builders.
+ * Interface for index reader suppliers. Provided readers MUST be closed by the caller when no
+ * longer needed. Implementations must be thread-safe.
  * @author Andres Rodriguez
- * @param <T> Result type.
  */
-public interface ResultBuilder<T extends Result> {
+public interface ReaderSupplier extends Supplier<Reader> {
 	/**
-	 * Builds the result.
-	 * @param time Elapsed time.
-	 * @return The result (must not be {@code null}).
+	 * Returns an index reader. Whether a new instance of a shared one is returned is
+	 * implementation-dependant.
+	 * @return An index reader.
+	 * @throws IndexNotAvailableException if an error occurs.
 	 */
-	T build(long time);
+	Reader get();
 }

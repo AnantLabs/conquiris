@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright (C) the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.lucene.search;
+package net.conquiris.api.search;
 
-import java.io.IOException;
+import org.apache.lucene.index.IndexReader;
 
-import net.conquiris.api.Result;
+import com.google.common.base.Supplier;
 
 /**
- * Interface for inquiries.
+ * Interface for unmanaged index reader sources. Unmanaged readers MUST be closed by the caller when
+ * no longer needed.
+ * Implementations must be thread-safe.
  * @author Andres Rodriguez
- * @param <T> Result type.
  */
-public interface Inquiry<T extends Result> {
+public interface UnmanagedReaderSource extends Supplier<IndexReader> {
 	/**
-	 * Performs the inquiry.
-	 * @param inquirable Inquirable object to use.
-	 * @return A result builder (must not be {@code null}).
-	 * @throws IOException If an error occurs.
+	 * Returns an unmanaged instance. Each call returns a new instance.
+	 * @return A unmanaged index reader.
+	 * @throws IndexNotAvailableException if an error occurs.
 	 */
-	ResultBuilder<T> perform(Inquirable inquirable) throws IOException;
+	IndexReader get();
 }

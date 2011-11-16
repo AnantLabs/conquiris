@@ -8,12 +8,11 @@
 	</parent>
 	<artifactId>conquiris-core</artifactId>
 	<name>Conquiris :: Core</name>
+	<description>Module containing core Conquiris classes</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
-			<version>${luceneVersion}</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.derquinse</groupId>
@@ -23,6 +22,16 @@
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-api</artifactId>
 			<version>3.4.0-SNAPSHOT</version>
+		</dependency>
+		<!-- SLF4J -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 	</dependencies>
 </project>

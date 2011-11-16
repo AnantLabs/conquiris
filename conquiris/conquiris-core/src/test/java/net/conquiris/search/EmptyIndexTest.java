@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright (C) the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.lucene.search;
+package net.conquiris.search;
+
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.testng.annotations.Test;
 
 /**
- * Basic counting result.
+ * Tests for EmptyIndex.
  * @author Andres Rodriguez
  */
-public final class CountingResult extends AbstractCountingResult {
-	/**
-	 * Constructor.
-	 * @param time The elapsed time in milliseconds.
-	 * @param totalHits The total number of hits of the performed query.
-	 */
-	public CountingResult(long time, int totalHits) {
-		super(time, totalHits);
+public class EmptyIndexTest {
+
+	/** Search. */
+	@Test
+	public void search() throws Exception {
+		IndexSearcher s = new IndexSearcher(EmptyIndex.getInstance().get().get());
+		s.search(new MatchAllDocsQuery(), 5);
 	}
+
 }

@@ -27,5 +27,6 @@
 
 	<modules>
 		<module>conquiris-api</module>
+		<module>conquiris-core</module>
 	</modules>
 </project>
