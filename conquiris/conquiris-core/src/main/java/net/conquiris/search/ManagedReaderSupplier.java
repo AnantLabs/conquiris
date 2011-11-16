@@ -19,46 +19,47 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.Reader;
 import net.conquiris.api.search.ReaderSupplier;
-import net.conquiris.api.search.UnmanagedReaderSource;
-import net.derquinse.common.util.concurrent.RefCounted;
-import net.derquinse.common.util.concurrent.Refs;
 
 import org.apache.lucene.index.IndexReader;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.io.Closeables;
 
 /**
- * Single directory unmanaged reader source implementation.
+ * Default managed reader supplier implementation.
  * @author Andres Rodriguez
  */
-final class DirectoryUnmanagedReaderSource implements ReaderSupplier {
-	/** Directory. */
-	private final UnmanagedReaderSource unmanaged;
+final class ManagedReaderSupplier implements ReaderSupplier {
+	/** Reader supplier to manage. */
+	private final ReaderSupplier source;
 	/** Reader hold time in ms. */
 	private final long holdTime;
 	/** Current watch. */
 	private final Stopwatch watch;
 	/** Current reader. */
-	private IndexReader reader;
-	/** Current managed reader. */
-	private volatile RefCounted<IndexReader> managed;
+	private volatile Reader reader;
 
 	/**
 	 * Constructor.
-	 * @param unmanaged Unmanaged reader source.
-	 * @param holdTime Reader hold time (ms). If less than 0, zero will be used.
+	 * @param source Reader supplier to manage.
+	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
 	 */
-	DirectoryUnmanagedReaderSource(UnmanagedReaderSource unmanaged, long holdTime) {
-		this.unmanaged = checkNotNull(unmanaged, "The unmanaged reader source must be provided");
+	ManagedReaderSupplier(ReaderSupplier source, long holdTime) {
+		this.source = checkNotNull(source, "The unmanaged reader source must be provided");
 		this.holdTime = Math.max(0, holdTime);
 		this.watch = this.holdTime > 0 ? new Stopwatch() : null;
 	}
 
-	public final Reader get() {
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.search.ReaderSupplier#get()
+	 */
+	public Reader get() {
 		while (true) {
-			final IndexReader opened;
-			if (managed == null) {
-				opened = unmanaged.get();
+			final Reader current = reader;
+			final Reader opened;
+			if (current == null) {
+				opened = checkNotNull(source.get(), "The source supplier returned a null reader");
 			} else {
 				opened = null;
 			}
@@ -74,23 +75,28 @@ final class DirectoryUnmanagedReaderSource implements ReaderSupplier {
 	 * @param opened Opened reader.
 	 * @return The managed reference or null if the operation has to be retried.
 	 */
-	private synchronized Reader tryGet(IndexReader opened) {
+	private synchronized Reader tryGet(Reader opened) {
 		boolean used = false;
 		try {
-			if (managed == null) {
+			final Reader current = reader;
+			if (current == null) {
 				if (opened != null) {
 					start(opened);
 					used = true;
+					return opened;
 				} else {
 					return null;
 				}
 			} else if (watch == null || watch.elapsedMillis() > holdTime) {
-				IndexReader reopened = reader.reopen();
-				if (reopened != reader) {
-					start(reopened);
+				IndexReader indexReader = reader.get();
+				IndexReader reopened = indexReader.reopen();
+				if (reopened != indexReader) {
+					start(Reader.of(indexReader, true));
 				}
 			}
-			return null; // TODO;
+			// Increment reference and return
+			reader.get().incRef();
+			return reader;
 		} catch (IndexNotAvailableException e) {
 			shutdown();
 			throw e;
@@ -99,17 +105,14 @@ final class DirectoryUnmanagedReaderSource implements ReaderSupplier {
 			throw new IndexNotAvailableException(e);
 		} finally {
 			if (opened != null && !used) {
-				new ReaderCloser(opened).run();
+				Closeables.closeQuietly(opened.get());
 			}
 		}
 	}
 
 	private void shutdown() {
-		if (managed != null) {
-			managed.shutdown();
-			managed = null;
-		}
 		if (reader != null) {
+			Closeables.closeQuietly(reader.get());
 			reader = null;
 		}
 		if (watch != null) {
@@ -117,12 +120,13 @@ final class DirectoryUnmanagedReaderSource implements ReaderSupplier {
 		}
 	}
 
-	private void start(IndexReader newReader) {
+	private void start(Reader newReader) {
 		shutdown();
-		this.reader = newReader;
-		this.managed = Refs.counted(newReader, new ReaderCloser(newReader));
-		if (watch != null) {
-			watch.start();
+		if (newReader.isReopenable()) {
+			this.reader = newReader;
+			if (watch != null) {
+				watch.start();
+			}
 		}
 	}
 

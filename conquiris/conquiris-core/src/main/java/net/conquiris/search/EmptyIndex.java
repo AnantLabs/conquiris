@@ -31,22 +31,38 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
 /**
- * Empty index.
+ * Empty RAM-based index.
  * @author Andres Rodriguez
  */
 final class EmptyIndex implements ReaderSupplier {
 	/** Instance. */
 	private static volatile WeakReference<EmptyIndex> instance;
 
-	static EmptyIndex getInstance() throws IOException {
-		final WeakReference<EmptyIndex> r = instance;
-		if (r != null) {
-			EmptyIndex i = r.get();
-			if (i != null) {
-				return i;
+	/** Returns the shared instance. */
+	static EmptyIndex getInstance() {
+		try {
+			final WeakReference<EmptyIndex> r = instance;
+			if (r != null) {
+				EmptyIndex i = r.get();
+				if (i != null) {
+					return i;
+				}
 			}
+			return create();
+		} catch (IOException e) {
+			// Should not happen.
+			throw new IndexNotAvailableException(e);
 		}
-		return create();
+	}
+
+	/** Returns a new initalized RAM-based empty directory. */
+	static Directory newDirectory() {
+		try {
+			return new EmptyIndex().directory;
+		} catch (IOException e) {
+			// Should not happen.
+			throw new IndexNotAvailableException(e);
+		}
 	}
 
 	private static synchronized EmptyIndex create() throws IOException {
