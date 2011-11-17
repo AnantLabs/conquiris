@@ -85,7 +85,7 @@ public interface Searcher {
 	 * @param highlight Highlight configuration.
 	 * @return The page result.
 	 */
-	<T> PageResult<T> page(DocMapper<T> mapper, Query query, int firstRecord, int maxRecords, @Nullable Filter filter,
+	<T> PageResult<T> getPage(DocMapper<T> mapper, Query query, int firstRecord, int maxRecords, @Nullable Filter filter,
 			@Nullable Sort sort, @Nullable Highlight highlight);
 
 	/**
@@ -95,5 +95,5 @@ public interface Searcher {
 	 * @param score Whether the scores must be calculated.
 	 * @return The count result.
 	 */
-	CountResult count(Query query, @Nullable Filter filter, boolean score);
+	CountResult getCount(Query query, @Nullable Filter filter, boolean score);
 }

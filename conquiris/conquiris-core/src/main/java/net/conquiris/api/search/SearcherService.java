@@ -15,22 +15,19 @@
  */
 package net.conquiris.api.search;
 
-import net.derquinse.common.base.Disposable;
-
-import org.apache.lucene.index.IndexReader;
-
-import com.google.common.base.Supplier;
+import com.google.common.base.Function;
 
 /**
- * Interface for managed index reader sources. Managed instances MUST NOT be closed manually.
- * Instead, they MUST be disposed when no longer needed. Implementations must be thread-safe.
+ * Conquiris Searcher Service. Each independent call may used a different lucene searcher.
  * @author Andres Rodriguez
  */
-public interface ManagedReaderSource extends Supplier<Disposable<IndexReader>> {
+public interface SearcherService extends Searcher {
 	/**
-	 * Returns a managed instance.
-	 * @return A managed index reader.
-	 * @throws IndexNotAvailableException if an error occurs.
+	 * Perform a personalized and potentially compound query. The searcher provided to the query
+	 * performs every operation using a single lucene searcher is guaranteed to be open only during
+	 * the execution of the operation.
+	 * @param query Query to perform.
+	 * @return The query result.
 	 */
-	Disposable<IndexReader> get();
+	<T> T search(Function<Searcher, T> query);
 }

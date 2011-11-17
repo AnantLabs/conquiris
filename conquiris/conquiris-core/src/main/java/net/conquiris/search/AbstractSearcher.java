@@ -29,6 +29,7 @@ import net.conquiris.api.search.Highlight;
 import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.ItemResult;
 import net.conquiris.api.search.PageResult;
+import net.conquiris.api.search.SearchException;
 import net.conquiris.api.search.Searcher;
 import net.conquiris.lucene.ScoredTotalHitCountCollector;
 
@@ -81,7 +82,7 @@ abstract class AbstractSearcher implements Searcher {
 	 * @param operation Operation to perform.
 	 * @return Operation return value.
 	 */
-	private <T> T perform(Op<T> operation) {
+	<T> T perform(Op<T> operation) {
 		final IndexSearcher searcher = getIndexSearcher();
 		try {
 			return operation.apply(searcher);
@@ -231,11 +232,11 @@ abstract class AbstractSearcher implements Searcher {
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.conquiris.api.search.Searcher#page(net.conquiris.api.search.DocMapper,
+	 * @see net.conquiris.api.search.Searcher#getPage(net.conquiris.api.search.DocMapper,
 	 * org.apache.lucene.search.Query, int, int, org.apache.lucene.search.Filter,
 	 * org.apache.lucene.search.Sort, net.conquiris.api.search.Highlight)
 	 */
-	public final <T> PageResult<T> page(final DocMapper<T> mapper, final Query query, final int firstRecord,
+	public final <T> PageResult<T> getPage(final DocMapper<T> mapper, final Query query, final int firstRecord,
 			final int maxRecords, final @Nullable Filter filter, final @Nullable Sort sort,
 			final @Nullable Highlight highlight) {
 		return perform(new Op<PageResult<T>>() {
@@ -268,8 +269,13 @@ abstract class AbstractSearcher implements Searcher {
 		});
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.search.Searcher#getCount(org.apache.lucene.search.Query,
+	 * org.apache.lucene.search.Filter, boolean)
+	 */
 	@Override
-	public CountResult count(final Query query, final @Nullable Filter filter, final boolean score) {
+	public CountResult getCount(final Query query, final @Nullable Filter filter, final boolean score) {
 		return perform(new Op<CountResult>() {
 			public CountResult perform(IndexSearcher searcher) throws Exception {
 				final Stopwatch w = new Stopwatch().start();
@@ -293,12 +299,12 @@ abstract class AbstractSearcher implements Searcher {
 	 * Searcher primitive operation.
 	 * @param <T> Return type.
 	 */
-	private abstract class Op<T> implements Function<IndexSearcher, T> {
+	abstract class Op<T> implements Function<IndexSearcher, T> {
 		@Override
 		public final T apply(IndexSearcher searcher) {
 			try {
 				return perform(searcher);
-			} catch (IndexNotAvailableException e) {
+			} catch (SearchException e) {
 				throw e;
 			} catch (Exception e) {
 				throw new IndexNotAvailableException(e);

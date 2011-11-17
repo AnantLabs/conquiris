@@ -15,6 +15,7 @@
  */
 package net.conquiris.search;
 
+import net.conquiris.api.search.ManagedReaderSupplier;
 import net.conquiris.api.search.ReaderSupplier;
 
 import org.apache.lucene.store.Directory;
@@ -47,7 +48,7 @@ public final class ReaderSuppliers {
 	 * @param supplier Source reader supplier.
 	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
 	 */
-	public static ReaderSupplier managed(ReaderSupplier supplier, long holdTime) {
+	public static ManagedReaderSupplier managed(ReaderSupplier supplier, long holdTime) {
 		return new DefaultManagedReaderSupplier(supplier, holdTime);
 	}
 
@@ -55,7 +56,7 @@ public final class ReaderSuppliers {
 	 * Returns a managed reader supplier based on another one with no hold time.
 	 * @param supplier Source reader supplier.
 	 */
-	public static ReaderSupplier managed(ReaderSupplier supplier) {
+	public static ManagedReaderSupplier managed(ReaderSupplier supplier) {
 		return managed(supplier, 0);
 	}
 
