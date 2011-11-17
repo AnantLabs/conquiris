@@ -20,7 +20,6 @@ import java.lang.ref.WeakReference;
 
 import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.Reader;
-import net.conquiris.api.search.ReaderSupplier;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
@@ -34,7 +33,7 @@ import org.apache.lucene.util.Version;
  * Empty RAM-based index.
  * @author Andres Rodriguez
  */
-final class EmptyIndex implements ReaderSupplier {
+final class EmptyIndex extends AbstractReaderSupplier {
 	/** Instance. */
 	private static volatile WeakReference<EmptyIndex> instance;
 
@@ -88,13 +87,13 @@ final class EmptyIndex implements ReaderSupplier {
 		w.close();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.search.AbstractReaderSupplier#doGet()
+	 */
 	@Override
-	public Reader get() {
-		try {
-			return Reader.of(IndexReader.open(getInstance().directory), false);
-		} catch (IOException e) {
-			throw new IndexNotAvailableException(e);
-		}
+	Reader doGet() throws IOException {
+		return Reader.of(IndexReader.open(getInstance().directory), false);
 	}
 
 }

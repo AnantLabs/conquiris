@@ -30,4 +30,7 @@ public interface ReaderSupplier extends Supplier<Reader> {
 	 * @throws IndexNotAvailableException if an error occurs.
 	 */
 	Reader get();
+	
+	/** Returns the number of successful requests done. */
+	long getRequested();
 }

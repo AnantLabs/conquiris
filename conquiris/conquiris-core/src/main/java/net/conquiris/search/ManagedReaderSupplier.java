@@ -16,7 +16,9 @@
 package net.conquiris.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import net.conquiris.api.search.IndexNotAvailableException;
+
+import java.io.IOException;
+
 import net.conquiris.api.search.Reader;
 import net.conquiris.api.search.ReaderSupplier;
 
@@ -29,7 +31,7 @@ import com.google.common.io.Closeables;
  * Default managed reader supplier implementation.
  * @author Andres Rodriguez
  */
-final class ManagedReaderSupplier implements ReaderSupplier {
+final class ManagedReaderSupplier extends AbstractReaderSupplier {
 	/** Reader supplier to manage. */
 	private final ReaderSupplier source;
 	/** Reader hold time in ms. */
@@ -52,9 +54,10 @@ final class ManagedReaderSupplier implements ReaderSupplier {
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.conquiris.api.search.ReaderSupplier#get()
+	 * @see net.conquiris.search.AbstractReaderSupplier#doGet()
 	 */
-	public Reader get() {
+	@Override
+	Reader doGet() throws IOException {
 		while (true) {
 			final Reader current = reader;
 			final Reader opened;
@@ -75,16 +78,19 @@ final class ManagedReaderSupplier implements ReaderSupplier {
 	 * @param opened Opened reader.
 	 * @return The managed reference or null if the operation has to be retried.
 	 */
-	private synchronized Reader tryGet(Reader opened) {
+	private synchronized Reader tryGet(Reader opened) throws IOException {
 		boolean used = false;
+		boolean ok = false;
 		try {
 			final Reader current = reader;
 			if (current == null) {
 				if (opened != null) {
 					start(opened);
 					used = true;
+					ok = true;
 					return opened;
 				} else {
+					ok = true;
 					return null;
 				}
 			} else if (watch == null || watch.elapsedMillis() > holdTime) {
@@ -96,14 +102,12 @@ final class ManagedReaderSupplier implements ReaderSupplier {
 			}
 			// Increment reference and return
 			reader.get().incRef();
+			ok = true;
 			return reader;
-		} catch (IndexNotAvailableException e) {
-			shutdown();
-			throw e;
-		} catch (Exception e) {
-			shutdown();
-			throw new IndexNotAvailableException(e);
 		} finally {
+			if (!ok) {
+				shutdown();
+			}
 			if (opened != null && !used) {
 				Closeables.closeQuietly(opened.get());
 			}

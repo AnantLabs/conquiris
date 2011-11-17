@@ -15,8 +15,10 @@
  */
 package net.conquiris.search;
 
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.store.RAMDirectory;
 import org.testng.annotations.Test;
 
 /**
@@ -25,6 +27,13 @@ import org.testng.annotations.Test;
  */
 public class EmptyIndexTest {
 
+	/** Missing index. */
+	@Test(expectedExceptions=IndexNotFoundException.class)
+	public void missingRAM() throws Exception {
+		IndexSearcher s = new IndexSearcher(new RAMDirectory());
+		s.search(new MatchAllDocsQuery(), 5);
+	}
+	
 	/** Search. */
 	@Test
 	public void search() throws Exception {

@@ -15,21 +15,23 @@
  */
 package net.conquiris.api.search;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.document.Document;
 
-import com.google.common.base.Supplier;
+import com.google.common.collect.Multimap;
 
 /**
- * Interface for unmanaged index reader sources. Unmanaged readers MUST be closed by the caller when
- * no longer needed.
- * Implementations must be thread-safe.
+ * Mapper from a Lucene document to a custom object.
  * @author Andres Rodriguez
+ * @author Emilio Escobar Reyero
+ * @param <T> Type of the custom object.
  */
-public interface UnmanagedReaderSource extends Supplier<IndexReader> {
+public interface DocMapper<T> {
 	/**
-	 * Returns an unmanaged instance. Each call returns a new instance.
-	 * @return A unmanaged index reader.
-	 * @throws IndexNotAvailableException if an error occurs.
+	 * @param id
+	 * @param score
+	 * @param doc
+	 * @param fragments not null multimap of highlighter fragments
+	 * @return
 	 */
-	IndexReader get();
+	T map(int id, float score, Document doc, Multimap<String, String> fragments);
 }

@@ -19,19 +19,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 
-import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.Reader;
-import net.conquiris.api.search.ReaderSupplier;
 
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 
 /**
- * Single directory unmanaged reader supplier implementation.
+ * Single directory unmanaged reader supplier implementation. If no index is found in the directory
+ * a non-reopenable empty reader is returned and the request is counted as successful.
  * @author Andres Rodriguez
  */
-final class DirectoryReaderSupplier implements ReaderSupplier {
+final class DirectoryReaderSupplier extends AbstractReaderSupplier {
 	/** Directory. */
 	private final Directory directory;
 
@@ -43,17 +42,12 @@ final class DirectoryReaderSupplier implements ReaderSupplier {
 		this.directory = checkNotNull(directory, "The index directory must be provided");
 	}
 
-	public Reader get() {
-		try {
-			return tryGet();
-		} catch (IndexNotAvailableException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IndexNotAvailableException(e);
-		}
-	}
-
-	private Reader tryGet() throws IOException {
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.search.AbstractReaderSupplier#doGet()
+	 */
+	@Override
+	Reader doGet() throws IOException {
 		try {
 			final IndexReader reader = IndexReader.open(directory, true);
 			return Reader.of(reader, true);
