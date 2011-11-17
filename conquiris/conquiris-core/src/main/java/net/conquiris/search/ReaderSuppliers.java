@@ -48,7 +48,7 @@ public final class ReaderSuppliers {
 	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
 	 */
 	public static ReaderSupplier managed(ReaderSupplier supplier, long holdTime) {
-		return new ManagedReaderSupplier(supplier, holdTime);
+		return new DefaultManagedReaderSupplier(supplier, holdTime);
 	}
 
 	/**

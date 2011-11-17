@@ -18,7 +18,9 @@ package net.conquiris.search;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 
+import net.conquiris.api.search.ManagedReaderSupplier;
 import net.conquiris.api.search.Reader;
 import net.conquiris.api.search.ReaderSupplier;
 
@@ -31,7 +33,7 @@ import com.google.common.io.Closeables;
  * Default managed reader supplier implementation.
  * @author Andres Rodriguez
  */
-final class ManagedReaderSupplier extends AbstractReaderSupplier {
+final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implements ManagedReaderSupplier {
 	/** Reader supplier to manage. */
 	private final ReaderSupplier source;
 	/** Reader hold time in ms. */
@@ -40,16 +42,36 @@ final class ManagedReaderSupplier extends AbstractReaderSupplier {
 	private final Stopwatch watch;
 	/** Current reader. */
 	private volatile Reader reader;
+	/** Reused count. */
+	private final AtomicLong reused = new AtomicLong();
+	/** Reopened count. */
+	private final AtomicLong reopened = new AtomicLong();
 
 	/**
 	 * Constructor.
 	 * @param source Reader supplier to manage.
 	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
 	 */
-	ManagedReaderSupplier(ReaderSupplier source, long holdTime) {
+	DefaultManagedReaderSupplier(ReaderSupplier source, long holdTime) {
 		this.source = checkNotNull(source, "The unmanaged reader source must be provided");
 		this.holdTime = Math.max(0, holdTime);
 		this.watch = this.holdTime > 0 ? new Stopwatch() : null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.search.ManagedReaderSupplier#getReused()
+	 */
+	public long getReused() {
+		return reused.get();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.search.ManagedReaderSupplier#getReopened()
+	 */
+	public long getReopened() {
+		return reopened.get();
 	}
 
 	/*
@@ -98,7 +120,10 @@ final class ManagedReaderSupplier extends AbstractReaderSupplier {
 				IndexReader reopened = indexReader.reopen();
 				if (reopened != indexReader) {
 					start(Reader.of(indexReader, true));
+					this.reopened.incrementAndGet();
 				}
+			} else {
+				this.reused.incrementAndGet();
 			}
 			// Increment reference and return
 			reader.get().incRef();
