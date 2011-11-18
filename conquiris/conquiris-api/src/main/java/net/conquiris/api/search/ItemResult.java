@@ -17,6 +17,7 @@ package net.conquiris.api.search;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -86,11 +87,18 @@ public final class ItemResult<T> extends Result {
 		this.item = item;
 	}
 
+	/** Returns whether the item was found. */
+	public boolean isFound() {
+		return item != null;
+	}
+
 	/**
 	 * Returns the item. Will be null iff totalHits = 0
 	 * @return The found item.
+	 * @throws IllegalStateException if the item was not found.
 	 */
 	public T getItem() {
+		checkState(item != null, "Item not found");
 		return item;
 	}
 

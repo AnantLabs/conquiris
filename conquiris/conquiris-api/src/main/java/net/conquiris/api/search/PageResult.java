@@ -98,7 +98,8 @@ public final class PageResult<T> extends Result implements Iterable<T> {
 		checkNotNull(items, "The items list must be provided");
 		checkArgument(firstResult >= 0, "The first result must be >= 0");
 		this.items = ImmutableList.copyOf(items);
-		checkArgument(totalHits >= firstResult + this.items.size(),
+		int n = this.items.size();
+		checkArgument(n == 0 || totalHits >= firstResult + n,
 				"The total number of hits must be >= first result + number of items");
 		this.firstResult = firstResult;
 	}
