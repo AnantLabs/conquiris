@@ -82,10 +82,10 @@ public class SearchersTest {
 		create();
 		performEmptyQueries(unmanagedSearcher);
 		performEmptyQueries(managedSearcher);
-		assertEquals(managed.getRequested(), supplier.getRequested());
 		assertEquals(managed.getRequested(), unmanaged.getRequested());
 		assertEquals(managed.getReopened(), 0);
 		assertEquals(managed.getReused(), 0);
+		show("Empty");
 	}
 	
 	private void show(String test) {
@@ -95,11 +95,20 @@ public class SearchersTest {
 		System.out.printf("Managed: %d requested, %d reopened, %d reused\n", managed.getRequested(), managed.getReopened(),
 				managed.getReused());
 		System.out.printf("===== END %s\n\n", test);
-		assertTrue(unmanaged.getRequested() < supplier.getRequested());
+		assertTrue(unmanaged.getRequested() <= supplier.getRequested());
 		assertEquals(managed.getRequested(), supplier.getRequested());
 	}
-
+	
 	@Test(dependsOnMethods = "empty")
+	public void added() {
+		write(0);
+		performQueriesInService(unmanagedSearcher, FROM, TO);
+		performQueriesInService(managedSearcher, FROM, TO);
+		show("Added over empty");
+	}
+	
+
+	@Test(dependsOnMethods = "added")
 	public void single() throws Exception {
 		createFull();
 		for (int i = 0; i < 5; i++) {
