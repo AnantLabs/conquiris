@@ -33,14 +33,17 @@ import net.conquiris.search.ReaderSuppliers;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.NumericUtils;
 import org.apache.lucene.util.Version;
 
 import com.google.common.base.Function;
@@ -59,21 +62,17 @@ public final class TestSupport {
 	static final String ID = "CQ-ID";
 	static final String ANALYZED = "ANALYZED";
 
-	public static final String value(int value) {
+	private static final String value(int value) {
 		return "value_" + value;
 	}
 
 	public static class Node {
-		private String id;
+		private int id;
 		private String analyzed;
 
-		public void test(String value) {
+		public void test(int value) {
 			assertEquals(id, value);
-			assertEquals(analyzed, value);
-		}
-
-		void test(int value) {
-			test(value(value));
+			assertEquals(analyzed, value(value));
 		}
 
 	}
@@ -81,7 +80,7 @@ public final class TestSupport {
 	public static final DocMapper<Node> MAPPER = new DocMapper<Node>() {
 		public Node map(int id, float score, Document doc, Multimap<String, String> fragments) {
 			final Node node = new Node();
-			node.id = doc.get(ID);
+			node.id = ((NumericField) doc.getFieldable(ID)).getNumericValue().intValue();
 			node.analyzed = doc.get(ANALYZED);
 			return node;
 		}
@@ -90,13 +89,13 @@ public final class TestSupport {
 	public static Document document(int value) {
 		final Document document = new Document();
 		final String text = value(value);
-		document.add(new Field(ID, text, Field.Store.YES, Field.Index.NOT_ANALYZED));
+		document.add(new NumericField(ID, Field.Store.YES, true).setIntValue(value));
 		document.add(new Field(ANALYZED, text, Field.Store.YES, Field.Index.ANALYZED));
 		return document;
 	}
 
 	public static Term termId(int value) {
-		return new Term(ID, value(value));
+		return new Term(ID, NumericUtils.intToPrefixCoded(value));
 	}
 
 	public static ItemResult<Node> getFirst(Searcher searcher, Query query) {
@@ -107,8 +106,9 @@ public final class TestSupport {
 		return getFirst(searcher, new TermQuery(termId(value)));
 	}
 
-	public static PageResult<Node> getPage(Searcher searcher, int first, int max) {
-		return searcher.getPage(MAPPER, new MatchAllDocsQuery(), first, max, null, null, null);
+	public static PageResult<Node> getPage(Searcher searcher, int from, int to, int first, int max) {
+		return searcher.getPage(MAPPER, NumericRangeQuery.newIntRange(ID, from, to, true, true), first, max, null, null,
+				null);
 	}
 
 	public static int getCount(Searcher searcher) {
@@ -173,8 +173,8 @@ public final class TestSupport {
 		for (int i = 0; i < 500; i++) {
 			notFound(searcher, i);
 		}
-		checkPage(getPage(searcher, 0, 10), 0, 0);
-		checkPage(getPage(searcher, 100, 10), 100, 0);
+		checkPage(getPage(searcher, 3, 67, 0, 10), 0, 0);
+		checkPage(getPage(searcher, 3, 67, 100, 10), 100, 0);
 	}
 
 	/**
@@ -192,12 +192,12 @@ public final class TestSupport {
 		notFound(searcher, to + 1);
 		found(searcher, (from + to) / 2);
 		final int p = Math.min(5, n);
-		checkPage(getPage(searcher, from, p), 0, p);
-		checkPage(getPage(searcher, to - p + 1, p), n - p + 1, p);
-		checkPage(getPage(searcher, to - p + 1, 3 * p), n - p + 1, p);
+		checkPage(getPage(searcher, from, from + p, 0, p), 0, p);
+		checkPage(getPage(searcher, to - p + 1, to, 0, p), 0, p);
+		checkPage(getPage(searcher, to - p + 1, to + 2 * p, 0, 3 * p), 0, p);
 		final int f = Math.max(0, from - 5);
 		if (f > 0) {
-			checkPage(getPage(searcher, f, 10), 0, f + 10 - from + 1);
+			checkPage(getPage(searcher, f, f+10, 0, 20), 0, f + 10 - from + 1);
 		}
 	}
 
@@ -216,21 +216,6 @@ public final class TestSupport {
 				return null;
 			}
 		});
-		final int n = to - from + 1;
-		assertTrue(n > 1);
-		found(service, from);
-		found(service, to);
-		notFound(service, from - 1);
-		notFound(service, to + 1);
-		found(service, (from + to) / 2);
-		final int p = Math.min(5, n);
-		checkPage(getPage(service, from, p), 0, p);
-		checkPage(getPage(service, to - p + 1, p), n - p + 1, p);
-		checkPage(getPage(service, to - p + 1, 3 * p), n - p + 1, p);
-		final int f = Math.max(0, from - 5);
-		if (f > 0) {
-			checkPage(getPage(service, f, 10), 0, f + 10 - from + 1);
-		}
 	}
 
 	/*

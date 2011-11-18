@@ -15,7 +15,12 @@
  */
 package net.conquiris.search;
 
+import static net.conquiris.support.TestSupport.performEmptyQueries;
+import static net.conquiris.support.TestSupport.performQueriesInService;
 import static org.testng.Assert.assertEquals;
+
+import java.io.IOException;
+
 import net.conquiris.api.search.ManagedReaderSupplier;
 import net.conquiris.api.search.ReaderSupplier;
 import net.conquiris.api.search.SearcherService;
@@ -30,6 +35,9 @@ import org.testng.annotations.Test;
  * @author Andres Rodriguez
  */
 public class SearchersTest {
+	private static final int FROM = 1000;
+	private static final int TO = 10000;
+
 	private Directory directory;
 	private ReaderSupplier supplier;
 	private ReaderSupplier unmanaged;
@@ -45,16 +53,28 @@ public class SearchersTest {
 		unmanagedSearcher = Searchers.service(supplier);
 		managedSearcher = Searchers.service(managed);
 	}
+	
+	private void createFull() throws IOException {
+		create();
+		TestSupport.write(directory, FROM, TO);
+	}
+	
 
 	@Test
 	public void empty() {
 		create();
-		TestSupport.performEmptyQueries(unmanagedSearcher);
-		TestSupport.performEmptyQueries(managedSearcher);
+		performEmptyQueries(unmanagedSearcher);
+		performEmptyQueries(managedSearcher);
 		assertEquals(managed.getRequested(), supplier.getRequested());
 		assertEquals(managed.getRequested(), unmanaged.getRequested());
 		assertEquals(managed.getReopened(), 0);
 		assertEquals(managed.getReused(), 0);
 	}
 
+	@Test(dependsOnMethods="empty")
+	public void single() throws IOException {
+		createFull();
+		performQueriesInService(unmanagedSearcher, FROM, TO);
+	}
+	
 }

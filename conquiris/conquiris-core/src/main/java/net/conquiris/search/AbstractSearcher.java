@@ -17,15 +17,14 @@ package net.conquiris.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import net.conquiris.api.search.CountResult;
 import net.conquiris.api.search.DocMapper;
 import net.conquiris.api.search.Highlight;
+import net.conquiris.api.search.Highlight.HighlightedQuery;
 import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.ItemResult;
 import net.conquiris.api.search.PageResult;
@@ -33,7 +32,6 @@ import net.conquiris.api.search.SearchException;
 import net.conquiris.api.search.Searcher;
 import net.conquiris.lucene.ScoredTotalHitCountCollector;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Filter;
@@ -44,16 +42,10 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.TotalHitCountCollector;
-import org.apache.lucene.search.highlight.Highlighter;
-import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
-import org.apache.lucene.search.highlight.NullFragmenter;
-import org.apache.lucene.search.highlight.QueryScorer;
-import org.apache.lucene.search.highlight.SimpleFragmenter;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 
 /**
  * Abstract searcher implementation.
@@ -167,36 +159,6 @@ abstract class AbstractSearcher implements Searcher {
 		return docs;
 	}
 
-	/** Fragment highlighting helper method. */
-	private static Multimap<String, String> getFragments(Highlighter highlighter, Document doc, Highlight highlight) {
-		final Multimap<String, String> fragments = ArrayListMultimap.create();
-		final Map<String, Integer> fields = highlight.getFields();
-		final Analyzer analyzer = highlight.getAnalyzer();
-		for (Map.Entry<String, Integer> entry : fields.entrySet()) {
-			final String field = entry.getKey();
-			final Integer maxNumFragments = entry.getValue();
-			if (maxNumFragments >= 0) {
-				final String text = doc.get(field);
-
-				if (text != null) {
-					try {
-						highlighter.setTextFragmenter(maxNumFragments > 0 ? new SimpleFragmenter() : new NullFragmenter());
-						String[] fr = highlighter.getBestFragments(analyzer, field, text, maxNumFragments);
-
-						if (fr != null && fr.length > 0) {
-							fragments.putAll(field, Arrays.asList(fr));
-						}
-					} catch (IOException e) {
-					} catch (InvalidTokenOffsetsException e) {
-					}
-				}
-			}
-		}
-		// TODO: fix exceptions.
-
-		return fragments;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see net.conquiris.api.search.Searcher#getFirst(net.conquiris.api.search.DocMapper,
@@ -207,21 +169,15 @@ abstract class AbstractSearcher implements Searcher {
 			final @Nullable Sort sort, final @Nullable Highlight highlight) {
 		return perform(new Op<ItemResult<T>>() {
 			public ItemResult<T> perform(IndexSearcher searcher) throws Exception {
-				final Stopwatch w = new Stopwatch().start();
-				final TopDocs docs = getTopDocs(searcher, query, filter, sort, 1);
+				Stopwatch w = new Stopwatch().start();
+				Query rewritten = searcher.rewrite(query);
+				TopDocs docs = getTopDocs(searcher, query, filter, sort, 1);
 				if (docs.totalHits > 0) {
-					final ScoreDoc sd = docs.scoreDocs[0];
-					final Document doc = searcher.doc(sd.doc);
-					final Multimap<String, String> fragments;
-					if (highlight != null && !highlight.getFields().isEmpty()) {
-						final Query rewrote = searcher.rewrite(query);
-						final Highlighter highlighter = new Highlighter(highlight.getFormatter(), new QueryScorer(rewrote));
-						fragments = getFragments(highlighter, doc, highlight);
-					} else {
-						fragments = ArrayListMultimap.create();
-					}
-					final float score = sd.score;
-					final T item = mapper.map(sd.doc, score, doc, fragments);
+					ScoreDoc sd = docs.scoreDocs[0];
+					Document doc = searcher.doc(sd.doc);
+					HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
+					float score = sd.score;
+					T item = mapper.map(sd.doc, score, doc, highlighted.getFragments(doc));
 					return ItemResult.found(docs.totalHits, score, w.elapsedMillis(), item);
 				} else {
 					return ItemResult.notFound(w.elapsedMillis());
@@ -241,21 +197,20 @@ abstract class AbstractSearcher implements Searcher {
 			final @Nullable Highlight highlight) {
 		return perform(new Op<PageResult<T>>() {
 			public PageResult<T> perform(IndexSearcher searcher) throws Exception {
-				final Stopwatch w = new Stopwatch().start();
-				final int total = firstRecord + maxRecords;
-				final TopDocs docs = getTopDocs(searcher, query, filter, sort, total);
+				Stopwatch w = new Stopwatch().start();
+				int total = firstRecord + maxRecords;
+				Query rewritten = searcher.rewrite(query);
+				TopDocs docs = getTopDocs(searcher, rewritten, filter, sort, total);
 				if (docs.totalHits > 0) {
-					final int n = Math.min(total, docs.scoreDocs.length);
-					final float score = docs.getMaxScore();
+					int n = Math.min(total, docs.scoreDocs.length);
+					float score = docs.getMaxScore();
 					if (n > firstRecord) {
 						final List<T> items = new ArrayList<T>(n - firstRecord);
-						final Query rewrote = searcher.rewrite(query);
-						final Highlighter highlighter = new Highlighter(highlight.getFormatter(), new QueryScorer(rewrote));
+						HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 						for (int i = firstRecord; i < n; i++) {
-							final ScoreDoc sd = docs.scoreDocs[i];
-							final Document doc = searcher.doc(sd.doc);
-							final Multimap<String, String> fragments = getFragments(highlighter, doc, highlight);
-							final T item = mapper.map(sd.doc, score, doc, fragments);
+							ScoreDoc sd = docs.scoreDocs[i];
+							Document doc = searcher.doc(sd.doc);
+							T item = mapper.map(sd.doc, score, doc, highlighted.getFragments(doc));
 							items.add(item);
 						}
 						return PageResult.found(docs.totalHits, score, w.elapsedMillis(), firstRecord, items);
