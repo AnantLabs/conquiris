@@ -15,29 +15,13 @@
  */
 package net.conquiris.api.index;
 
-import com.google.common.util.concurrent.Service;
-
 /**
- * Interface for an indexer service.
+ * Interface defining an activation policy for a running indexer.
  * @author Andres Rodriguez.
  */
-public interface IndexerService extends Service {
+public interface IndexerActivationPolicy {
 	/**
-	 * Returns the index status.
-	 */
-	IndexStatus getIndexStatus();
-	
-	/**
-	 * Returns true if and only if the service is RUNNING and the current policy is to keep the index active.
+	 * Returns true if the indexer is active.
 	 */
 	boolean isActive();
-	
-	/** Returns the current delay specification. */
-	Delays getDelays();
-	
-	/**
-	 * Set the delay specification.
-	 * @param delays New delay specification.
-	 */
-	void setDelays(Delays delays);
 }
