@@ -17,6 +17,8 @@ package net.conquiris.api.index;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.google.common.primitives.Booleans;
+
 /**
  * Indexer activation policy based on a mutable boolean value.
  * @author Andres Rodriguez.
@@ -57,6 +59,19 @@ public final class MutableIndexerActivationPolicy implements IndexerActivationPo
 	 */
 	private MutableIndexerActivationPolicy(boolean active) {
 		this.active = active;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Booleans.hashCode(active);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof MutableIndexerActivationPolicy) {
+			return active == ((MutableIndexerActivationPolicy)obj).active;
+		}
+		return false;
 	}
 
 	/*
