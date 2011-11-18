@@ -109,8 +109,10 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 				if (opened != null) {
 					start(opened);
 					used = true;
-					ok = true;
-					return opened;
+					if (reader == null) { // Not reopenable
+						ok = true;
+						return opened;
+					}
 				} else {
 					ok = true;
 					return null;
@@ -121,6 +123,8 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 				if (reopened != indexReader) {
 					start(Reader.of(indexReader, true));
 					this.reopened.incrementAndGet();
+				} else {
+					this.reused.incrementAndGet();
 				}
 			} else {
 				this.reused.incrementAndGet();
