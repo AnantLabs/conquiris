@@ -15,6 +15,7 @@
  */
 package net.conquiris.api.index;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,27 +28,35 @@ import org.apache.lucene.index.Term;
 /**
  * Conquiris index writer interface. Commit properties starting with the 'cq:' prefix are reserved.
  * If no state modifiers methods are called nothing will be commited to the index. Implementations
- * are not thread-safe.
+ * MUST BE thread-safe. All methods throw {@link IllegalStateException} if the writer can no longer
+ * be used, {@link InterruptedException} if the thread they are running is interrupted and
+ * {@link IOException} if there's a problem with the index.
  * @author Andres Rodriguez
  */
 public interface Writer {
 	/** Reserved commit properties prefix. */
 	String RESERVED_PREFIX = "cq:";
+	/** Checkpoint property. */
+	String CHECKPOINT = RESERVED_PREFIX + "checkpoint";
+	/** Timestamp property. */
+	String TIMESTAMP = RESERVED_PREFIX + "timestamp";
+	/** Sequence property. */
+	String SEQUENCE = RESERVED_PREFIX + "sequence";
 
 	/**
-	 * Returns the last checkpoint, or {@code null} if there was no checkpoint.
+	 * Returns the last commit checkpoint, or {@code null} if there was no checkpoint.
 	 */
 	String getCheckpoint() throws InterruptedException;
-
-	/**
-	 * Returns the last write sequence.
-	 */
-	long getWriteSecuence() throws InterruptedException;
 
 	/**
 	 * Returns the last commit timestamp.
 	 */
 	long getTimestamp() throws InterruptedException;
+
+	/**
+	 * Returns the last commit sequence.
+	 */
+	long getSequence() throws InterruptedException;
 
 	/**
 	 * Returns a commit property. Includes the modifications performed in this writer.
@@ -59,7 +68,7 @@ public interface Writer {
 
 	/**
 	 * Returns the existing property keys. Includes the modifications performed in this writer.
-	 * @return The set of existing property keys.
+	 * @return The (unmodifiable) set of existing property keys.
 	 */
 	Set<String> getPropertyKeys() throws InterruptedException;
 
@@ -76,7 +85,7 @@ public interface Writer {
 	 * @param document Document to add. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
 	 */
-	Writer add(@Nullable Document document) throws InterruptedException;
+	Writer add(@Nullable Document document) throws InterruptedException, IOException;
 
 	/**
 	 * Adds a document.
@@ -84,13 +93,13 @@ public interface Writer {
 	 * @param analyzer Analyzer to use. If {@code null} the service default analyzer will be used.
 	 * @return This writer for method chaining.
 	 */
-	Writer add(@Nullable Document document, @Nullable Analyzer analyzer) throws InterruptedException;
+	Writer add(@Nullable Document document, @Nullable Analyzer analyzer) throws InterruptedException, IOException;
 
 	/**
 	 * Deletes all documents.
 	 * @return This writer for method chaining.
 	 */
-	Writer deleteAll() throws InterruptedException;
+	Writer deleteAll() throws InterruptedException, IOException;
 
 	/**
 	 * Deletes documents matching a certain term.
@@ -98,14 +107,14 @@ public interface Writer {
 	 * @param text Term text to match. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
 	 */
-	Writer delete(@Nullable String field, @Nullable String text) throws InterruptedException;
+	Writer delete(@Nullable String field, @Nullable String text) throws InterruptedException, IOException;
 
 	/**
 	 * Deletes documents matching a certain term.
 	 * @param term Term to match. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
 	 */
-	Writer delete(@Nullable Term term) throws InterruptedException;
+	Writer delete(@Nullable Term term) throws InterruptedException, IOException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -115,7 +124,8 @@ public interface Writer {
 	 * @param document Document to add. If {@code null} no document will be added.
 	 * @return This writer for method chaining.
 	 */
-	Writer update(@Nullable String field, @Nullable String text, @Nullable Document document) throws InterruptedException;
+	Writer update(@Nullable String field, @Nullable String text, @Nullable Document document)
+			throws InterruptedException, IOException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -124,7 +134,7 @@ public interface Writer {
 	 * @param document Document to add. If {@code null} no document will be added.
 	 * @return This writer for method chaining.
 	 */
-	Writer update(@Nullable Term term, @Nullable Document document) throws InterruptedException;
+	Writer update(@Nullable Term term, @Nullable Document document) throws InterruptedException, IOException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -136,7 +146,7 @@ public interface Writer {
 	 * @return This writer for method chaining.
 	 */
 	Writer update(@Nullable String field, @Nullable String text, @Nullable Document document, @Nullable Analyzer analyzer)
-			throws InterruptedException;
+			throws InterruptedException, IOException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -147,7 +157,7 @@ public interface Writer {
 	 * @return This writer for method chaining.
 	 */
 	Writer update(@Nullable Term term, @Nullable Document document, @Nullable Analyzer analyzer)
-			throws InterruptedException;
+			throws InterruptedException, IOException;
 
 	/**
 	 * Sets a commit property value.
