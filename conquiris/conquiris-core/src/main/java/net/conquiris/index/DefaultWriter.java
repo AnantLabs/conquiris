@@ -22,6 +22,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.concurrent.GuardedBy;
 
@@ -32,6 +36,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 
@@ -40,12 +45,16 @@ import com.google.common.io.Closeables;
  * @author Andres Rodriguez.
  */
 abstract class DefaultWriter extends AbstractWriter {
+	/** Writer state lock. */
+	private final Lock lock = new ReentrantLock();
+	/** Index writer lock. Is RW as the Index Writer has its own synchronization. */
+	private final ReadWriteLock indexLock = new ReentrantReadWriteLock();
 	/** Lucene index writer. */
 	private final IndexWriter writer;
 	/** Last commit user properties. */
 	private final ImmutableMap<String, String> lastProperties;
 	/** Current user properties. */
-	@GuardedBy("this")
+	@GuardedBy("lock")
 	private final Map<String, String> properties;
 	/** User properties key set. */
 	private final Set<String> keys;
@@ -56,9 +65,11 @@ abstract class DefaultWriter extends AbstractWriter {
 	/** Last commit sequence. */
 	private final long sequence;
 	/** Whether the writer is available. */
+	@GuardedBy("lock")
 	private volatile boolean available = true;
 	/** Whether the index has been updated. */
-	private volatile boolean updated = false;
+	@GuardedBy("indexLock")
+	private boolean updated = false;
 	/** Current checkpoint. */
 	@GuardedBy("this")
 	private String newCheckpoint;
@@ -80,7 +91,7 @@ abstract class DefaultWriter extends AbstractWriter {
 	 */
 	DefaultWriter(Logger logger, IndexWriter writer) throws IOException {
 		this.writer = checkNotNull(writer, "The index writer must be provided");
-		this.properties = Maps.newHashMap();
+		this.properties = new MapMaker().makeMap();
 		this.keys = Collections.unmodifiableSet(this.properties.keySet());
 		// Read properties
 		final IndexReader reader = IndexReader.open(writer, false);
@@ -104,11 +115,24 @@ abstract class DefaultWriter extends AbstractWriter {
 		}
 	}
 
-	/** Called when the writer can't be used any longer. */
+	
+	/**
+	 * Called when the writer can't be used any longer.
+	 * @return True if the writer was commited.
+	 */
 	void done() throws InterruptedException {
-		synchronized (this) {
+		lock.lock();
+		try {
 			ensureAvailable();
 			available = false;
+			indexLock.writeLock().lock();
+			try {
+				// TODO
+			} finally {
+				indexLock.writeLock().unlock();
+			}
+		} finally {
+			lock.unlock();
 		}
 	}
 
@@ -172,9 +196,15 @@ abstract class DefaultWriter extends AbstractWriter {
 	}
 
 	@Override
-	public synchronized Writer setCheckpoint(String checkpoint) throws InterruptedException {
-		ensureAvailable();
-		return null;
+	public Writer setCheckpoint(String checkpoint) throws InterruptedException {
+		lock.lock();
+		try {
+			ensureAvailable();
+			this.newCheckpoint = checkpoint;
+		} finally {
+			lock.unlock();
+		}
+		return this;
 	}
 
 }
