@@ -27,4 +27,6 @@ public interface ManagedReaderSupplier extends ReaderSupplier {
 	/** Returns the number of successful requests that where server reopening a reader. */
 	long getReopened();
 
+	/** Dispose any acquired resources. */
+	void dispose();
 }

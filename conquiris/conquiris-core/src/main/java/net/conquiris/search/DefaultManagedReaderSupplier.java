@@ -135,7 +135,7 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 			return reader;
 		} finally {
 			if (!ok) {
-				shutdown();
+				dispose();
 			}
 			if (opened != null && !used) {
 				Closeables.closeQuietly(opened.get());
@@ -143,7 +143,11 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 		}
 	}
 
-	private void shutdown() {
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.search.ManagedReaderSupplier#dispose()
+	 */
+	public synchronized void dispose() {
 		if (reader != null) {
 			Closeables.closeQuietly(reader.get());
 			reader = null;
@@ -154,7 +158,7 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 	}
 
 	private void start(Reader newReader) {
-		shutdown();
+		dispose();
 		if (newReader.isReopenable()) {
 			this.reader = newReader;
 			if (watch != null) {

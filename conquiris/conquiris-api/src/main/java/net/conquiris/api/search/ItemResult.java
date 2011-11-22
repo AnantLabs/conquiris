@@ -135,7 +135,7 @@ public final class ItemResult<T> extends Result {
 			this.totalHits = r.getTotalHits();
 			this.maxScore = r.getMaxScore();
 			this.time = r.getTime();
-			this.item = r.getItem();
+			this.item = r.isFound() ? r.getItem() : null;
 		}
 
 		private Object readResolve() {
