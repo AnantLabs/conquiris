@@ -15,11 +15,19 @@
  */
 package net.conquiris.search;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
 import org.testng.annotations.Test;
+
+import com.google.common.io.Closeables;
 
 /**
  * Tests for EmptyIndex.
@@ -32,6 +40,24 @@ public class EmptyIndexTest {
 	public void missingRAM() throws Exception {
 		IndexSearcher s = new IndexSearcher(new RAMDirectory());
 		s.search(new MatchAllDocsQuery(), 5);
+	}
+
+	/** Missing index. */
+	@Test
+	public void missingRAMnrt() throws Exception {
+		final Directory d = new RAMDirectory();
+		final IndexWriter w = new IndexWriter(d, new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(
+				Version.LUCENE_34)));
+		try {
+			final IndexReader r = IndexReader.open(w, true);
+			try {
+				IndexSearcher s = new IndexSearcher(r);
+				s.search(new MatchAllDocsQuery(), 5);
+			} finally {
+				Closeables.closeQuietly(r);
+			}
+		} finally {
+		}
 	}
 	
 	/** Search. */

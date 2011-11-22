@@ -15,12 +15,14 @@
  */
 package net.conquiris.index;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -31,6 +33,8 @@ import javax.annotation.concurrent.GuardedBy;
 
 import net.conquiris.api.index.Writer;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
@@ -38,6 +42,7 @@ import org.slf4j.Logger;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 
 /**
@@ -115,7 +120,6 @@ abstract class DefaultWriter extends AbstractWriter {
 		}
 	}
 
-	
 	/**
 	 * Called when the writer can't be used any longer.
 	 * @return True if the writer was commited.
@@ -195,6 +199,10 @@ abstract class DefaultWriter extends AbstractWriter {
 		return keys;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#setCheckpoint(java.lang.String)
+	 */
 	@Override
 	public Writer setCheckpoint(String checkpoint) throws InterruptedException {
 		lock.lock();
@@ -203,6 +211,87 @@ abstract class DefaultWriter extends AbstractWriter {
 			this.newCheckpoint = checkpoint;
 		} finally {
 			lock.unlock();
+		}
+		return this;
+	}
+
+	private static void checkProperty(String key, String value) {
+		checkNotNull(key, "Null commit property key [%s]", key);
+		checkArgument(!IS_RESERVED.apply(key), "Reserved commit property key [%s]", key);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#setProperty(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Writer setProperty(String key, String value) throws InterruptedException {
+		lock.lock();
+		try {
+			ensureAvailable();
+			checkProperty(key, value);
+			if (value != null) {
+				properties.put(key, value);
+			} else {
+				properties.remove(key);
+			}
+		} finally {
+			lock.unlock();
+		}
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#setProperties(java.util.Map)
+	 */
+	@Override
+	public Writer setProperties(Map<String, String> values) throws InterruptedException {
+		checkNotNull(values, "The commit properties map is null");
+		lock.lock();
+		try {
+			ensureAvailable();
+			Map<String, String> put = Maps.newHashMapWithExpectedSize(values.size());
+			Set<String> remove = Sets.newHashSet();
+			for (Entry<String, String> e : values.entrySet()) {
+				String key = e.getKey();
+				String value = e.getValue();
+				checkProperty(key, value);
+				if (value != null) {
+					put.put(key, value);
+				} else {
+					remove.add(key);
+				}
+			}
+			properties.putAll(put);
+			for (String k : remove) {
+				properties.remove(k);
+			}
+		} finally {
+			lock.unlock();
+		}
+		return this;
+	}
+	
+	private Analyzer analyzer(Analyzer a) {
+		return a != null ? a : writer.getAnalyzer();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#add(org.apache.lucene.document.Document, org.apache.lucene.analysis.Analyzer)
+	 */
+	@Override
+	public Writer add(Document document, Analyzer analyzer) throws InterruptedException, IOException {
+		if (document != null) {
+			indexLock.readLock().lock();
+			try {
+				ensureAvailable();
+				writer.addDocument(document, analyzer(analyzer));
+				updated = true;
+			} finally {
+				indexLock.readLock().unlock();
+			}
 		}
 		return this;
 	}

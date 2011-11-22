@@ -81,6 +81,24 @@ public interface Writer {
 	Writer setCheckpoint(@Nullable String checkpoint) throws InterruptedException;
 
 	/**
+	 * Sets a commit property value.
+	 * @param key Property key.
+	 * @param value Value to set. If {@code null} the property is removed.
+	 * @return This writer for method chaining.
+	 * @throws IllegalArgumentException if a provided key is reserverd.
+	 */
+	Writer setProperty(String key, String value) throws InterruptedException;
+
+	/**
+	 * Sets a collection of commit property value.
+	 * @param values Values to set. For those properties which value is {@code null} the property will
+	 *          be removed.
+	 * @return This writer for method chaining.
+	 * @throws IllegalArgumentException if any of the provided key is reserved.
+	 */
+	Writer setProperties(Map<String, String> values) throws InterruptedException;
+
+	/**
 	 * Adds a document. The service default analyzer will be used.
 	 * @param document Document to add. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
@@ -158,23 +176,5 @@ public interface Writer {
 	 */
 	Writer update(@Nullable Term term, @Nullable Document document, @Nullable Analyzer analyzer)
 			throws InterruptedException, IOException;
-
-	/**
-	 * Sets a commit property value.
-	 * @param key Property key.
-	 * @param value Value to set. If {@code null} the property is removed.
-	 * @return This writer for method chaining.
-	 * @throws IllegalArgumentException if a provided key is reserverd.
-	 */
-	Writer setProperty(String key, String value) throws InterruptedException;
-
-	/**
-	 * Sets a collection of commit property value.
-	 * @param values Values to set. For those properties which value is {@code null} the property will
-	 *          be removed.
-	 * @return This writer for method chaining.
-	 * @throws IllegalArgumentException if any of the provided key is reserved.
-	 */
-	Writer setProperties(Map<String, String> values) throws InterruptedException;
 
 }

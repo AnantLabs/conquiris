@@ -18,6 +18,7 @@ package net.conquiris.search;
 import net.conquiris.api.search.ManagedReaderSupplier;
 import net.conquiris.api.search.ReaderSupplier;
 
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 
 /**
@@ -43,6 +44,14 @@ public final class ReaderSuppliers {
 		return new DirectoryReaderSupplier(directory);
 	}
 
+	/**
+	 * Returns an unmanaged near-real-time reader supplier using the provided index writer.
+	 * @param writer Index writer.
+	 */
+	public static ReaderSupplier writer(IndexWriter writer) {
+		return new IndexWriterReaderSupplier(writer);
+	}
+	
 	/**
 	 * Returns a managed reader supplier based on another one.
 	 * @param supplier Source reader supplier.
@@ -77,5 +86,23 @@ public final class ReaderSuppliers {
 	public static ReaderSupplier managed(Directory directory) {
 		return managed(directory(directory), 0);
 	}
+	
+	/**
+	 * Returns an unmanaged near-real-time reader supplier using the provided index writer.
+	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
+	 * @param writer Index writer.
+	 */
+	public static ReaderSupplier managed(IndexWriter writer, long holdTime) {
+		return managed(writer(writer), holdTime);
+	}
+
+	/**
+	 * Returns an unmanaged near-real-time reader supplier using the provided index writer.
+	 * @param writer Index writer.
+	 */
+	public static ReaderSupplier managed(IndexWriter writer) {
+		return managed(writer(writer), 0);
+	}
+
 
 }
