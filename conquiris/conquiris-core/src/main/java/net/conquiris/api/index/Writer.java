@@ -44,6 +44,12 @@ public interface Writer {
 	String SEQUENCE = RESERVED_PREFIX + "sequence";
 
 	/**
+	 * Cancels the operation of this writer. Indexer can continue but all operations will be ignored
+	 * and the index writer will be rolled back.
+	 */
+	void cancel() throws InterruptedException;
+
+	/**
 	 * Returns the last commit checkpoint, or {@code null} if there was no checkpoint.
 	 */
 	String getCheckpoint() throws InterruptedException;

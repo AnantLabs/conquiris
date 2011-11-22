@@ -37,8 +37,11 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.slf4j.Logger;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -49,7 +52,7 @@ import com.google.common.io.Closeables;
  * Default writer implementation.
  * @author Andres Rodriguez.
  */
-abstract class DefaultWriter extends AbstractWriter {
+final class DefaultWriter extends AbstractWriter {
 	/** Writer state lock. */
 	private final Lock lock = new ReentrantLock();
 	/** Index writer lock. Is RW as the Index Writer has its own synchronization. */
@@ -72,6 +75,9 @@ abstract class DefaultWriter extends AbstractWriter {
 	/** Whether the writer is available. */
 	@GuardedBy("lock")
 	private volatile boolean available = true;
+	/** Whether the writer has been cancelled. */
+	@GuardedBy("lock")
+	private volatile boolean cancelled = false;
 	/** Whether the index has been updated. */
 	@GuardedBy("indexLock")
 	private boolean updated = false;
@@ -131,7 +137,11 @@ abstract class DefaultWriter extends AbstractWriter {
 			available = false;
 			indexLock.writeLock().lock();
 			try {
-				// TODO
+				// TODO: status and error handling.
+				if (cancelled || !updated || Objects.equal(checkpoint, newCheckpoint) || lastProperties.equals(properties)) {
+					// TODO: rollback
+				}
+				// TODO: commit
 			} finally {
 				indexLock.writeLock().unlock();
 			}
@@ -147,6 +157,26 @@ abstract class DefaultWriter extends AbstractWriter {
 			throw new InterruptedException();
 		}
 		// TODO: use interruptions.
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#cancel()
+	 */
+	@Override
+	public void cancel() throws InterruptedException {
+		lock.lock();
+		try {
+			ensureAvailable();
+			if (!cancelled) {
+				newCheckpoint = checkpoint;
+				properties.clear();
+				properties.putAll(lastProperties);
+				cancelled = true;
+			}
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/*
@@ -208,7 +238,9 @@ abstract class DefaultWriter extends AbstractWriter {
 		lock.lock();
 		try {
 			ensureAvailable();
-			this.newCheckpoint = checkpoint;
+			if (!cancelled) {
+				this.newCheckpoint = checkpoint;
+			}
 		} finally {
 			lock.unlock();
 		}
@@ -229,11 +261,13 @@ abstract class DefaultWriter extends AbstractWriter {
 		lock.lock();
 		try {
 			ensureAvailable();
-			checkProperty(key, value);
-			if (value != null) {
-				properties.put(key, value);
-			} else {
-				properties.remove(key);
+			if (!cancelled) {
+				checkProperty(key, value);
+				if (value != null) {
+					properties.put(key, value);
+				} else {
+					properties.remove(key);
+				}
 			}
 		} finally {
 			lock.unlock();
@@ -251,47 +285,113 @@ abstract class DefaultWriter extends AbstractWriter {
 		lock.lock();
 		try {
 			ensureAvailable();
-			Map<String, String> put = Maps.newHashMapWithExpectedSize(values.size());
-			Set<String> remove = Sets.newHashSet();
-			for (Entry<String, String> e : values.entrySet()) {
-				String key = e.getKey();
-				String value = e.getValue();
-				checkProperty(key, value);
-				if (value != null) {
-					put.put(key, value);
-				} else {
-					remove.add(key);
+			if (!cancelled) {
+				Map<String, String> put = Maps.newHashMapWithExpectedSize(values.size());
+				Set<String> remove = Sets.newHashSet();
+				for (Entry<String, String> e : values.entrySet()) {
+					String key = e.getKey();
+					String value = e.getValue();
+					checkProperty(key, value);
+					if (value != null) {
+						put.put(key, value);
+					} else {
+						remove.add(key);
+					}
 				}
-			}
-			properties.putAll(put);
-			for (String k : remove) {
-				properties.remove(k);
+				properties.putAll(put);
+				for (String k : remove) {
+					properties.remove(k);
+				}
 			}
 		} finally {
 			lock.unlock();
 		}
 		return this;
 	}
-	
+
 	private Analyzer analyzer(Analyzer a) {
 		return a != null ? a : writer.getAnalyzer();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see net.conquiris.api.index.Writer#add(org.apache.lucene.document.Document, org.apache.lucene.analysis.Analyzer)
+	 * @see net.conquiris.api.index.Writer#add(org.apache.lucene.document.Document,
+	 * org.apache.lucene.analysis.Analyzer)
 	 */
 	@Override
 	public Writer add(Document document, Analyzer analyzer) throws InterruptedException, IOException {
-		if (document != null) {
-			indexLock.readLock().lock();
-			try {
-				ensureAvailable();
+		indexLock.readLock().lock();
+		try {
+			ensureAvailable();
+			if (!cancelled && document != null) {
 				writer.addDocument(document, analyzer(analyzer));
 				updated = true;
-			} finally {
-				indexLock.readLock().unlock();
 			}
+		} finally {
+			indexLock.readLock().unlock();
+		}
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#deleteAll()
+	 */
+	@Override
+	public Writer deleteAll() throws InterruptedException, IOException {
+		indexLock.readLock().lock();
+		try {
+			ensureAvailable();
+			if (!cancelled) {
+				writer.deleteDocuments(new MatchAllDocsQuery());
+				updated = true;
+			}
+		} finally {
+			indexLock.readLock().unlock();
+		}
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#delete(org.apache.lucene.index.Term)
+	 */
+	@Override
+	public Writer delete(Term term) throws InterruptedException, IOException {
+		indexLock.readLock().lock();
+		try {
+			ensureAvailable();
+			if (!cancelled && !isTermNull(term)) {
+				writer.deleteDocuments(term);
+				updated = true;
+			}
+		} finally {
+			indexLock.readLock().unlock();
+		}
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#update(org.apache.lucene.index.Term,
+	 * org.apache.lucene.document.Document, org.apache.lucene.analysis.Analyzer)
+	 */
+	@Override
+	public Writer update(Term term, Document document, Analyzer analyzer) throws InterruptedException, IOException {
+		indexLock.readLock().lock();
+		try {
+			ensureAvailable();
+			if (!cancelled && document != null) {
+				analyzer = analyzer(analyzer);
+				if (isTermNull(term)) {
+					writer.addDocument(document, analyzer);
+				} else {
+					writer.updateDocument(term, document, analyzer);
+				}
+				updated = true;
+			}
+		} finally {
+			indexLock.readLock().unlock();
 		}
 		return this;
 	}
