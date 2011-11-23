@@ -31,14 +31,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import net.conquiris.api.index.IndexException;
+import net.conquiris.api.index.IndexStatus;
 import net.conquiris.api.index.Writer;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.util.ThreadInterruptedException;
 import org.slf4j.Logger;
 
 import com.google.common.base.Objects;
@@ -81,6 +86,9 @@ final class DefaultWriter extends AbstractWriter {
 	/** Whether the index has been updated. */
 	@GuardedBy("indexLock")
 	private boolean updated = false;
+	/** Index status. */
+	@GuardedBy("indexLock")
+	private volatile IndexStatus indexStatus = IndexStatus.OK;
 	/** Current checkpoint. */
 	@GuardedBy("this")
 	private String newCheckpoint;
@@ -100,29 +108,40 @@ final class DefaultWriter extends AbstractWriter {
 	 * Default writer.
 	 * @param writer Lucene index writer to use.
 	 */
-	DefaultWriter(Logger logger, IndexWriter writer) throws IOException {
+	DefaultWriter(Logger logger, IndexWriter writer) throws IndexException {
 		this.writer = checkNotNull(writer, "The index writer must be provided");
 		this.properties = new MapMaker().makeMap();
 		this.keys = Collections.unmodifiableSet(this.properties.keySet());
 		// Read properties
-		final IndexReader reader = IndexReader.open(writer, false);
 		try {
-			Map<String, String> data = reader.getCommitUserData();
-			if (data == null || data.isEmpty()) {
-				this.lastProperties = ImmutableMap.of();
-				this.checkpoint = null;
-				this.timestamp = 0L;
-				this.sequence = 0L;
-			} else {
-				this.lastProperties = ImmutableMap.copyOf(Maps.filterEntries(data, IS_USER_PROPERTY));
-				properties.putAll(this.lastProperties);
-				this.checkpoint = data.get(CHECKPOINT);
-				this.timestamp = safe2Long(data.get(TIMESTAMP));
-				this.sequence = safe2Long(data.get(SEQUENCE));
+			final IndexReader reader = IndexReader.open(writer, false);
+			try {
+				Map<String, String> data = reader.getCommitUserData();
+				if (data == null || data.isEmpty()) {
+					this.lastProperties = ImmutableMap.of();
+					this.checkpoint = null;
+					this.timestamp = 0L;
+					this.sequence = 0L;
+				} else {
+					this.lastProperties = ImmutableMap.copyOf(Maps.filterEntries(data, IS_USER_PROPERTY));
+					properties.putAll(this.lastProperties);
+					this.checkpoint = data.get(CHECKPOINT);
+					this.timestamp = safe2Long(data.get(TIMESTAMP));
+					this.sequence = safe2Long(data.get(SEQUENCE));
+				}
+				this.newCheckpoint = this.checkpoint;
+			} finally {
+				Closeables.closeQuietly(reader);
 			}
-			this.newCheckpoint = this.checkpoint;
-		} finally {
-			Closeables.closeQuietly(reader);
+		} catch (LockObtainFailedException e) {
+			indexStatus = IndexStatus.LOCKED;
+			throw new IndexException(e);
+		} catch (CorruptIndexException e) {
+			indexStatus = IndexStatus.CORRUPT;
+			throw new IndexException(e);
+		} catch (IOException e) {
+			indexStatus = IndexStatus.IOERROR;
+			throw new IndexException(e);
 		}
 	}
 
@@ -309,8 +328,55 @@ final class DefaultWriter extends AbstractWriter {
 		return this;
 	}
 
+	/*
+	 * Index Operations support.
+	 */
+
 	private Analyzer analyzer(Analyzer a) {
 		return a != null ? a : writer.getAnalyzer();
+	}
+
+	private abstract class IndexOp {
+		IndexOp() {
+		}
+
+		abstract boolean perform() throws IOException, InterruptedException;
+
+		final void run() throws InterruptedException {
+			indexLock.readLock().lock();
+			boolean cancel = false;
+			try {
+				ensureAvailable();
+				if (!cancelled) {
+					if (perform()) {
+						updated = true;
+					}
+				}
+			} catch (ThreadInterruptedException e) {
+				throw new InterruptedException();
+			} catch (LockObtainFailedException e) {
+				if (indexStatus == IndexStatus.OK) {
+					indexStatus = IndexStatus.LOCKED;
+				}
+				throw new IndexException(e);
+			} catch (CorruptIndexException e) {
+				if (indexStatus == IndexStatus.OK) {
+					indexStatus = IndexStatus.CORRUPT;
+				}
+				throw new IndexException(e);
+			} catch (IOException e) {
+				if (indexStatus == IndexStatus.OK) {
+					indexStatus = IndexStatus.IOERROR;
+				}
+				throw new IndexException(e);
+			} finally {
+				if (cancel) {
+					cancelled = true;
+				}
+				indexLock.readLock().unlock();
+			}
+		}
+
 	}
 
 	/*
@@ -319,17 +385,17 @@ final class DefaultWriter extends AbstractWriter {
 	 * org.apache.lucene.analysis.Analyzer)
 	 */
 	@Override
-	public Writer add(Document document, Analyzer analyzer) throws InterruptedException, IOException {
-		indexLock.readLock().lock();
-		try {
-			ensureAvailable();
-			if (!cancelled && document != null) {
-				writer.addDocument(document, analyzer(analyzer));
-				updated = true;
+	public Writer add(final Document document, final Analyzer analyzer) throws InterruptedException {
+		new IndexOp() {
+			@Override
+			boolean perform() throws IOException, InterruptedException {
+				if (document != null) {
+					writer.addDocument(document, analyzer(analyzer));
+					return true;
+				}
+				return false;
 			}
-		} finally {
-			indexLock.readLock().unlock();
-		}
+		}.run();
 		return this;
 	}
 
@@ -338,17 +404,14 @@ final class DefaultWriter extends AbstractWriter {
 	 * @see net.conquiris.api.index.Writer#deleteAll()
 	 */
 	@Override
-	public Writer deleteAll() throws InterruptedException, IOException {
-		indexLock.readLock().lock();
-		try {
-			ensureAvailable();
-			if (!cancelled) {
+	public Writer deleteAll() throws InterruptedException {
+		new IndexOp() {
+			@Override
+			boolean perform() throws IOException, InterruptedException {
 				writer.deleteDocuments(new MatchAllDocsQuery());
-				updated = true;
+				return true;
 			}
-		} finally {
-			indexLock.readLock().unlock();
-		}
+		}.run();
 		return this;
 	}
 
@@ -357,17 +420,17 @@ final class DefaultWriter extends AbstractWriter {
 	 * @see net.conquiris.api.index.Writer#delete(org.apache.lucene.index.Term)
 	 */
 	@Override
-	public Writer delete(Term term) throws InterruptedException, IOException {
-		indexLock.readLock().lock();
-		try {
-			ensureAvailable();
-			if (!cancelled && !isTermNull(term)) {
-				writer.deleteDocuments(term);
-				updated = true;
+	public Writer delete(final Term term) throws InterruptedException {
+		new IndexOp() {
+			@Override
+			boolean perform() throws IOException, InterruptedException {
+				if (!isTermNull(term)) {
+					writer.deleteDocuments(term);
+					return true;
+				}
+				return false;
 			}
-		} finally {
-			indexLock.readLock().unlock();
-		}
+		}.run();
 		return this;
 	}
 
@@ -377,22 +440,21 @@ final class DefaultWriter extends AbstractWriter {
 	 * org.apache.lucene.document.Document, org.apache.lucene.analysis.Analyzer)
 	 */
 	@Override
-	public Writer update(Term term, Document document, Analyzer analyzer) throws InterruptedException, IOException {
-		indexLock.readLock().lock();
-		try {
-			ensureAvailable();
-			if (!cancelled && document != null) {
-				analyzer = analyzer(analyzer);
-				if (isTermNull(term)) {
-					writer.addDocument(document, analyzer);
-				} else {
-					writer.updateDocument(term, document, analyzer);
+	public Writer update(final Term term, final Document document, final Analyzer analyzer) throws InterruptedException {
+		new IndexOp() {
+			@Override
+			boolean perform() throws IOException, InterruptedException {
+				if (document != null) {
+					if (isTermNull(term)) {
+						writer.addDocument(document, analyzer);
+					} else {
+						writer.updateDocument(term, document, analyzer);
+					}
+					return true;
 				}
-				updated = true;
+				return false;
 			}
-		} finally {
-			indexLock.readLock().unlock();
-		}
+		}.run();
 		return this;
 	}
 

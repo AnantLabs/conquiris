@@ -18,9 +18,9 @@ package net.conquiris.index;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
 import java.util.Map.Entry;
 
+import net.conquiris.api.index.IndexException;
 import net.conquiris.api.index.Writer;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -67,11 +67,11 @@ abstract class AbstractWriter implements Writer {
 		checkArgument(!IS_RESERVED.apply(key), "Reserved key");
 		return key;
 	}
-	
+
 	/** Constructor. */
 	AbstractWriter() {
 	}
-	
+
 	/** Ensures operations can be performed on the writer. */
 	abstract void ensureAvailable() throws InterruptedException;
 
@@ -80,7 +80,7 @@ abstract class AbstractWriter implements Writer {
 	 * @see net.conquiris.api.index.Writer#add(org.apache.lucene.document.Document)
 	 */
 	@Override
-	public final Writer add(Document document) throws InterruptedException, IOException {
+	public final Writer add(Document document) throws InterruptedException, IndexException {
 		ensureAvailable();
 		if (document != null) {
 			add(document, null);
@@ -93,7 +93,7 @@ abstract class AbstractWriter implements Writer {
 	 * @see net.conquiris.api.index.Writer#delete(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public final Writer delete(String field, String text) throws InterruptedException, IOException {
+	public final Writer delete(String field, String text) throws InterruptedException, IndexException {
 		ensureAvailable();
 		if (field != null && text != null) {
 			delete(new Term(field, text));
@@ -107,7 +107,7 @@ abstract class AbstractWriter implements Writer {
 	 * org.apache.lucene.document.Document)
 	 */
 	@Override
-	public final Writer update(String field, String text, Document document) throws InterruptedException, IOException {
+	public final Writer update(String field, String text, Document document) throws InterruptedException, IndexException {
 		ensureAvailable();
 		if (field != null && text != null && document != null) {
 			update(new Term(field, text), document, null);
@@ -122,7 +122,7 @@ abstract class AbstractWriter implements Writer {
 	 */
 	@Override
 	public final Writer update(String field, String text, Document document, Analyzer analyzer)
-			throws InterruptedException, IOException {
+			throws InterruptedException, IndexException {
 		ensureAvailable();
 		if (field != null && text != null && document != null) {
 			update(new Term(field, text), document, analyzer);
@@ -131,7 +131,7 @@ abstract class AbstractWriter implements Writer {
 	}
 
 	@Override
-	public final Writer update(Term term, Document document) throws InterruptedException, IOException {
+	public final Writer update(Term term, Document document) throws InterruptedException, IndexException {
 		ensureAvailable();
 		if (!isTermNull(term) && document != null) {
 			update(term, document, null);

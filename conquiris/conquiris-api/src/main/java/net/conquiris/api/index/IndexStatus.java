@@ -20,5 +20,5 @@ package net.conquiris.api.index;
  * @author Andres Rodriguez
  */
 public enum IndexStatus {
-	OK, ERROR, IOERROR, CORRUPT, LOCKED;
+	OK, IOERROR, CORRUPT, LOCKED;
 }

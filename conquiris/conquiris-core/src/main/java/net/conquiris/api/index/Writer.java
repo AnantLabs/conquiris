@@ -15,7 +15,6 @@
  */
 package net.conquiris.api.index;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,7 +29,7 @@ import org.apache.lucene.index.Term;
  * If no state modifiers methods are called nothing will be commited to the index. Implementations
  * MUST BE thread-safe. All methods throw {@link IllegalStateException} if the writer can no longer
  * be used, {@link InterruptedException} if the thread they are running is interrupted and
- * {@link IOException} if there's a problem with the index.
+ * {@link IndexException} if there's a problem with the index.
  * @author Andres Rodriguez
  */
 public interface Writer {
@@ -109,7 +108,7 @@ public interface Writer {
 	 * @param document Document to add. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
 	 */
-	Writer add(@Nullable Document document) throws InterruptedException, IOException;
+	Writer add(@Nullable Document document) throws InterruptedException, IndexException;
 
 	/**
 	 * Adds a document.
@@ -117,13 +116,13 @@ public interface Writer {
 	 * @param analyzer Analyzer to use. If {@code null} the service default analyzer will be used.
 	 * @return This writer for method chaining.
 	 */
-	Writer add(@Nullable Document document, @Nullable Analyzer analyzer) throws InterruptedException, IOException;
+	Writer add(@Nullable Document document, @Nullable Analyzer analyzer) throws InterruptedException, IndexException;
 
 	/**
 	 * Deletes all documents.
 	 * @return This writer for method chaining.
 	 */
-	Writer deleteAll() throws InterruptedException, IOException;
+	Writer deleteAll() throws InterruptedException, IndexException;
 
 	/**
 	 * Deletes documents matching a certain term.
@@ -131,14 +130,14 @@ public interface Writer {
 	 * @param text Term text to match. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
 	 */
-	Writer delete(@Nullable String field, @Nullable String text) throws InterruptedException, IOException;
+	Writer delete(@Nullable String field, @Nullable String text) throws InterruptedException, IndexException;
 
 	/**
 	 * Deletes documents matching a certain term.
 	 * @param term Term to match. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
 	 */
-	Writer delete(@Nullable Term term) throws InterruptedException, IOException;
+	Writer delete(@Nullable Term term) throws InterruptedException, IndexException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -149,7 +148,7 @@ public interface Writer {
 	 * @return This writer for method chaining.
 	 */
 	Writer update(@Nullable String field, @Nullable String text, @Nullable Document document)
-			throws InterruptedException, IOException;
+			throws InterruptedException, IndexException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -158,7 +157,7 @@ public interface Writer {
 	 * @param document Document to add. If {@code null} no document will be added.
 	 * @return This writer for method chaining.
 	 */
-	Writer update(@Nullable Term term, @Nullable Document document) throws InterruptedException, IOException;
+	Writer update(@Nullable Term term, @Nullable Document document) throws InterruptedException, IndexException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -170,7 +169,7 @@ public interface Writer {
 	 * @return This writer for method chaining.
 	 */
 	Writer update(@Nullable String field, @Nullable String text, @Nullable Document document, @Nullable Analyzer analyzer)
-			throws InterruptedException, IOException;
+			throws InterruptedException, IndexException;
 
 	/**
 	 * Atomically (with respect to index flushing) deletes the documents matching a certain term and
@@ -181,6 +180,6 @@ public interface Writer {
 	 * @return This writer for method chaining.
 	 */
 	Writer update(@Nullable Term term, @Nullable Document document, @Nullable Analyzer analyzer)
-			throws InterruptedException, IOException;
+			throws InterruptedException, IndexException;
 
 }
