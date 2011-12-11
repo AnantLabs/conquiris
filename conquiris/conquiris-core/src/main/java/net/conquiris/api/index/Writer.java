@@ -17,6 +17,7 @@ package net.conquiris.api.index;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 
@@ -181,5 +182,14 @@ public interface Writer {
 	 */
 	Writer update(@Nullable Term term, @Nullable Document document, @Nullable Analyzer analyzer)
 			throws InterruptedException, IndexException;
+
+	/**
+	 * Runs a collection of subindexers using the provided executor, waiting for them to finish.
+	 * @param executor Executor to use.
+	 * @param subindexers Indexers to run.
+	 * @return This writer for method chaining.
+	 */
+	Writer runSubindexers(Executor executor, Iterable<? extends Indexer> subindexers) throws InterruptedException,
+			IndexException;
 
 }

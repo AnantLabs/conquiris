@@ -24,6 +24,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,7 +38,9 @@ import javax.annotation.concurrent.GuardedBy;
 
 import net.conquiris.api.index.IndexException;
 import net.conquiris.api.index.IndexStatus;
+import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
+import net.derquinse.common.util.concurrent.Interruptions;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -47,11 +54,14 @@ import org.apache.lucene.util.ThreadInterruptedException;
 import org.slf4j.Logger;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
+import com.google.common.util.concurrent.Atomics;
 
 /**
  * Default writer implementation.
@@ -77,6 +87,8 @@ final class DefaultWriter extends AbstractWriter {
 	private final long timestamp;
 	/** Last commit sequence. */
 	private final long sequence;
+	/** Whether any indexer has been ever interrupted. */
+	private volatile boolean interrupted = false;
 	/** Whether the writer is available. */
 	@GuardedBy("lock")
 	private volatile boolean available = true;
@@ -88,7 +100,7 @@ final class DefaultWriter extends AbstractWriter {
 	private boolean updated = false;
 	/** Index status. */
 	@GuardedBy("indexLock")
-	private volatile IndexStatus indexStatus = IndexStatus.OK;
+	private final AtomicReference<IndexStatus> indexStatus = Atomics.newReference(IndexStatus.OK);
 	/** Current checkpoint. */
 	@GuardedBy("this")
 	private String newCheckpoint;
@@ -134,13 +146,13 @@ final class DefaultWriter extends AbstractWriter {
 				Closeables.closeQuietly(reader);
 			}
 		} catch (LockObtainFailedException e) {
-			indexStatus = IndexStatus.LOCKED;
+			indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.LOCKED);
 			throw new IndexException(e);
 		} catch (CorruptIndexException e) {
-			indexStatus = IndexStatus.CORRUPT;
+			indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.CORRUPT);
 			throw new IndexException(e);
 		} catch (IOException e) {
-			indexStatus = IndexStatus.IOERROR;
+			indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.IOERROR);
 			throw new IndexException(e);
 		}
 	}
@@ -170,12 +182,20 @@ final class DefaultWriter extends AbstractWriter {
 	}
 
 	@Override
-	void ensureAvailable() throws InterruptedException {
+	boolean ensureAvailable() throws InterruptedException {
 		checkState(available, "The writer can't be used any longer");
-		if (Thread.interrupted()) {
+		if (interrupted) {
 			throw new InterruptedException();
 		}
-		// TODO: use interruptions.
+		boolean ok = false;
+		try {
+			Interruptions.throwIfInterrupted();
+			ok = true;
+		} finally {
+			if (!ok)
+				interrupted = true;
+		}
+		return !cancelled && IndexStatus.OK == indexStatus.get();
 	}
 
 	/*
@@ -256,8 +276,7 @@ final class DefaultWriter extends AbstractWriter {
 	public Writer setCheckpoint(String checkpoint) throws InterruptedException {
 		lock.lock();
 		try {
-			ensureAvailable();
-			if (!cancelled) {
+			if (ensureAvailable()) {
 				this.newCheckpoint = checkpoint;
 			}
 		} finally {
@@ -279,8 +298,7 @@ final class DefaultWriter extends AbstractWriter {
 	public Writer setProperty(String key, String value) throws InterruptedException {
 		lock.lock();
 		try {
-			ensureAvailable();
-			if (!cancelled) {
+			if (ensureAvailable()) {
 				checkProperty(key, value);
 				if (value != null) {
 					properties.put(key, value);
@@ -303,8 +321,7 @@ final class DefaultWriter extends AbstractWriter {
 		checkNotNull(values, "The commit properties map is null");
 		lock.lock();
 		try {
-			ensureAvailable();
-			if (!cancelled) {
+			if (ensureAvailable()) {
 				Map<String, String> put = Maps.newHashMapWithExpectedSize(values.size());
 				Set<String> remove = Sets.newHashSet();
 				for (Entry<String, String> e : values.entrySet()) {
@@ -346,28 +363,22 @@ final class DefaultWriter extends AbstractWriter {
 			indexLock.readLock().lock();
 			boolean cancel = false;
 			try {
-				ensureAvailable();
-				if (!cancelled) {
+				if (ensureAvailable()) {
 					if (perform()) {
 						updated = true;
 					}
 				}
 			} catch (ThreadInterruptedException e) {
+				interrupted = true;
 				throw new InterruptedException();
 			} catch (LockObtainFailedException e) {
-				if (indexStatus == IndexStatus.OK) {
-					indexStatus = IndexStatus.LOCKED;
-				}
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.LOCKED);
 				throw new IndexException(e);
 			} catch (CorruptIndexException e) {
-				if (indexStatus == IndexStatus.OK) {
-					indexStatus = IndexStatus.CORRUPT;
-				}
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.CORRUPT);
 				throw new IndexException(e);
 			} catch (IOException e) {
-				if (indexStatus == IndexStatus.OK) {
-					indexStatus = IndexStatus.IOERROR;
-				}
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.IOERROR);
 				throw new IndexException(e);
 			} finally {
 				if (cancel) {
@@ -446,9 +457,9 @@ final class DefaultWriter extends AbstractWriter {
 			boolean perform() throws IOException, InterruptedException {
 				if (document != null) {
 					if (isTermNull(term)) {
-						writer.addDocument(document, analyzer);
+						writer.addDocument(document, analyzer(analyzer));
 					} else {
-						writer.updateDocument(term, document, analyzer);
+						writer.updateDocument(term, document, analyzer(analyzer));
 					}
 					return true;
 				}
@@ -456,6 +467,46 @@ final class DefaultWriter extends AbstractWriter {
 			}
 		}.run();
 		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#runSubindexers(java.util.concurrent.Executor,
+	 * java.lang.Iterable)
+	 */
+	@Override
+	public Writer runSubindexers(Executor executor, Iterable<? extends Indexer> subindexers) throws InterruptedException,
+			IndexException {
+		checkNotNull(executor, "The executor must be provided");
+		checkNotNull(executor, "The subindexers must be provided");
+		if (ensureAvailable()) {
+			CompletionService<IndexStatus> ecs = new ExecutorCompletionService<IndexStatus>(executor);
+			int n = 0;
+			for (Indexer subindexer : Iterables.filter(subindexers, Predicates.notNull())) {
+				ecs.submit(new SubindexerTask(subindexer));
+				n++;
+			}
+			for (int i = 0; i < n && ensureAvailable(); i++) {
+				ecs.take();
+			}
+		}
+		return this;
+	}
+
+	private final class SubindexerTask implements Callable<IndexStatus> {
+		private final Indexer indexer;
+
+		SubindexerTask(Indexer indexer) {
+			this.indexer = checkNotNull(indexer, "The subindexer must be provided");
+		}
+
+		@Override
+		public IndexStatus call() throws Exception {
+			if (ensureAvailable()) {
+				indexer.index(DefaultWriter.this);
+			}
+			return indexStatus.get();
+		}
 	}
 
 }

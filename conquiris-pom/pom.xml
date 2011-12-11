@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.conquiris.maven</groupId>
+	<groupId>net.conquiris</groupId>
 	<artifactId>conquiris-pom</artifactId>
-	<version>3.4.0-SNAPSHOT</version>
+	<version>3.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
 	<description>Conquiris :: Parent POM</description>
 	<parent>
 		<groupId>net.derquinse</groupId>
 		<artifactId>derquinse-common-project-parent</artifactId>
-		<version>1.0.10</version>
+		<version>1.0.11-SNAPSHOT</version>
 	</parent>
 	<url>http://code.google.com/p/conquiris/</url>
 	<scm>
@@ -30,17 +30,17 @@
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-core</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analyzers</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-highlighter</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

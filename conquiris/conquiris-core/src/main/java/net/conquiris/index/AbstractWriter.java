@@ -72,8 +72,14 @@ abstract class AbstractWriter implements Writer {
 	AbstractWriter() {
 	}
 
-	/** Ensures operations can be performed on the writer. */
-	abstract void ensureAvailable() throws InterruptedException;
+	/**
+	 * Ensures operations can be performed on the writer.
+	 * @return True if the operations performed may be considered. That is, the writer has not been
+	 *         cancelled and no previous error has been registered.
+	 * @throws InterruptedException If the writer task has been interrupted.
+	 * @throws IllegalStateException if the writer is no longer available.
+	 */
+	abstract boolean ensureAvailable() throws InterruptedException;
 
 	/*
 	 * (non-Javadoc)
@@ -81,8 +87,7 @@ abstract class AbstractWriter implements Writer {
 	 */
 	@Override
 	public final Writer add(Document document) throws InterruptedException, IndexException {
-		ensureAvailable();
-		if (document != null) {
+		if (ensureAvailable() && document != null) {
 			add(document, null);
 		}
 		return this;
@@ -94,8 +99,7 @@ abstract class AbstractWriter implements Writer {
 	 */
 	@Override
 	public final Writer delete(String field, String text) throws InterruptedException, IndexException {
-		ensureAvailable();
-		if (field != null && text != null) {
+		if (ensureAvailable() && field != null && text != null) {
 			delete(new Term(field, text));
 		}
 		return this;
@@ -108,8 +112,7 @@ abstract class AbstractWriter implements Writer {
 	 */
 	@Override
 	public final Writer update(String field, String text, Document document) throws InterruptedException, IndexException {
-		ensureAvailable();
-		if (field != null && text != null && document != null) {
+		if (ensureAvailable() && field != null && text != null && document != null) {
 			update(new Term(field, text), document, null);
 		}
 		return this;
@@ -123,8 +126,7 @@ abstract class AbstractWriter implements Writer {
 	@Override
 	public final Writer update(String field, String text, Document document, Analyzer analyzer)
 			throws InterruptedException, IndexException {
-		ensureAvailable();
-		if (field != null && text != null && document != null) {
+		if (ensureAvailable() && field != null && text != null && document != null) {
 			update(new Term(field, text), document, analyzer);
 		}
 		return this;
@@ -132,8 +134,7 @@ abstract class AbstractWriter implements Writer {
 
 	@Override
 	public final Writer update(Term term, Document document) throws InterruptedException, IndexException {
-		ensureAvailable();
-		if (!isTermNull(term) && document != null) {
+		if (ensureAvailable() && !isTermNull(term) && document != null) {
 			update(term, document, null);
 		}
 		return this;
