@@ -15,29 +15,58 @@
  */
 package net.conquiris.api.index;
 
-import com.google.common.util.concurrent.Service;
+import javax.annotation.Nullable;
 
 /**
  * Interface for an indexer service.
  * @author Andres Rodriguez.
  */
-public interface IndexerService extends Service {
+public interface IndexerService {
 	/**
-	 * Returns the index status.
+	 * Returns the last known index information.
+	 */
+	IndexInfo getIndexInfo();
+
+	/**
+	 * Returns the last known index status.
 	 */
 	IndexStatus getIndexStatus();
-	
+
 	/**
-	 * Returns true if and only if the service is RUNNING and the current policy is to keep the index active.
+	 * Returns true if and only if the service is started.
+	 */
+	boolean isStarted();
+
+	/**
+	 * Returns true if and only if the service is started and the current policy is to keep the index
+	 * active.
 	 */
 	boolean isActive();
-	
+
 	/** Returns the current delay specification. */
 	Delays getDelays();
-	
+
 	/**
 	 * Set the delay specification.
 	 * @param delays New delay specification.
 	 */
 	void setDelays(Delays delays);
+
+	/** Starts the service. It is a no-op if the service is already running. */
+	void start();
+
+	/** Stops the service. It is a no-op if the service is already stopped. */
+	void stop();
+
+	/**
+	 * Schedules a tasks that changes the index checkpoint. It is a no-op if the service is stopped or
+	 * the activation policy is disabled.
+	 */
+	void setCheckpoint(@Nullable String checkpoint);
+
+	/**
+	 * Schedules a tasks that changes the index checkpoint. It is a no-op if the service is stopped or
+	 * the activation policy is disabled.
+	 */
+	void reindex();
 }

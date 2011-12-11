@@ -24,8 +24,6 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.lucene.index.IndexReader;
-
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
@@ -146,16 +144,6 @@ public final class IndexInfo {
 		}
 		return of(data.get(CHECKPOINT), safe2Long(data.get(TIMESTAMP)), safe2Long(data.get(SEQUENCE)),
 				Maps.filterEntries(data, isUserProperty()));
-	}
-
-	/**
-	 * Creates a new index info object from the commit data of an index reader. Reserved properties
-	 * are extracted with default values provided if needed. Invalid user properties are filtered out.
-	 * @param reader The index reader.
-	 * @return The created object.
-	 */
-	public static IndexInfo fromReader(IndexReader reader) {
-		return fromMap(reader.getCommitUserData());
 	}
 
 	/** Last commit checkpoint. */

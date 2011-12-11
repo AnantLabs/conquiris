@@ -110,7 +110,7 @@ final class DefaultWriter extends AbstractWriter {
 		try {
 			final IndexReader reader = IndexReader.open(writer, false);
 			try {
-				this.indexInfo = IndexInfo.fromReader(reader);
+				this.indexInfo = IndexInfo.fromMap(reader.getCommitUserData());
 				this.checkpoint = this.indexInfo.getCheckpoint();
 				this.properties.putAll(this.indexInfo.getProperties());
 			} finally {
@@ -132,24 +132,39 @@ final class DefaultWriter extends AbstractWriter {
 	 * Called when the writer can't be used any longer.
 	 * @return True if the writer was commited.
 	 */
-	void done() throws InterruptedException {
+	boolean done() throws InterruptedException {
 		lock.lock();
 		try {
-			ensureAvailable();
-			available = false;
 			indexLock.writeLock().lock();
+			if (!available) {
+				return false;
+			}
+			available = false;
 			try {
-				// TODO: status and error handling.
-				if (cancelled || !updated || Objects.equal(checkpoint, indexInfo.getCheckpoint())) {
-					// TODO: rollback
+				if (!canContinue() || !updated || Objects.equal(checkpoint, indexInfo.getCheckpoint())) {
+					writer.rollback();
+				} else {
+					writer.commit();
+					return true;
 				}
-				// TODO: commit
+			} catch (LockObtainFailedException e) {
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.LOCKED);
+			} catch (CorruptIndexException e) {
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.CORRUPT);
+			} catch (IOException e) {
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.IOERROR);
 			} finally {
 				indexLock.writeLock().unlock();
 			}
 		} finally {
 			lock.unlock();
 		}
+		return false;
+	}
+
+	/** Returns the current index status. */
+	IndexStatus getIndexStatus() {
+		return indexStatus.get();
 	}
 
 	@Override
@@ -166,7 +181,11 @@ final class DefaultWriter extends AbstractWriter {
 			if (!ok)
 				interrupted = true;
 		}
-		return !cancelled && IndexStatus.OK == indexStatus.get();
+		return canContinue();
+	}
+
+	private boolean canContinue() {
+		return !cancelled && !interrupted && IndexStatus.OK == indexStatus.get();
 	}
 
 	/*
