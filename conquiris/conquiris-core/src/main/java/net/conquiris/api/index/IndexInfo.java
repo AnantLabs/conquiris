@@ -21,12 +21,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+
+import org.apache.lucene.index.IndexReader;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 /**
  * Conquiris index info at a certain commit point.
@@ -48,20 +52,6 @@ public final class IndexInfo {
 	public static final String TIMESTAMP = RESERVED_PREFIX + TIMESTAMP_NAME;
 	/** Sequence property. */
 	public static final String SEQUENCE = RESERVED_PREFIX + SEQUENCE_NAME;
-	private static final Predicate<String> IS_RESERVED = new Predicate<String>() {
-		@Override
-		public boolean apply(String input) {
-			return input != null && input.startsWith(RESERVED_PREFIX);
-		}
-	};
-	/** User property entry filter. */
-	private static final Predicate<Entry<String, String>> IS_USER_PROPERTY = new Predicate<Entry<String, String>>() {
-		@Override
-		public boolean apply(Entry<String, String> input) {
-			String k = input.getKey();
-			return k != null && input.getValue() != null && !IS_RESERVED.apply(k);
-		}
-	};
 
 	/** Returns whether a property name is reserved. */
 	public static boolean isReserved(String key) {
@@ -118,6 +108,54 @@ public final class IndexInfo {
 	/** Returns the valid user property predicate. */
 	public static Predicate<Entry<String, String>> isUserProperty() {
 		return IsUserProperty.INSTANCE;
+	}
+
+	/**
+	 * Creates a new index info object.
+	 * @param checkpoint Checkpoint.
+	 * @param timestamp Commit timestamp. Must be >= 0.
+	 * @param sequence Commit sequence. Must be >= 0.
+	 * @param properties User properties. Must be non-null and contain no reserved properties.
+	 * @return The created object.
+	 * @throws IllegalArgumentException if any of the arguments is invalid.
+	 */
+	public static IndexInfo of(@Nullable String checkpoint, long timestamp, long sequence, Map<String, String> properties) {
+		return new IndexInfo(checkpoint, timestamp, sequence, properties);
+	}
+
+	private static long safe2Long(String s) {
+		if (s == null) {
+			return 0L;
+		}
+		try {
+			return Math.max(0L, Long.parseLong(s));
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	/**
+	 * Creates a new index info object from a string map. Reserved properties are extracted with
+	 * default values provided if needed. Invalid user properties are filtered out.
+	 * @param data Commit data.
+	 * @return The created object.
+	 */
+	public static IndexInfo fromMap(Map<String, String> data) {
+		if (data == null || data.isEmpty()) {
+			return of(null, 0L, 0L, ImmutableMap.<String, String> of());
+		}
+		return of(data.get(CHECKPOINT), safe2Long(data.get(TIMESTAMP)), safe2Long(data.get(SEQUENCE)),
+				Maps.filterEntries(data, isUserProperty()));
+	}
+
+	/**
+	 * Creates a new index info object from the commit data of an index reader. Reserved properties
+	 * are extracted with default values provided if needed. Invalid user properties are filtered out.
+	 * @param reader The index reader.
+	 * @return The created object.
+	 */
+	public static IndexInfo fromReader(IndexReader reader) {
+		return fromMap(reader.getCommitUserData());
 	}
 
 	/** Last commit checkpoint. */

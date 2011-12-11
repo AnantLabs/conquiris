@@ -34,15 +34,6 @@ import org.apache.lucene.index.Term;
  * @author Andres Rodriguez
  */
 public interface Writer {
-	/** Reserved commit properties prefix. */
-	String RESERVED_PREFIX = "cq:";
-	/** Checkpoint property. */
-	String CHECKPOINT = RESERVED_PREFIX + "checkpoint";
-	/** Timestamp property. */
-	String TIMESTAMP = RESERVED_PREFIX + "timestamp";
-	/** Sequence property. */
-	String SEQUENCE = RESERVED_PREFIX + "sequence";
-
 	/**
 	 * Cancels the operation of this writer. Indexer can continue but all operations will be ignored
 	 * and the index writer will be rolled back.
@@ -50,19 +41,15 @@ public interface Writer {
 	void cancel() throws InterruptedException;
 
 	/**
-	 * Returns the last commit checkpoint, or {@code null} if there was no checkpoint.
+	 * Returns the last commit index info.
+	 */
+	IndexInfo getIndexInfo() throws InterruptedException;
+
+	/**
+	 * Returns the commit checkpoint, or {@code null} if there was no checkpoint. Includes the
+	 * modifications performed in this writer.
 	 */
 	String getCheckpoint() throws InterruptedException;
-
-	/**
-	 * Returns the last commit timestamp.
-	 */
-	long getTimestamp() throws InterruptedException;
-
-	/**
-	 * Returns the last commit sequence.
-	 */
-	long getSequence() throws InterruptedException;
 
 	/**
 	 * Returns a commit property. Includes the modifications performed in this writer.

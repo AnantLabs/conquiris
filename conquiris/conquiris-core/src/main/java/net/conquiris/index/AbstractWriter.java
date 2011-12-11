@@ -17,45 +17,19 @@ package net.conquiris.index;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Map.Entry;
-
 import net.conquiris.api.index.IndexException;
+import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.Writer;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
 
-import com.google.common.base.Predicate;
-
 /**
  * Abstract writer implementation. Includes the convenience methods.
  * @author Andres Rodriguez.
  */
 abstract class AbstractWriter implements Writer {
-	/** Checkpoint property. */
-	static final String CHECKPOINT = RESERVED_PREFIX + "checkpoint";
-	/** Timestamp property. */
-	static final String TIMESTAMP = RESERVED_PREFIX + "timestamp";
-	/** Sequence property. */
-	static final String SEQUENCE = RESERVED_PREFIX + "sequence";
-	/** Reserved property filter. */
-	static final Predicate<String> IS_RESERVED = new Predicate<String>() {
-		@Override
-		public boolean apply(String input) {
-			return input != null && input.startsWith(RESERVED_PREFIX);
-		}
-	};
-	/** User property entry filter. */
-	static final Predicate<Entry<String, String>> IS_USER_PROPERTY = new Predicate<Entry<String, String>>() {
-		@Override
-		public boolean apply(Entry<String, String> input) {
-			String k = input.getKey();
-			return k != null && input.getValue() != null && !IS_RESERVED.apply(k);
-		}
-	};
-
 	/** Checks whether a term or any of its properties is null. */
 	static boolean isTermNull(Term term) {
 		return term == null || term.field() == null || term.text() == null;
@@ -64,7 +38,7 @@ abstract class AbstractWriter implements Writer {
 	/** Check a property key is valid. */
 	static String checkKey(String key) {
 		checkNotNull("key", "Null user property keys not allowed");
-		checkArgument(!IS_RESERVED.apply(key), "Reserved key");
+		checkArgument(!IndexInfo.isReserved(key), "Reserved key");
 		return key;
 	}
 

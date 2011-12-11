@@ -15,7 +15,6 @@
  */
 package net.conquiris.index;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -37,6 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.concurrent.GuardedBy;
 
 import net.conquiris.api.index.IndexException;
+import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexStatus;
 import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
@@ -55,7 +55,6 @@ import org.slf4j.Logger;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -74,19 +73,13 @@ final class DefaultWriter extends AbstractWriter {
 	private final ReadWriteLock indexLock = new ReentrantReadWriteLock();
 	/** Lucene index writer. */
 	private final IndexWriter writer;
-	/** Last commit user properties. */
-	private final ImmutableMap<String, String> lastProperties;
+	/** Last commit index info. */
+	private final IndexInfo indexInfo;
 	/** Current user properties. */
 	@GuardedBy("lock")
 	private final Map<String, String> properties;
 	/** User properties key set. */
 	private final Set<String> keys;
-	/** Last commit checkpoint. */
-	private final String checkpoint;
-	/** Last commit timestamp. */
-	private final long timestamp;
-	/** Last commit sequence. */
-	private final long sequence;
 	/** Whether any indexer has been ever interrupted. */
 	private volatile boolean interrupted = false;
 	/** Whether the writer is available. */
@@ -103,18 +96,7 @@ final class DefaultWriter extends AbstractWriter {
 	private final AtomicReference<IndexStatus> indexStatus = Atomics.newReference(IndexStatus.OK);
 	/** Current checkpoint. */
 	@GuardedBy("this")
-	private String newCheckpoint;
-
-	private static long safe2Long(String s) {
-		if (s == null) {
-			return 0L;
-		}
-		try {
-			return Long.parseLong(s);
-		} catch (NumberFormatException e) {
-			return 0;
-		}
-	}
+	private String checkpoint;
 
 	/**
 	 * Default writer.
@@ -128,20 +110,9 @@ final class DefaultWriter extends AbstractWriter {
 		try {
 			final IndexReader reader = IndexReader.open(writer, false);
 			try {
-				Map<String, String> data = reader.getCommitUserData();
-				if (data == null || data.isEmpty()) {
-					this.lastProperties = ImmutableMap.of();
-					this.checkpoint = null;
-					this.timestamp = 0L;
-					this.sequence = 0L;
-				} else {
-					this.lastProperties = ImmutableMap.copyOf(Maps.filterEntries(data, IS_USER_PROPERTY));
-					properties.putAll(this.lastProperties);
-					this.checkpoint = data.get(CHECKPOINT);
-					this.timestamp = safe2Long(data.get(TIMESTAMP));
-					this.sequence = safe2Long(data.get(SEQUENCE));
-				}
-				this.newCheckpoint = this.checkpoint;
+				this.indexInfo = IndexInfo.fromReader(reader);
+				this.checkpoint = this.indexInfo.getCheckpoint();
+				this.properties.putAll(this.indexInfo.getProperties());
 			} finally {
 				Closeables.closeQuietly(reader);
 			}
@@ -169,7 +140,7 @@ final class DefaultWriter extends AbstractWriter {
 			indexLock.writeLock().lock();
 			try {
 				// TODO: status and error handling.
-				if (cancelled || !updated || Objects.equal(checkpoint, newCheckpoint) || lastProperties.equals(properties)) {
+				if (cancelled || !updated || Objects.equal(checkpoint, indexInfo.getCheckpoint())) {
 					// TODO: rollback
 				}
 				// TODO: commit
@@ -208,14 +179,24 @@ final class DefaultWriter extends AbstractWriter {
 		try {
 			ensureAvailable();
 			if (!cancelled) {
-				newCheckpoint = checkpoint;
+				checkpoint = indexInfo.getCheckpoint();
 				properties.clear();
-				properties.putAll(lastProperties);
+				properties.putAll(indexInfo.getProperties());
 				cancelled = true;
 			}
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#getIndexInfo()
+	 */
+	@Override
+	public IndexInfo getIndexInfo() throws InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*
@@ -226,26 +207,6 @@ final class DefaultWriter extends AbstractWriter {
 	public String getCheckpoint() throws InterruptedException {
 		ensureAvailable();
 		return checkpoint;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.conquiris.api.index.Writer#getTimestamp()
-	 */
-	@Override
-	public long getTimestamp() throws InterruptedException {
-		ensureAvailable();
-		return timestamp;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.conquiris.api.index.Writer#getSequence()
-	 */
-	@Override
-	public long getSequence() throws InterruptedException {
-		ensureAvailable();
-		return sequence;
 	}
 
 	/*
@@ -277,17 +238,12 @@ final class DefaultWriter extends AbstractWriter {
 		lock.lock();
 		try {
 			if (ensureAvailable()) {
-				this.newCheckpoint = checkpoint;
+				this.checkpoint = checkpoint;
 			}
 		} finally {
 			lock.unlock();
 		}
 		return this;
-	}
-
-	private static void checkProperty(String key, String value) {
-		checkNotNull(key, "Null commit property key [%s]", key);
-		checkArgument(!IS_RESERVED.apply(key), "Reserved commit property key [%s]", key);
 	}
 
 	/*
@@ -299,7 +255,7 @@ final class DefaultWriter extends AbstractWriter {
 		lock.lock();
 		try {
 			if (ensureAvailable()) {
-				checkProperty(key, value);
+				checkKey(key);
 				if (value != null) {
 					properties.put(key, value);
 				} else {
@@ -327,7 +283,7 @@ final class DefaultWriter extends AbstractWriter {
 				for (Entry<String, String> e : values.entrySet()) {
 					String key = e.getKey();
 					String value = e.getValue();
-					checkProperty(key, value);
+					checkKey(key);
 					if (value != null) {
 						put.put(key, value);
 					} else {
