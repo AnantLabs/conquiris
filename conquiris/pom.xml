@@ -26,5 +26,6 @@
 	<modules>
 		<module>conquiris-api</module>
 		<module>conquiris-core</module>
+		<module>conquiris-gson</module>
 	</modules>
 </project>
