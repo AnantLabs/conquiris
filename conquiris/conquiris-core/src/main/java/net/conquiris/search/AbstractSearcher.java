@@ -16,7 +16,6 @@
 package net.conquiris.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -46,6 +45,7 @@ import org.apache.lucene.search.TotalHitCountCollector;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 
 /**
  * Abstract searcher implementation.
@@ -205,7 +205,7 @@ abstract class AbstractSearcher implements Searcher {
 					int n = Math.min(total, docs.scoreDocs.length);
 					float score = docs.getMaxScore();
 					if (n > firstRecord) {
-						final List<T> items = new ArrayList<T>(n - firstRecord);
+						final List<T> items = Lists.newArrayListWithCapacity(n - firstRecord);
 						HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 						for (int i = firstRecord; i < n; i++) {
 							ScoreDoc sd = docs.scoreDocs[i];
