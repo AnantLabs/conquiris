@@ -23,28 +23,11 @@ import javax.annotation.Nullable;
  */
 public interface IndexerService {
 	/**
-	 * Returns the last known index information.
+	 * Returns a report from the index.
+	 * @param level Desired level.
+	 * @return The requested report.
 	 */
-	IndexInfo getIndexInfo();
-
-	/**
-	 * Returns the last known index status.
-	 */
-	IndexStatus getIndexStatus();
-
-	/**
-	 * Returns true if and only if the service is started.
-	 */
-	boolean isStarted();
-
-	/**
-	 * Returns true if and only if the service is started and the current policy is to keep the index
-	 * active.
-	 */
-	boolean isActive();
-
-	/** Returns the current delay specification. */
-	Delays getDelays();
+	IndexReport getIndexReport(IndexReportLevel level);
 
 	/**
 	 * Set the delay specification.

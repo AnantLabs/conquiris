@@ -15,6 +15,7 @@
  */
 package net.conquiris.api.index;
 
+import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -25,6 +26,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -40,12 +42,16 @@ public final class IndexInfo {
 	public static final String RESERVED_PREFIX = "cq:";
 	/** Checkpoint property unqualified name. */
 	private static final String CHECKPOINT_NAME = "checkpoint";
+	/** Target checkpoint property unqualified name. */
+	private static final String TARGET_CHECKPOINT_NAME = "targetCheckpoint";
 	/** Timestamp property unqualified name. */
 	private static final String TIMESTAMP_NAME = "timestamp";
 	/** Sequence property unqualified name. */
 	private static final String SEQUENCE_NAME = "sequence";
 	/** Checkpoint property. */
 	public static final String CHECKPOINT = RESERVED_PREFIX + CHECKPOINT_NAME;
+	/** Target checkpoint property. */
+	public static final String TARGET_CHECKPOINT = RESERVED_PREFIX + TARGET_CHECKPOINT_NAME;
 	/** Timestamp property. */
 	public static final String TIMESTAMP = RESERVED_PREFIX + TIMESTAMP_NAME;
 	/** Sequence property. */
@@ -117,8 +123,9 @@ public final class IndexInfo {
 	 * @return The created object.
 	 * @throws IllegalArgumentException if any of the arguments is invalid.
 	 */
-	public static IndexInfo of(@Nullable String checkpoint, long timestamp, long sequence, Map<String, String> properties) {
-		return new IndexInfo(checkpoint, timestamp, sequence, properties);
+	public static IndexInfo of(@Nullable String checkpoint, @Nullable String targetCheckpoint, long timestamp,
+			long sequence, Map<String, String> properties) {
+		return new IndexInfo(checkpoint, targetCheckpoint, timestamp, sequence, properties);
 	}
 
 	private static long safe2Long(String s) {
@@ -140,14 +147,16 @@ public final class IndexInfo {
 	 */
 	public static IndexInfo fromMap(Map<String, String> data) {
 		if (data == null || data.isEmpty()) {
-			return of(null, 0L, 0L, ImmutableMap.<String, String> of());
+			return of(null, null, 0L, 0L, ImmutableMap.<String, String> of());
 		}
-		return of(data.get(CHECKPOINT), safe2Long(data.get(TIMESTAMP)), safe2Long(data.get(SEQUENCE)),
-				Maps.filterEntries(data, isUserProperty()));
+		return of(data.get(CHECKPOINT), data.get(TARGET_CHECKPOINT), safe2Long(data.get(TIMESTAMP)),
+				safe2Long(data.get(SEQUENCE)), Maps.filterEntries(data, isUserProperty()));
 	}
 
 	/** Last commit checkpoint. */
 	private final String checkpoint;
+	/** Last known target checkpoint. */
+	private final String targetCheckpoint;
 	/** Last commit timestamp. */
 	private final long timestamp;
 	/** Last commit sequence. */
@@ -155,20 +164,35 @@ public final class IndexInfo {
 	/** User properties. */
 	private final ImmutableMap<String, String> properties;
 
-	private IndexInfo(String checkpoint, long timestamp, long sequence, Map<String, String> properties) {
+	private IndexInfo(String checkpoint, String targetCheckpoint, long timestamp, long sequence,
+			Map<String, String> properties) {
 		checkArgument(timestamp >= 0);
 		checkArgument(sequence >= 0);
 		checkNotNull(properties);
 		checkArgument(Iterables.all(properties.entrySet(), isUserProperty()));
 		this.checkpoint = checkpoint;
+		this.targetCheckpoint = targetCheckpoint;
 		this.timestamp = timestamp;
 		this.sequence = sequence;
 		this.properties = ImmutableMap.copyOf(properties);
 	}
 
+	/** Returns a basic version without user properties. */
+	public IndexInfo asBasic() {
+		if (properties.isEmpty()) {
+			return this;
+		}
+		return new IndexInfo(checkpoint, targetCheckpoint, timestamp, sequence, ImmutableMap.<String, String> of());
+	}
+
 	/** Returns the checkpoint. */
 	public String getCheckpoint() {
 		return checkpoint;
+	}
+
+	/** Returns the last known target checkpoint. */
+	public String getTargetCheckpoint() {
+		return targetCheckpoint;
 	}
 
 	/** Returns the commit timestamp. */
@@ -187,9 +211,32 @@ public final class IndexInfo {
 	}
 
 	@Override
+	public int hashCode() {
+		return Objects.hashCode(checkpoint, targetCheckpoint, timestamp, sequence, properties);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof IndexInfo) {
+			IndexInfo other = (IndexInfo) obj;
+			return this.timestamp == other.timestamp && this.sequence == other.sequence
+					&& equal(checkpoint, other.checkpoint) && equal(targetCheckpoint, other.targetCheckpoint)
+					&& equal(properties, other.properties);
+		}
+		return false;
+	}
+
+	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).add(CHECKPOINT_NAME, checkpoint).add(TIMESTAMP_NAME, timestamp)
-				.add(SEQUENCE_NAME, sequence).add("properties", properties).toString();
+		ToStringHelper h = Objects.toStringHelper(this).add(CHECKPOINT_NAME, checkpoint)
+				.add(TARGET_CHECKPOINT_NAME, targetCheckpoint).add(TIMESTAMP_NAME, timestamp).add(SEQUENCE_NAME, sequence);
+		if (!properties.isEmpty()) {
+			h.add("properties", properties);
+		}
+		return h.toString();
 	}
 
 }
