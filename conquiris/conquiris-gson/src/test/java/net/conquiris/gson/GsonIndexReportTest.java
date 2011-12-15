@@ -15,23 +15,32 @@
  */
 package net.conquiris.gson;
 
+import net.conquiris.api.index.Delays;
+import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexReport;
 import net.conquiris.api.index.IndexStatus;
 import net.derquinse.common.test.GsonSerializabilityTests;
 
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Tests for IndexBasicReport.
  * @author Andres Rodriguez
  */
 public class GsonIndexReportTest {
+	private static final IndexInfo INFO = IndexInfo.fromMap(ImmutableMap.of(IndexInfo.CHECKPOINT, "test", "key",
+			"value"));
 	private static final IndexReport BASIC = IndexReport.basic(true, false, IndexStatus.CORRUPT);
+	private static final IndexReport NORMAL = IndexReport.normal(true, true, IndexStatus.IOERROR, Delays.constant(4L), INFO);
+	private static final IndexReport DETAILED = IndexReport.detailed(true, true, IndexStatus.OK, Delays.constant(10L), INFO);
 
 	/** Serializability. */
 	@Test
 	public void serializability() {
-		GsonSerializabilityTests.check(BASIC, BASIC.getClass(), true);
-		// TODO fix in 1.0.12
+		GsonSerializabilityTests.check(ConquirisGson.get(), BASIC);
+		GsonSerializabilityTests.check(ConquirisGson.get(), NORMAL);
+		GsonSerializabilityTests.check(ConquirisGson.get(), DETAILED);
 	}
 }

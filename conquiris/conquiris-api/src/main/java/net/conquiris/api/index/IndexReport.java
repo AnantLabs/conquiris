@@ -145,7 +145,7 @@ public final class IndexReport implements IndexStatusProperty, IndexStartedFlag,
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(started, isIndexActive(), status);
+		return Objects.hashCode(level, started, isIndexActive(), status, delays, info);
 	}
 
 	@Override
@@ -155,7 +155,8 @@ public final class IndexReport implements IndexStatusProperty, IndexStartedFlag,
 		}
 		if (obj instanceof IndexReport) {
 			IndexReport other = (IndexReport) obj;
-			return this.started == other.started && this.active == other.active && this.status == other.status;
+			return this.level == other.level && this.started == other.started && this.active == other.active
+					&& this.status == other.status && Objects.equal(delays, other.delays) && Objects.equal(info, other.info);
 		}
 		return false;
 	}

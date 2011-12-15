@@ -41,13 +41,13 @@ public final class IndexInfo {
 	/** Reserved commit properties prefix. */
 	public static final String RESERVED_PREFIX = "cq:";
 	/** Checkpoint property unqualified name. */
-	private static final String CHECKPOINT_NAME = "checkpoint";
+	public static final String CHECKPOINT_NAME = "checkpoint";
 	/** Target checkpoint property unqualified name. */
-	private static final String TARGET_CHECKPOINT_NAME = "targetCheckpoint";
+	public static final String TARGET_CHECKPOINT_NAME = "targetCheckpoint";
 	/** Timestamp property unqualified name. */
-	private static final String TIMESTAMP_NAME = "timestamp";
+	public static final String TIMESTAMP_NAME = "timestamp";
 	/** Sequence property unqualified name. */
-	private static final String SEQUENCE_NAME = "sequence";
+	public static final String SEQUENCE_NAME = "sequence";
 	/** Checkpoint property. */
 	public static final String CHECKPOINT = RESERVED_PREFIX + CHECKPOINT_NAME;
 	/** Target checkpoint property. */

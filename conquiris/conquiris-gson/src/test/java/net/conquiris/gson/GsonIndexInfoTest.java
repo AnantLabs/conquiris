@@ -33,8 +33,7 @@ public class GsonIndexInfoTest {
 	/** Serializability. */
 	@Test
 	public void serializability() {
-		GsonSerializabilityTests.check(SAMPLE, SAMPLE.getClass(), true);
-		GsonSerializabilityTests.check(SAMPLE.asBasic(), SAMPLE.getClass(), true);
-		// TODO fix in 1.0.12
+		GsonSerializabilityTests.check(ConquirisGson.get(), SAMPLE);
+		GsonSerializabilityTests.check(ConquirisGson.get(), SAMPLE.asBasic());
 	}
 }

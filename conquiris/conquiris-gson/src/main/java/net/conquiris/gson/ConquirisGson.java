@@ -17,6 +17,8 @@ package net.conquiris.gson;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import net.conquiris.api.index.Delays;
+import net.conquiris.api.index.IndexInfo;
+import net.conquiris.api.index.IndexReport;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,6 +44,8 @@ public final class ConquirisGson {
 	public static GsonBuilder decorate(GsonBuilder builder) {
 		checkNotNull(builder, "The builder to decorate must be provided");
 		builder.registerTypeAdapter(Delays.class, new GsonDelays());
+		builder.registerTypeAdapter(IndexInfo.class, new GsonIndexInfo());
+		builder.registerTypeAdapter(IndexReport.class, new GsonIndexReport());
 		return builder;
 	}
 
