@@ -97,11 +97,8 @@ public abstract class AbstractLocalIndexerService implements LocalIndexerService
 	 */
 	@Override
 	public final boolean isIndexActive() {
-		if (!isIndexStarted()) {
-			return false;
-		}
 		try {
-			return activationPolicy.isActive();
+			return activationPolicy.isActive() && isIndexStarted();
 		} catch (RuntimeException e) {
 			log().error(e, "Unable to get current activation state");
 		}

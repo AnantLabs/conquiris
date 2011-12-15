@@ -18,6 +18,8 @@ package net.conquiris.index;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,9 +31,12 @@ import net.conquiris.api.index.IndexStatus;
 
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 
+import com.google.common.base.Supplier;
 import com.google.common.io.Closeables;
 
 /**
@@ -41,44 +46,24 @@ import com.google.common.io.Closeables;
 public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 	/** Lucene directory to use. */
 	private final Directory directory;
+	/** Writer configuration supplier. */
+	private final Supplier<IndexWriterConfig> configSupplier;
 	/** Last known index status. */
 	private volatile IndexStatus indexStatus = IndexStatus.OK;
 	/** Service lock. */
 	private final Lock lock = new ReentrantLock();
-	/** Executor. */
+	/** Service session. */
 	@GuardedBy("lock")
-	private volatile ScheduledExecutorService executor;
+	private volatile Session session;
 
-	public DirectoryIndexerService(Directory directory) {
+	public DirectoryIndexerService(Directory directory, Supplier<IndexWriterConfig> configSupplier) {
 		this.directory = checkNotNull(directory, "The directory to use must be provided");
-	}
-
-	/** Called when there is an exception obtaining the index information. */
-	private void noInfo(Exception e, IndexStatus status) {
-		log().error(e, "Unable to read index info");
-		indexStatus = status;
+		this.configSupplier = checkNotNull(configSupplier, "The index writer configuration supplier must be provided");
 	}
 
 	@Override
 	public IndexInfo getIndexInfo() {
-		try {
-			if (!IndexReader.indexExists(directory)) {
-				return IndexInfo.empty();
-			}
-			final IndexReader reader = IndexReader.open(directory);
-			try {
-				return IndexInfo.fromMap(reader.getCommitUserData());
-			} finally {
-				Closeables.closeQuietly(reader);
-			}
-		} catch (LockObtainFailedException e) {
-			noInfo(e, IndexStatus.LOCKED);
-		} catch (CorruptIndexException e) {
-			noInfo(e, IndexStatus.CORRUPT);
-		} catch (IOException e) {
-			noInfo(e, IndexStatus.IOERROR);
-		}
-		return IndexInfo.empty();
+		return new GetIndexInfo().get();
 	}
 
 	@Override
@@ -88,14 +73,42 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-
+		lock.lock();
+		try {
+			if (session != null) {
+				return; // already started
+			}
+			session = new Session();
+			// TODO: schedule task
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
+		lock.lock();
+		try {
+			final Session s = session;
+			if (s == null) {
+				return; // already stopped
+			}
+			session = null;
+			s.shutdown();
+		} finally {
+			lock.unlock();
+		}
+	}
 
+	
+
+	void template() {
+		lock.lock();
+		try {
+			// TODO Auto-generated method stub
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@Override
@@ -112,7 +125,148 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 
 	@Override
 	public boolean isIndexStarted() {
-		return executor != null;
+		return session != null;
+	}
+
+	/** Wrapped Lucene operation. */
+	private abstract class Wrapped<T> {
+		private String message;
+		private T fallback;
+
+		Wrapped(String message, T fallback) {
+			this.message = checkNotNull(message);
+			this.fallback = fallback;
+		}
+
+		/** Called when there is an exception obtaining the index information. */
+		private void error(Exception e, IndexStatus status) {
+			log().error(e, message);
+			if (status != null) {
+				indexStatus = status;
+			}
+		}
+
+		final T get() {
+			try {
+				return run();
+			} catch (LockObtainFailedException e) {
+				error(e, IndexStatus.LOCKED);
+			} catch (CorruptIndexException e) {
+				error(e, IndexStatus.CORRUPT);
+			} catch (IOException e) {
+				error(e, IndexStatus.IOERROR);
+			} catch (RuntimeException e) {
+				error(e, IndexStatus.ERROR);
+			}
+			return fallback;
+		}
+
+		abstract T run() throws IOException;
+	}
+
+	/** Get index info. */
+	private final class GetIndexInfo extends Wrapped<IndexInfo> {
+		GetIndexInfo() {
+			super("Unable to get index info", IndexInfo.empty());
+		}
+
+		@Override
+		IndexInfo run() throws IOException {
+			if (!IndexReader.indexExists(directory)) {
+				return IndexInfo.empty();
+			}
+			final IndexReader reader = IndexReader.open(directory);
+			try {
+				return IndexInfo.fromMap(reader.getCommitUserData());
+			} finally {
+				Closeables.closeQuietly(reader);
+			}
+		}
+	}
+
+	/** Open writer. */
+	private final class OpenWriter extends Wrapped<IndexWriter> {
+		OpenWriter() {
+			super("Unable to open index writer", null);
+		}
+
+		@Override
+		IndexWriter run() throws IOException {
+			IndexWriterConfig config = checkNotNull(configSupplier.get(), "Null writer config supplied");
+			return new IndexWriter(directory, config);
+		}
+	}
+	
+	/** Service session. */
+	private final class Session {
+		/** Executor. */
+		private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		/** Index writer. */
+		@GuardedBy("lock")
+		private IndexWriter indexWriter = null;
+		/** Whether the session is active. */
+		@GuardedBy("lock")
+		private boolean active = true;
+
+		IndexWriter getOpenWriter() {
+			lock.lock();
+			try {
+				if (!active) {
+					return null;
+				}
+				if (indexWriter == null) {
+					indexWriter = new OpenWriter().get();
+				}
+				return indexWriter;
+			} finally {
+				lock.unlock();
+			}
+		}
+		
+		void closeWriter() {
+			lock.lock();
+			try {
+				if (indexWriter != null) {
+					Closeables.closeQuietly(indexWriter);
+					indexWriter = null;
+				}
+			} finally {
+				lock.unlock();
+			}
+		}
+		
+		void shutdown() {
+			active = false;
+			executor.shutdownNow();
+			closeWriter();
+		}
+	
+	}
+
+	/** Base task. */
+	private abstract class Task implements Runnable {
+		private final Session session;
+		
+		public Task(Session session) {
+			this.session = checkNotNull(session);
+		}
+		
+		@Override
+		public void run() {
+			lock.lock();
+			try {
+				boolean ok = true;
+				final IndexWriter indexWriter = session.getOpenWriter();
+			} finally {
+				lock.unlock();
+			}
+
+			// TODO Auto-generated method stub
+
+		}
+
+		// abstract IndexStatus
+
 	}
 
 }
