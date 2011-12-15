@@ -19,7 +19,7 @@ package net.conquiris.api.index;
  * Local interface for an indexer service.
  * @author Andres Rodriguez.
  */
-public interface LocalIndexerService extends IndexerService {
+public interface LocalIndexerService extends IndexerService, IndexStatusProperty, IndexStartedFlag, IndexActiveFlag {
 	/**
 	 * Returns the last known index information.
 	 */
@@ -29,17 +29,6 @@ public interface LocalIndexerService extends IndexerService {
 	 * Returns the last known index status.
 	 */
 	IndexStatus getIndexStatus();
-
-	/**
-	 * Returns true if and only if the service is started.
-	 */
-	boolean isStarted();
-
-	/**
-	 * Returns true if and only if the service is started and the current policy is to keep the index
-	 * active.
-	 */
-	boolean isActive();
 
 	/** Returns the current delay specification. */
 	Delays getDelays();

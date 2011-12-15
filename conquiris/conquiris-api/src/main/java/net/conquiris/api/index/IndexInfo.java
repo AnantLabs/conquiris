@@ -113,6 +113,14 @@ public final class IndexInfo {
 	public static Predicate<Entry<String, String>> isUserProperty() {
 		return IsUserProperty.INSTANCE;
 	}
+	
+	/** Empty object. */
+	private static final IndexInfo EMPTY = IndexInfo.of(null, null, 0, 0, ImmutableMap.<String, String>of());
+	
+	/** Returns the empty object. */
+	public static IndexInfo empty() {
+		return EMPTY;
+	}
 
 	/**
 	 * Creates a new index info object.
