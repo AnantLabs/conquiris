@@ -52,6 +52,12 @@ public interface Writer {
 	String getCheckpoint() throws InterruptedException;
 
 	/**
+	 * Returns the last known target checkpoint, or {@code null} if there was no checkpoint. Includes
+	 * the modifications performed in this writer.
+	 */
+	String getTargetCheckpoint() throws InterruptedException;
+
+	/**
 	 * Returns a commit property. Includes the modifications performed in this writer.
 	 * @param key Property key.
 	 * @return The property value or {@code null} if the property does no exist.
@@ -72,6 +78,14 @@ public interface Writer {
 	 * @return This writer for method chaining.
 	 */
 	Writer setCheckpoint(@Nullable String checkpoint) throws InterruptedException;
+
+	/**
+	 * Sets the new target checkpoint. It will only be considered a modifying operation if the
+	 * checkpoint is different.
+	 * @param targetCheckpoint New target checkpoint.
+	 * @return This writer for method chaining.
+	 */
+	Writer setTargetCheckpoint(@Nullable String targetCheckpoint) throws InterruptedException;
 
 	/**
 	 * Sets a commit property value.

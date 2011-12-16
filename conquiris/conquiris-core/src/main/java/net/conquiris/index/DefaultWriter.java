@@ -15,6 +15,7 @@
  */
 package net.conquiris.index;
 
+import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -40,6 +41,8 @@ import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexStatus;
 import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
+import net.conquiris.api.index.WriterResult;
+import net.derquinse.common.log.ContextLog;
 import net.derquinse.common.util.concurrent.Interruptions;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -51,9 +54,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.ThreadInterruptedException;
-import org.slf4j.Logger;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
@@ -67,6 +68,8 @@ import com.google.common.util.concurrent.Atomics;
  * @author Andres Rodriguez.
  */
 final class DefaultWriter extends AbstractWriter {
+	/** Log to use. */
+	private final ContextLog log;
 	/** Writer state lock. */
 	private final Lock lock = new ReentrantLock();
 	/** Index writer lock. Is RW as the Index Writer has its own synchronization. */
@@ -82,9 +85,9 @@ final class DefaultWriter extends AbstractWriter {
 	private final Set<String> keys;
 	/** Whether any indexer has been ever interrupted. */
 	private volatile boolean interrupted = false;
-	/** Whether the writer is available. */
+	/** Writer result. The writer is available while the value is {@code null}. */
 	@GuardedBy("lock")
-	private volatile boolean available = true;
+	private volatile WriterResult result = null;
 	/** Whether the writer has been cancelled. */
 	@GuardedBy("lock")
 	private volatile boolean cancelled = false;
@@ -95,14 +98,19 @@ final class DefaultWriter extends AbstractWriter {
 	@GuardedBy("indexLock")
 	private final AtomicReference<IndexStatus> indexStatus = Atomics.newReference(IndexStatus.OK);
 	/** Current checkpoint. */
-	@GuardedBy("this")
-	private String checkpoint;
+	@GuardedBy("lock")
+	private volatile String checkpoint;
+	/** Target checkpoint. */
+	@GuardedBy("lock")
+	private volatile String targetCheckpoint;
 
 	/**
 	 * Default writer.
+	 * @param log Log context.
 	 * @param writer Lucene index writer to use.
 	 */
-	DefaultWriter(Logger logger, IndexWriter writer) throws IndexException {
+	DefaultWriter(ContextLog log, IndexWriter writer) throws IndexException {
+		this.log = checkNotNull(log, "The log context must be provided");
 		this.writer = checkNotNull(writer, "The index writer must be provided");
 		this.properties = new MapMaker().makeMap();
 		this.keys = Collections.unmodifiableSet(this.properties.keySet());
@@ -112,6 +120,7 @@ final class DefaultWriter extends AbstractWriter {
 			try {
 				this.indexInfo = IndexInfo.fromMap(reader.getCommitUserData());
 				this.checkpoint = this.indexInfo.getCheckpoint();
+				this.targetCheckpoint = this.indexInfo.getTargetCheckpoint();
 				this.properties.putAll(this.indexInfo.getProperties());
 			} finally {
 				Closeables.closeQuietly(reader);
@@ -125,41 +134,58 @@ final class DefaultWriter extends AbstractWriter {
 		} catch (IOException e) {
 			indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.IOERROR);
 			throw new IndexException(e);
+		} catch (RuntimeException e) {
+			indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.ERROR);
+			throw e;
 		}
 	}
 
 	/**
 	 * Called when the writer can't be used any longer.
-	 * @return True if the writer was commited.
+	 * @return The writer result.
 	 */
-	boolean done() throws InterruptedException {
+	WriterResult done() throws InterruptedException {
 		lock.lock();
 		try {
 			indexLock.writeLock().lock();
-			if (!available) {
-				return false;
+			if (result != null) {
+				return result;
 			}
-			available = false;
+			result = WriterResult.NORMAL;
 			try {
-				if (!canContinue() || !updated || Objects.equal(checkpoint, indexInfo.getCheckpoint())) {
+				if (!canContinue()) {
+					log.trace("Writer rolled back");
+					result = WriterResult.ERROR;
+					writer.rollback();
+				} else if (!updated && equal(checkpoint, indexInfo.getCheckpoint())
+						&& equal(targetCheckpoint, indexInfo.getTargetCheckpoint())
+						&& !equal(properties, indexInfo.getProperties())) {
+					log.trace("Writer unchanged");
+					result = WriterResult.IDLE;
 					writer.rollback();
 				} else {
+					log.trace("Writer committed");
 					writer.commit();
-					return true;
 				}
 			} catch (LockObtainFailedException e) {
 				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.LOCKED);
+				result = WriterResult.ERROR;
 			} catch (CorruptIndexException e) {
 				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.CORRUPT);
+				result = WriterResult.ERROR;
 			} catch (IOException e) {
 				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.IOERROR);
+				result = WriterResult.ERROR;
+			} catch (RuntimeException e) {
+				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.ERROR);
+				result = WriterResult.ERROR;
 			} finally {
 				indexLock.writeLock().unlock();
 			}
 		} finally {
 			lock.unlock();
 		}
-		return false;
+		return result;
 	}
 
 	/** Returns the current index status. */
@@ -169,7 +195,7 @@ final class DefaultWriter extends AbstractWriter {
 
 	@Override
 	boolean ensureAvailable() throws InterruptedException {
-		checkState(available, "The writer can't be used any longer");
+		checkState(result == null, "The writer can't be used any longer");
 		if (interrupted) {
 			throw new InterruptedException();
 		}
@@ -230,6 +256,16 @@ final class DefaultWriter extends AbstractWriter {
 
 	/*
 	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#getTargetCheckpoint()
+	 */
+	@Override
+	public String getTargetCheckpoint() throws InterruptedException {
+		ensureAvailable();
+		return targetCheckpoint;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see net.conquiris.api.index.Writer#getProperty(java.lang.String)
 	 */
 	@Override
@@ -258,6 +294,23 @@ final class DefaultWriter extends AbstractWriter {
 		try {
 			if (ensureAvailable()) {
 				this.checkpoint = checkpoint;
+			}
+		} finally {
+			lock.unlock();
+		}
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.api.index.Writer#setTargetCheckpoint(java.lang.String)
+	 */
+	@Override
+	public Writer setTargetCheckpoint(String targetCheckpoint) throws InterruptedException {
+		lock.lock();
+		try {
+			if (ensureAvailable()) {
+				this.targetCheckpoint = targetCheckpoint;
 			}
 		} finally {
 			lock.unlock();
