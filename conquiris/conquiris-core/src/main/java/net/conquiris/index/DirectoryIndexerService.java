@@ -28,6 +28,8 @@ import javax.annotation.concurrent.GuardedBy;
 
 import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexStatus;
+import net.conquiris.api.index.Indexer;
+import net.conquiris.api.index.Writer;
 
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
@@ -44,6 +46,8 @@ import com.google.common.io.Closeables;
  * @author Andres Rodriguez
  */
 public final class DirectoryIndexerService extends AbstractLocalIndexerService {
+	/** Indexer to use. */
+	private final Indexer indexer;
 	/** Lucene directory to use. */
 	private final Directory directory;
 	/** Writer configuration supplier. */
@@ -56,7 +60,8 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 	@GuardedBy("lock")
 	private volatile Session session;
 
-	public DirectoryIndexerService(Directory directory, Supplier<IndexWriterConfig> configSupplier) {
+	public DirectoryIndexerService(Indexer indexer, Directory directory, Supplier<IndexWriterConfig> configSupplier) {
+		this.indexer = checkNotNull(indexer, "The indexer to use must be provided");
 		this.directory = checkNotNull(directory, "The directory to use must be provided");
 		this.configSupplier = checkNotNull(configSupplier, "The index writer configuration supplier must be provided");
 	}
@@ -138,7 +143,7 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 			this.fallback = fallback;
 		}
 
-		/** Called when there is an exception obtaining the index information. */
+		/** Called when there is an exception running the operation. */
 		private void error(Exception e, IndexStatus status) {
 			log().error(e, message);
 			if (status != null) {
@@ -252,17 +257,23 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 		}
 		
 		@Override
-		public void run() {
-			lock.lock();
+		public final void run() {
+			boolean ok = false;
+			boolean indexerOk = false;
+			final IndexWriter indexWriter = session.getOpenWriter();
 			try {
-				boolean ok = true;
-				final IndexWriter indexWriter = session.getOpenWriter();
+				final Writer writer = new DefaultWriter(writerLog(), indexWriter);
+				try {
+					indexer.index(writer);
+				} catch(Exception e) {
+					// TODO
+				}
+				ok = true;
 			} finally {
-				lock.unlock();
+				if (!ok) {
+					session.closeWriter();
+				}
 			}
-
-			// TODO Auto-generated method stub
-
 		}
 
 		// abstract IndexStatus
