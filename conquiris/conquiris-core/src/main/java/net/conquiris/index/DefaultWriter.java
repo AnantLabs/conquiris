@@ -159,13 +159,22 @@ final class DefaultWriter extends AbstractWriter {
 					writer.rollback();
 				} else if (!updated && equal(checkpoint, indexInfo.getCheckpoint())
 						&& equal(targetCheckpoint, indexInfo.getTargetCheckpoint())
-						&& !equal(properties, indexInfo.getProperties())) {
+						&& equal(properties, indexInfo.getProperties())) {
 					log.trace("Writer unchanged");
 					result = WriterResult.IDLE;
 					writer.rollback();
 				} else {
+					Map<String, String> data = Maps.newHashMap(properties);
+					if (checkpoint != null) {
+						data.put(IndexInfo.CHECKPOINT, checkpoint);
+					}
+					if (targetCheckpoint != null) {
+						data.put(IndexInfo.TARGET_CHECKPOINT, targetCheckpoint);
+					}
+					data.put(IndexInfo.TIMESTAMP, Long.toString(System.currentTimeMillis()));
+					data.put(IndexInfo.SEQUENCE, Long.toString(indexInfo.getSequence() + 1));
+					writer.commit(data);
 					log.trace("Writer committed");
-					writer.commit();
 				}
 			} catch (LockObtainFailedException e) {
 				indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.LOCKED);

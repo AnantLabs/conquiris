@@ -88,7 +88,6 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 			}
 			session = new Session();
 			new IndexTask(session, true, 0L);
-			// TODO: schedule task
 		} finally {
 			lock.unlock();
 		}

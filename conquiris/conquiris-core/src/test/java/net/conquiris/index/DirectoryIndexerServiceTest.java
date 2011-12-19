@@ -15,7 +15,7 @@
  */
 package net.conquiris.index;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import net.conquiris.api.index.Checkpoints;
 import net.conquiris.api.index.Delays;
 import net.conquiris.api.search.SearcherService;
@@ -23,6 +23,8 @@ import net.conquiris.lucene.Conquiris;
 import net.conquiris.search.ReaderSuppliers;
 import net.conquiris.search.Searchers;
 import net.conquiris.support.TestIndexer;
+import net.conquiris.support.TestMultiIndexer;
+import net.conquiris.support.TestSimpleIndexer;
 import net.conquiris.support.TestSupport;
 
 import org.apache.lucene.store.RAMDirectory;
@@ -34,9 +36,9 @@ import org.testng.annotations.Test;
  */
 public class DirectoryIndexerServiceTest {
 	private final RAMDirectory directory = new RAMDirectory();
+	private TestIndexer indexer;
 	private final SearcherService searcher = Searchers.service(ReaderSuppliers.directory(directory));
-	private final DirectoryIndexerService service = new DirectoryIndexerService(new TestIndexer(), directory,
-			Conquiris.writerConfigSupplier());
+	private DirectoryIndexerService service;
 
 	private int count() {
 		return TestSupport.getCount(searcher);
@@ -50,33 +52,57 @@ public class DirectoryIndexerServiceTest {
 		TestSupport.notFound(searcher, value);
 	}
 
+	private int checkpoint() {
+		return Checkpoints.ofInt(service.getIndexInfo().getCheckpoint(), 0);
+	}
+
 	private void check() {
-		int cp = Checkpoints.ofInt(service.getIndexInfo().getCheckpoint(), 0);
+		int cp = checkpoint();
 		if (cp > 0) {
 			found(cp - 3);
 			notFound(cp + 100000);
-			assertEquals(count(), cp);
+			assertTrue(count() >= cp);
 		}
 	}
 
-	@Test
-	public void start() {
-		check();
+	private void create() {
+		service = new DirectoryIndexerService(indexer, directory, Conquiris.writerConfigSupplier());
 		service.setDelays(Delays.constant(5));
-		service.start();
 	}
 
-	@Test(dependsOnMethods = "start")
-	public void test() throws InterruptedException {
+	private void testService() throws InterruptedException {
+		create();
+		check();
+		service.start();
+		doTest();
+		service.stop();
+		indexer.setTarget(2 * indexer.getTarget());
+		service.start();
+		doTest();
+		service.stop();
+		System.out.println("Count: " + count());
+	}
+
+	private void doTest() throws InterruptedException {
 		for (int i = 0; i < 50; i++) {
 			Thread.sleep(20L);
 			check();
 		}
+		assertTrue(checkpoint() >= 0);
+		assertTrue(count() >= 0);
 	}
 
-	@Test(dependsOnMethods = "test")
-	public void shutdown() {
-		service.stop();
+	@Test
+	public void simple() throws InterruptedException {
+		indexer = new TestSimpleIndexer();
+		testService();
 	}
 
+	@Test(dependsOnMethods="simple")
+	public void multi() throws InterruptedException {
+		indexer = new TestMultiIndexer();
+		indexer.setTarget(20000);
+		testService();
+	}
+	
 }

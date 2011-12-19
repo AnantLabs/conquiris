@@ -15,36 +15,24 @@
  */
 package net.conquiris.support;
 
-import net.conquiris.api.index.Checkpoints;
 import net.conquiris.api.index.IndexException;
-import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
 
 /**
- * Indexer used for tests.
+ * Simple indexer used for tests.
  * @author Andres Rodriguez
  */
-public abstract class TestIndexer implements Indexer {
-	private int target = 500;
-
-	TestIndexer() {
+public final class TestSimpleIndexer extends TestIndexer {
+	public TestSimpleIndexer() {
 	}
 
 	@Override
-	public final void index(Writer writer) throws InterruptedException, IndexException {
-		int cp = Checkpoints.ofInt(writer.getCheckpoint(), 0);
-		cp = index(cp, writer);
-		writer.setCheckpoint(Integer.toString(cp));
-		writer.setTargetCheckpoint(Integer.toString(getTarget()));
-	}
-
-	abstract int index(int cp, Writer writer) throws InterruptedException, IndexException;
-
-	public int getTarget() {
-		return target;
-	}
-
-	public void setTarget(int target) {
-		this.target = target;
+	int index(int cp, Writer writer) throws InterruptedException, IndexException {
+		int start = cp + 1;
+		final int end = Math.min(getTarget(), start + 9);
+		for (int i = start; i <= end; i++) {
+			writer.add(TestSupport.document(i));
+		}
+		return end;
 	}
 }
