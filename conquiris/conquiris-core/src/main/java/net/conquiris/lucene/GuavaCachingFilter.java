@@ -18,6 +18,7 @@ package net.conquiris.lucene;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.lucene.index.IndexReader;
@@ -30,7 +31,6 @@ import org.apache.lucene.util.FixedBitSet;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 /**
@@ -45,7 +45,7 @@ public class GuavaCachingFilter extends Filter {
 	/** Wrapped filter. */
 	private final Filter filter;
 	/** Cache. */
-	private final Cache<Key, DocIdSet> cache;
+	private final Cache<Object, DocIdSet> cache;
 
 	/**
 	 * Constructor.
@@ -59,8 +59,7 @@ public class GuavaCachingFilter extends Filter {
 	 */
 	public GuavaCachingFilter(Filter filter, int size, long duration, TimeUnit unit) {
 		this.filter = Preconditions.checkNotNull(filter, "The filter to cache must be provided");
-		this.cache = CacheBuilder.newBuilder().softValues().maximumSize(size).expireAfterAccess(duration, unit)
-				.build(new Loader());
+		this.cache = CacheBuilder.newBuilder().softValues().maximumSize(size).expireAfterAccess(duration, unit).build();
 	}
 
 	/**
@@ -73,18 +72,24 @@ public class GuavaCachingFilter extends Filter {
 
 	@Override
 	public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
-		final Key key = new Key(reader);
+		final Object key = reader.hasDeletions() ? reader.getDeletesCacheKey() : reader.getCoreCacheKey();
 		try {
-			return cache.getUnchecked(key);
-		} catch (UncheckedExecutionException e) {
-			Throwable t = e.getCause();
-			if (t instanceof IOException) {
-				throw (IOException) t;
+			return cache.get(key, new Loader(reader));
+		} catch (Throwable t) {
+			Throwable cause = t.getCause();
+			if (cause instanceof IOException) {
+				throw (IOException) cause;
 			}
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException) t;
+			if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
 			}
-			throw e;
+			if (cause instanceof Error) {
+				throw (Error) cause;
+			}
+			if (t instanceof UncheckedExecutionException) {
+				throw (UncheckedExecutionException) t;
+			}
+			throw new UncheckedExecutionException(cause);
 		}
 	}
 
@@ -106,14 +111,16 @@ public class GuavaCachingFilter extends Filter {
 	}
 
 	/** Cache loader. */
-	private final class Loader extends CacheLoader<Key, DocIdSet> {
-		Loader() {
+	private final class Loader implements Callable<DocIdSet> {
+		private final IndexReader reader;
+
+		Loader(IndexReader reader) {
+			this.reader = checkNotNull(reader, "The index reader must be provided");
 		}
 
 		@Override
-		public DocIdSet load(Key key) throws Exception {
-			final IndexReader reader = key.reader;
-			return docIdSetToCache(filter.getDocIdSet(reader), reader);
+		public DocIdSet call() throws Exception {
+			return docIdSetToCache(filter.getDocIdSet(reader));
 		}
 
 		/**
@@ -123,7 +130,7 @@ public class GuavaCachingFilter extends Filter {
 		 * returns <code>true</code>, else it copies the {@link DocIdSetIterator} into an
 		 * {@link FixedBitSet}.
 		 */
-		private DocIdSet docIdSetToCache(DocIdSet docIdSet, IndexReader reader) throws IOException {
+		private DocIdSet docIdSetToCache(DocIdSet docIdSet) throws IOException {
 			if (docIdSet == null) {
 				// this is better than returning null, as the nonnull result can be cached
 				return DocIdSet.EMPTY_DOCIDSET;
@@ -143,36 +150,5 @@ public class GuavaCachingFilter extends Filter {
 				}
 			}
 		}
-
 	}
-
-	/** Cache key. */
-	private static final class Key {
-		private final Object key;
-		private final IndexReader reader;
-
-		Key(IndexReader reader) {
-			this.reader = checkNotNull(reader);
-			this.key = reader.hasDeletions() ? reader.getDeletesCacheKey() : reader.getCoreCacheKey();
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o == this) {
-				return true;
-			}
-			if (o instanceof Key) {
-				Key other = (Key) o;
-				return this.key == other.key;
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return key.hashCode();
-		}
-
-	}
-
 }

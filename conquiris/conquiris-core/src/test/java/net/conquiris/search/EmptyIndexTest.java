@@ -36,10 +36,15 @@ import com.google.common.io.Closeables;
 public class EmptyIndexTest {
 
 	/** Missing index. */
-	@Test(expectedExceptions=IndexNotFoundException.class)
+	@Test(expectedExceptions = IndexNotFoundException.class)
 	public void missingRAM() throws Exception {
-		IndexSearcher s = new IndexSearcher(new RAMDirectory());
-		s.search(new MatchAllDocsQuery(), 5);
+		final IndexReader reader = IndexReader.open(new RAMDirectory());
+		try {
+			IndexSearcher s = new IndexSearcher(reader);
+			s.search(new MatchAllDocsQuery(), 5);
+		} finally {
+			Closeables.closeQuietly(reader);
+		}
 	}
 
 	/** Missing index. */
@@ -59,7 +64,7 @@ public class EmptyIndexTest {
 		} finally {
 		}
 	}
-	
+
 	/** Search. */
 	@Test
 	public void search() throws Exception {

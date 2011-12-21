@@ -119,8 +119,8 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 				}
 			} else if (watch == null || watch.elapsedMillis() > holdTime) {
 				IndexReader indexReader = reader.get();
-				IndexReader reopened = indexReader.reopen();
-				if (reopened != indexReader) {
+				IndexReader reopened = IndexReader.openIfChanged(indexReader);
+				if (reopened != null) {
 					start(Reader.of(indexReader, true));
 					this.reopened.incrementAndGet();
 				} else {

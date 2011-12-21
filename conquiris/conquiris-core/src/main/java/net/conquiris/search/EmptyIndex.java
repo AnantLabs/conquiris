@@ -20,14 +20,12 @@ import java.lang.ref.WeakReference;
 
 import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.Reader;
+import net.conquiris.lucene.Conquiris;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 
 /**
  * Empty RAM-based index.
@@ -82,8 +80,7 @@ final class EmptyIndex extends AbstractReaderSupplier {
 	/** Constructor. */
 	private EmptyIndex() throws IOException {
 		this.directory = new RAMDirectory();
-		IndexWriter w = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(
-				Version.LUCENE_34)));
+		IndexWriter w = new IndexWriter(directory, Conquiris.writerConfig());
 		w.close();
 	}
 
