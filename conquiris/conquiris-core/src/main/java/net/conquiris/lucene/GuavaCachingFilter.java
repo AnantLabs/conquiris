@@ -31,6 +31,7 @@ import org.apache.lucene.util.FixedBitSet;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheStats;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 /**
@@ -38,7 +39,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
  * {@link DeletesMode.RECACHE}.
  * @author Andres Rodriguez
  */
-public class GuavaCachingFilter extends Filter {
+public final class GuavaCachingFilter extends Filter {
 	/** Serial UID. */
 	private static final long serialVersionUID = -3469818482930960618L;
 
@@ -91,6 +92,11 @@ public class GuavaCachingFilter extends Filter {
 			}
 			throw new UncheckedExecutionException(cause);
 		}
+	}
+	
+	/**  Returns a current snapshot of this cache's cumulative statistics. */
+	public CacheStats stats() {
+		return cache.stats();
 	}
 
 	@Override

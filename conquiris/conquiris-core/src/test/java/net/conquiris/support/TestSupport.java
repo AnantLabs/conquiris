@@ -28,15 +28,15 @@ import net.conquiris.api.search.PageResult;
 import net.conquiris.api.search.ReaderSupplier;
 import net.conquiris.api.search.Searcher;
 import net.conquiris.api.search.SearcherService;
+import net.conquiris.lucene.Conquiris;
 import net.conquiris.search.ReaderSuppliers;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
@@ -44,9 +44,9 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.NumericUtils;
-import org.apache.lucene.util.Version;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.collect.Multimap;
 
 /**
@@ -60,6 +60,7 @@ public final class TestSupport {
 	}
 
 	static final String ID = "CQ-ID";
+	public static final String BASE = "BASE";
 	static final String ANALYZED = "ANALYZED";
 
 	private static final String value(int value) {
@@ -86,37 +87,58 @@ public final class TestSupport {
 		}
 	};
 
-	public static Document document(int value) {
+	public static Document document(int value, String base) {
 		final Document document = new Document();
 		final String text = value(value);
 		document.add(new NumericField(ID, Field.Store.YES, true).setIntValue(value));
 		document.add(new Field(ANALYZED, text, Field.Store.YES, Field.Index.ANALYZED));
+		document.add(new Field(BASE, Objects.firstNonNull(base, BASE), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
 		return document;
+	}
+
+	public static Document document(int value) {
+		return document(value, BASE);
 	}
 
 	public static Term termId(int value) {
 		return new Term(ID, NumericUtils.intToPrefixCoded(value));
 	}
 
+	public static ItemResult<Node> getFirst(Searcher searcher, Query query, Filter filter) {
+		return searcher.getFirst(MAPPER, query, filter, null, null);
+	}
+
 	public static ItemResult<Node> getFirst(Searcher searcher, Query query) {
-		return searcher.getFirst(MAPPER, query, null, null, null);
+		return getFirst(searcher, query, null);
+	}
+
+	public static ItemResult<Node> getFirst(Searcher searcher, int value, Filter filter) {
+		return getFirst(searcher, new TermQuery(termId(value)), filter);
 	}
 
 	public static ItemResult<Node> getFirst(Searcher searcher, int value) {
-		return getFirst(searcher, new TermQuery(termId(value)));
+		return getFirst(searcher, value, null);
 	}
 
-	public static PageResult<Node> getPage(Searcher searcher, int from, int to, int first, int max) {
-		return searcher.getPage(MAPPER, NumericRangeQuery.newIntRange(ID, from, to, true, true), first, max, null, null,
+	public static PageResult<Node> getPage(Searcher searcher, int from, int to, int first, int max, Filter filter) {
+		return searcher.getPage(MAPPER, NumericRangeQuery.newIntRange(ID, from, to, true, true), first, max, filter, null,
 				null);
 	}
 
-	public static int getCount(Searcher searcher) {
-		return searcher.getCount(new MatchAllDocsQuery(), null, false).getTotalHits();
+	public static PageResult<Node> getPage(Searcher searcher, int from, int to, int first, int max) {
+		return getPage(searcher, from, to, first, max, null);
 	}
 
-	public static void found(Searcher searcher, int value) {
-		final ItemResult<Node> item = getFirst(searcher, value);
+	public static int getCount(Searcher searcher, Filter filter) {
+		return searcher.getCount(new MatchAllDocsQuery(), filter, false).getTotalHits();
+	}
+
+	public static int getCount(Searcher searcher) {
+		return getCount(searcher, null);
+	}
+
+	public static void found(Searcher searcher, int value, Filter filter) {
+		final ItemResult<Node> item = getFirst(searcher, value, filter);
 		assertNotNull(item);
 		assertTrue(item.isFound());
 		final Node node = item.getItem();
@@ -124,27 +146,42 @@ public final class TestSupport {
 		node.test(value);
 	}
 
-	public static void notFound(Searcher searcher, int value) {
-		final ItemResult<Node> item = getFirst(searcher, value);
+	public static void found(Searcher searcher, int value) {
+		found(searcher, value, null);
+	}
+
+	public static void notFound(Searcher searcher, int value, Filter filter) {
+		final ItemResult<Node> item = getFirst(searcher, value, filter);
 		assertNotNull(item);
 		assertFalse(item.isFound());
 	}
 
-	public static void write(Directory directory, int from, int to) throws IOException {
-		IndexWriter w = new IndexWriter(directory, new IndexWriterConfig(Version.LUCENE_34, new StandardAnalyzer(
-				Version.LUCENE_34)));
+	public static void notFound(Searcher searcher, int value) {
+		notFound(searcher, value, null);
+	}
+
+	public static void write(Directory directory, String base, int from, int to) throws IOException {
+		IndexWriter w = new IndexWriter(directory, Conquiris.writerConfig());
 		int min = Math.min(from, to);
 		int max = Math.max(from, to);
 		for (int i = min; i <= max; i++) {
-			w.addDocument(document(i));
+			w.addDocument(document(i, base));
 		}
 		w.close();
 	}
 
-	public static Directory createRAMDirectory(int from, int to) throws IOException {
+	public static void write(Directory directory, int from, int to) throws IOException {
+		write(directory, null, from, to);
+	}
+
+	public static Directory createRAMDirectory(String base, int from, int to) throws IOException {
 		Directory directory = new RAMDirectory();
-		write(directory, from, to);
+		write(directory, base, from, to);
 		return directory;
+	}
+
+	public static Directory createRAMDirectory(int from, int to) throws IOException {
+		return createRAMDirectory(null, from, to);
 	}
 
 	public static ReaderSupplier createRAMSupplier(int from, int to) throws IOException {
@@ -197,7 +234,7 @@ public final class TestSupport {
 		checkPage(getPage(searcher, to - p + 1, to + 2 * p, 0, 3 * p), 0, p);
 		final int f = Math.max(0, from - 5);
 		if (f > 0) {
-			checkPage(getPage(searcher, f, f+10, 0, 20), 0, f + 10 - from + 1);
+			checkPage(getPage(searcher, f, f + 10, 0, 20), 0, f + 10 - from + 1);
 		}
 	}
 

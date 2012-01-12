@@ -121,7 +121,7 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 				IndexReader indexReader = reader.get();
 				IndexReader reopened = IndexReader.openIfChanged(indexReader);
 				if (reopened != null) {
-					start(Reader.of(indexReader, true));
+					start(Reader.of(reopened, true));
 					this.reopened.incrementAndGet();
 				} else {
 					this.reused.incrementAndGet();
