@@ -21,7 +21,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 
 /**
- * Base class for numeric field builders. Numeric fields are indexed and stored by default.
+ * Base class for numeric field builders. Numeric fields are indexed but not stored by default.
  * @author Andres Rodriguez
  */
 public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<B>> extends FieldableBuilder<B> {

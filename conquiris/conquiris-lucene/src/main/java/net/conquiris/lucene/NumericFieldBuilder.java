@@ -16,7 +16,7 @@
 package net.conquiris.lucene;
 
 /**
- * Builder for numeric fields. Numeric fields are indexed and stored by default.
+ * Builder for numeric fields. Numeric fields are indexed but not stored by default.
  * @author Andres Rodriguez
  */
 public final class NumericFieldBuilder extends BaseNumericFieldBuilder<NumericFieldBuilder> {

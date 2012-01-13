@@ -24,14 +24,14 @@ import net.derquinse.common.reflect.This;
 import org.apache.lucene.document.Field;
 
 /**
- * Fieldable builder base class. Fieldables are stored by default.
+ * Fieldable builder base class. Fieldables are not stored by default.
  * @author Andres Rodriguez
  */
 public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends This<B> {
 	/** Field name. */
 	private final String name;
 	/** Whether to store the field. */
-	private boolean store = true;
+	private boolean store = false;
 
 	/**
 	 * Constructor.
@@ -57,6 +57,11 @@ public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends Th
 		return thisValue();
 	}
 
+	/** Sets the field to be stored. */
+	public final B store() {
+		return store(true);
+	}
+	
 	/**
 	 * Sets whether to store the field.
 	 * @param store The field will be stored if the argument is Field.Store.YES.
