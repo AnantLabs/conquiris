@@ -57,5 +57,6 @@
 		<module>conquiris-api</module>
 		<module>conquiris-core</module>
 		<module>conquiris-gson</module>
+		<module>conquiris-lucene</module>
 	</modules>
 </project>
