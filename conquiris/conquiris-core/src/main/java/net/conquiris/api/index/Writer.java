@@ -33,7 +33,7 @@ import org.apache.lucene.index.Term;
  * {@link IndexException} if there's a problem with the index.
  * @author Andres Rodriguez
  */
-public interface Writer {
+public interface Writer extends DocumentWriter {
 	/**
 	 * Cancels the operation of this writer. Indexer can continue but all operations will be ignored
 	 * and the index writer will be rolled back.
@@ -190,7 +190,7 @@ public interface Writer {
 	 * @param subindexers Indexers to run.
 	 * @return This writer for method chaining.
 	 */
-	Writer runSubindexers(Executor executor, Iterable<? extends Indexer> subindexers) throws InterruptedException,
+	Writer runSubindexers(Executor executor, Iterable<? extends Subindexer> subindexers) throws InterruptedException,
 			IndexException;
 
 }

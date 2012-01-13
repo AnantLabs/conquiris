@@ -36,10 +36,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import net.conquiris.api.index.DocumentWriter;
 import net.conquiris.api.index.IndexException;
 import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexStatus;
-import net.conquiris.api.index.Indexer;
+import net.conquiris.api.index.Subindexer;
 import net.conquiris.api.index.Writer;
 import net.conquiris.api.index.WriterResult;
 import net.derquinse.common.log.ContextLog;
@@ -158,8 +159,7 @@ final class DefaultWriter extends AbstractWriter {
 					result = WriterResult.ERROR;
 					writer.rollback();
 				} else if (!updated && equal(checkpoint, indexInfo.getCheckpoint())
-						&& equal(targetCheckpoint, indexInfo.getTargetCheckpoint())
-						&& equal(properties, indexInfo.getProperties())) {
+						&& equal(targetCheckpoint, indexInfo.getTargetCheckpoint()) && equal(properties, indexInfo.getProperties())) {
 					log.trace("Writer unchanged");
 					result = WriterResult.IDLE;
 					writer.rollback();
@@ -512,15 +512,16 @@ final class DefaultWriter extends AbstractWriter {
 	 * java.lang.Iterable)
 	 */
 	@Override
-	public Writer runSubindexers(Executor executor, Iterable<? extends Indexer> subindexers) throws InterruptedException,
-			IndexException {
+	public Writer runSubindexers(Executor executor, Iterable<? extends Subindexer> subindexers)
+			throws InterruptedException, IndexException {
 		checkNotNull(executor, "The executor must be provided");
 		checkNotNull(executor, "The subindexers must be provided");
 		if (ensureAvailable()) {
+			DocumentWriter subwriter = new DefaultDocumentWriter(this);
 			CompletionService<IndexStatus> ecs = new ExecutorCompletionService<IndexStatus>(executor);
 			int n = 0;
-			for (Indexer subindexer : Iterables.filter(subindexers, Predicates.notNull())) {
-				ecs.submit(new SubindexerTask(subindexer));
+			for (Subindexer subindexer : Iterables.filter(subindexers, Predicates.notNull())) {
+				ecs.submit(new SubindexerTask(subwriter, subindexer));
 				n++;
 			}
 			for (int i = 0; i < n && ensureAvailable(); i++) {
@@ -531,16 +532,18 @@ final class DefaultWriter extends AbstractWriter {
 	}
 
 	private final class SubindexerTask implements Callable<IndexStatus> {
-		private final Indexer indexer;
+		private final DocumentWriter writer;
+		private final Subindexer indexer;
 
-		SubindexerTask(Indexer indexer) {
+		SubindexerTask(DocumentWriter writer, Subindexer indexer) {
+			this.writer = checkNotNull(writer, "The document writer must be provided");
 			this.indexer = checkNotNull(indexer, "The subindexer must be provided");
 		}
 
 		@Override
 		public IndexStatus call() throws Exception {
 			if (ensureAvailable()) {
-				indexer.index(DefaultWriter.this);
+				indexer.index(writer);
 			}
 			return indexStatus.get();
 		}

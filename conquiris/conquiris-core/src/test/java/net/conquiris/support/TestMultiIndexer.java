@@ -20,8 +20,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import net.conquiris.api.index.DocumentWriter;
 import net.conquiris.api.index.IndexException;
-import net.conquiris.api.index.Indexer;
+import net.conquiris.api.index.Subindexer;
 import net.conquiris.api.index.Writer;
 
 import com.beust.jcommander.internal.Lists;
@@ -42,9 +43,9 @@ public final class TestMultiIndexer extends TestIndexer {
 	int index(int cp, Writer writer) throws InterruptedException, IndexException {
 		int start = cp + 1;
 		final int end = Math.min(target, start + 19);
-		List<Indexer> list = Lists.newArrayList();
+		List<Subindexer> list = Lists.newArrayList();
 		for (int i = start; i <= end; i++) {
-			list.add(new Subindexer(i));
+			list.add(new Sub(i));
 		}
 		writer.runSubindexers(executor, list);
 		return end;
@@ -58,15 +59,15 @@ public final class TestMultiIndexer extends TestIndexer {
 		this.target = target;
 	}
 
-	final class Subindexer implements Indexer {
+	final class Sub implements Subindexer {
 		private final int id;
 
-		Subindexer(int id) {
+		Sub(int id) {
 			this.id = id;
 		}
 
 		@Override
-		public void index(Writer writer) throws InterruptedException, IndexException {
+		public void index(DocumentWriter writer) throws InterruptedException, IndexException {
 			Thread.sleep(1 + random.nextInt(15));
 			writer.add(TestSupport.document(id));
 		}
