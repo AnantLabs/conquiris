@@ -15,21 +15,53 @@
  */
 package net.conquiris.lucene;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import javax.annotation.Nullable;
 
 import net.derquinse.common.reflect.This;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.document.Field;
 
 /**
- * Base class for fieldable builders.
+ * Fieldable builder base class. Fieldables are stored by default.
  * @author Andres Rodriguez
  */
-public abstract class FieldableBuilder<B extends FieldBuilder<B>> extends This<B> {
-	
-	
-	
-	
+public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends This<B> {
+	/** Field name. */
+	private final String name;
+	/** Whether to store the field. */
+	private boolean store = true;
+
+	/**
+	 * Constructor.
+	 * @param name Field name.
+	 */
+	FieldableBuilder(String name) {
+		this.name = checkNotNull(name, "The field name must be provided");
+	}
+
+	/** Returns the field name. */
+	final String name() {
+		return name;
+	}
+
+	/** Returns the field store value. */
+	final Field.Store fieldStore() {
+		return store ? Field.Store.YES : Field.Store.NO;
+	}
+
+	/** Sets whether to store the field. */
+	public final B store(boolean store) {
+		this.store = store;
+		return thisValue();
+	}
+
+	/**
+	 * Sets whether to store the field.
+	 * @param store The field will be stored if the argument is Field.Store.YES.
+	 */
+	public final B store(@Nullable Field.Store store) {
+		return store(Field.Store.YES == store);
+	}
 }
