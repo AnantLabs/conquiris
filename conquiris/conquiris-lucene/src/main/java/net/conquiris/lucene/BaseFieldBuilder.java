@@ -124,6 +124,13 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 		return new Field(name(), value, checkUsed(index), fieldIndex(), vector);
 	}
 
+	private Field decorateIndexed(Field field) {
+		if (!norms) {
+			field.setOmitNorms(true);
+		}
+		return field;
+	}
+
 	/**
 	 * Builds an indexed, tokenized but not stored field with the current term vector information.
 	 * @param reader Field value reader.
@@ -132,7 +139,7 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 	 */
 	public final Field build(Reader reader) {
 		checkNotNull(reader, "The field value reader must be provided");
-		return new Field(name(), reader, vector);
+		return decorateIndexed(new Field(name(), reader, vector));
 	}
 
 	/**
@@ -143,7 +150,7 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 	 */
 	public final Field build(TokenStream tokenStream) {
 		checkNotNull(tokenStream, "The field value token stream must be provided");
-		return new Field(name(), tokenStream, vector);
+		return decorateIndexed(new Field(name(), tokenStream, vector));
 	}
 
 }
