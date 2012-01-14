@@ -16,8 +16,22 @@
 package net.conquiris.lucene;
 
 /**
- * Base class for document builders.
+ * Basic document builder.
  * @author Andres Rodriguez
  */
-public interface DocumentBuilder {
+public final class DocumentBuilder extends BaseDocumentBuilder<DocumentBuilder> {
+
+	/**
+	 * Creates a new builder.
+	 */
+	public static DocumentBuilder create() {
+		return new DocumentBuilder();
+	}
+
+	/**
+	 * Constructor.
+	 */
+	private DocumentBuilder() {
+		super();
+	}
 }
