@@ -15,8 +15,14 @@
  */
 package net.conquiris.lucene;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.Reader;
+
 import javax.annotation.Nullable;
 
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.TermVector;
 
@@ -105,6 +111,39 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 	public final B vector(@Nullable TermVector vector) {
 		this.vector = Objects.firstNonNull(vector, TermVector.NO);
 		return thisValue();
+	}
+
+	/**
+	 * Builds a field with the current information and the provided value.
+	 * @param value Field value.
+	 * @return The created field.
+	 * @throws IllegalStateException if the field is neither stored nor indexed.
+	 */
+	public final Field build(String value) {
+		checkNotNull(value, "The field value must be provided");
+		return new Field(name(), value, checkUsed(index), fieldIndex(), vector);
+	}
+
+	/**
+	 * Builds an indexed, tokenized but not stored field with the current term vector information.
+	 * @param reader Field value reader.
+	 * @return The created field.
+	 * @throws IllegalStateException if the field is neither stored nor indexed.
+	 */
+	public final Field build(Reader reader) {
+		checkNotNull(reader, "The field value reader must be provided");
+		return new Field(name(), reader, vector);
+	}
+
+	/**
+	 * Builds an indexed, tokenized but not stored field with the current term vector information.
+	 * @param tokenStream Field value token stream.
+	 * @return The created field.
+	 * @throws IllegalStateException if the field is neither stored nor indexed.
+	 */
+	public final Field build(TokenStream tokenStream) {
+		checkNotNull(tokenStream, "The field value token stream must be provided");
+		return new Field(name(), tokenStream, vector);
 	}
 
 }

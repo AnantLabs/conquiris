@@ -15,17 +15,25 @@
  */
 package net.conquiris.lucene;
 
-import javax.annotation.Nullable;
-
-import net.derquinse.common.reflect.This;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.Term;
-
 /**
- * Base class for fieldable builders.
+ * Field builder.
  * @author Andres Rodriguez
  */
-public abstract class FieldBuilder<B extends FieldBuilder<B>> extends This<B>{
+public final class FieldBuilder extends BaseFieldBuilder<FieldBuilder> {
+	/**
+	 * Creates a new builder.
+	 * @param name Field name.
+	 */
+	public static FieldBuilder create(String name) {
+		return new FieldBuilder(name);
+	}
+
+	/**
+	 * Constructor.
+	 * @param name Field name.
+	 */
+	private FieldBuilder(String name) {
+		super(name);
+	}
+
 }

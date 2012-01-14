@@ -15,9 +15,6 @@
  */
 package net.conquiris.lucene;
 
-import static com.google.common.base.Preconditions.checkState;
-
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 
 /**
@@ -47,9 +44,7 @@ public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<
 	 * @throws IllegalStateException if the field is neither stored nor indexed.
 	 */
 	private NumericField buildField() {
-		Field.Store store = fieldStore();
-		checkState(index || Field.Store.YES == store, "Field neither stored nor indexed");
-		return new NumericField(name(), store, index);
+		return new NumericField(name(), checkUsed(index), index);
 	}
 
 	/** Sets whether to index the field. */
