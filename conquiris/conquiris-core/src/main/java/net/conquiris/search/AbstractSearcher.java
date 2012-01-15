@@ -29,7 +29,7 @@ import net.conquiris.api.search.ItemResult;
 import net.conquiris.api.search.PageResult;
 import net.conquiris.api.search.SearchException;
 import net.conquiris.api.search.Searcher;
-import net.conquiris.lucene.ScoredTotalHitCountCollector;
+import net.conquiris.lucene.search.ScoredTotalHitCountCollector;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Collector;

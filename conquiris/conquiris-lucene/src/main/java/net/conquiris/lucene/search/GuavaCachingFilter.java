@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.lucene;
+package net.conquiris.lucene.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

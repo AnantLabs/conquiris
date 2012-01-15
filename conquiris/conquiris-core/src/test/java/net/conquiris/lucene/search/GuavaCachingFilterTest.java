@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.lucene;
+package net.conquiris.lucene.search;
 
 import static org.testng.Assert.assertEquals;
 import net.conquiris.api.search.Searcher;
+import net.conquiris.lucene.search.GuavaCachingFilter;
 import net.conquiris.search.ReaderSuppliers;
 import net.conquiris.search.Searchers;
 import net.conquiris.support.TestSupport;
