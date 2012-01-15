@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>conquiris</artifactId>
+		<groupId>net.conquiris</groupId>
+		<version>3.5.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>conquiris-jersey-server</artifactId>
+	<name>Conquiris :: Jersey Server</name>
+	<description>Module containing Jersey-based JAX-RS indexer service.</description>
+	<dependencies>
+		<dependency>
+			<groupId>net.conquiris</groupId>
+			<artifactId>conquiris-jersey</artifactId>
+			<version>3.5.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey.jersey-test-framework</groupId>
+			<artifactId>jersey-test-framework-http</artifactId>
+			<version>1.11</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

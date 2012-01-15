@@ -60,5 +60,6 @@
 		<module>conquiris-lucene</module>
 		<module>conquiris-jersey-client</module>
 		<module>conquiris-jersey</module>
+		<module>conquiris-jersey-server</module>
 	</modules>
 </project>

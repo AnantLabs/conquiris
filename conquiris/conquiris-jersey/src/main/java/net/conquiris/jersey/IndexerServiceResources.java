@@ -16,7 +16,7 @@
 package net.conquiris.jersey;
 
 /**
- * Resouce constants for IndexerService RESTful resources.
+ * Resource constants for IndexerService RESTful resources.
  * @author Andres Rodriguez.
  */
 public final class IndexerServiceResources {
