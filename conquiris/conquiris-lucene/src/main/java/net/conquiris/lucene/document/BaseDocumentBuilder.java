@@ -17,9 +17,13 @@ package net.conquiris.lucene.document;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+
+import java.io.Reader;
+
 import net.derquinse.common.base.Builder;
 import net.derquinse.common.reflect.This;
 
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 
@@ -108,7 +112,15 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		return new DocNumericFieldBuilder(name);
 	}
 
-	/** Numeric field builder that adds to the current builder. */
+	/**
+	 * Creates a new field builder that adds to the current document.
+	 * @param name Field name.
+	 */
+	public final DocFieldBuilder field(String name) {
+		return new DocFieldBuilder(name);
+	}
+
+	/** Numeric field builder that adds to the current document builder. */
 	public final class DocNumericFieldBuilder extends BaseNumericFieldBuilder<DocNumericFieldBuilder> implements
 			NumericFieldAdder<B> {
 		/**
@@ -137,6 +149,32 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		@Override
 		public B add(double value) {
 			return BaseDocumentBuilder.this.add(build(value));
+		}
+	}
+
+	/** Numeric field builder that adds to the current document builder. */
+	public final class DocFieldBuilder extends BaseFieldBuilder<DocFieldBuilder> implements FieldAdder<B> {
+		/**
+		 * Constructor.
+		 * @param name Field name.
+		 */
+		private DocFieldBuilder(String name) {
+			super(name);
+		}
+
+		@Override
+		public B add(String value) {
+			return BaseDocumentBuilder.this.add(build(value));
+		}
+
+		@Override
+		public B add(Reader reader) {
+			return BaseDocumentBuilder.this.add(build(reader));
+		}
+
+		@Override
+		public B add(TokenStream tokenStream) {
+			return BaseDocumentBuilder.this.add(build(tokenStream));
 		}
 	}
 

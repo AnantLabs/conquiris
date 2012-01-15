@@ -15,44 +15,41 @@
  */
 package net.conquiris.lucene.document;
 
+import java.io.Reader;
+
+import org.apache.lucene.analysis.TokenStream;
+
 /**
- * Base interface for numeric field adders.
+ * Base interface for field adders.
  * @author Andres Rodriguez
  */
-public interface NumericFieldAdder<B extends BaseDocumentBuilder<B>> {
+public interface FieldAdder<B extends BaseDocumentBuilder<B>> {
 	/**
-	 * Adds the field to the document with the current information and an int value.
+	 * Adds the field to the document field with the current information and the provided value.
 	 * @param value Field value.
 	 * @return The document builder.
 	 * @throws IllegalStateException if the field is neither stored nor indexed.
 	 * @throws IllegalStateException if the document was already built.
 	 */
-	B add(int value);
+	B add(String value);
 
 	/**
-	 * Adds the field to the document with the current information and a long value.
-	 * @param value Field value.
+	 * Adds the field to the document indexed, tokenized but not stored field with the current term
+	 * vector information..
+	 * @param reader Field value reader.
 	 * @return The document builder.
 	 * @throws IllegalStateException if the field is neither stored nor indexed.
 	 * @throws IllegalStateException if the document was already built.
 	 */
-	B add(long value);
+	B add(Reader reader);
 
 	/**
-	 * Adds the field to the document with the current information and a float value.
-	 * @param value Field value.
+	 * Adds the field to the document indexed, tokenized but not stored field with the current term
+	 * vector information..
+	 * @param tokenStream Field value token stream.
 	 * @return The document builder.
 	 * @throws IllegalStateException if the field is neither stored nor indexed.
 	 * @throws IllegalStateException if the document was already built.
 	 */
-	B add(float value);
-
-	/**
-	 * Adds the field to the document with the current information and a double value.
-	 * @param value Field value.
-	 * @return The document builder.
-	 * @throws IllegalStateException if the field is neither stored nor indexed.
-	 * @throws IllegalStateException if the document was already built.
-	 */
-	B add(double value);
+	B add(TokenStream tokenStream);
 }
