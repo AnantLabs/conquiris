@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.derquinse</groupId>
@@ -8,14 +7,14 @@
 	</parent>
 	<groupId>net.conquiris</groupId>
 	<artifactId>conquiris</artifactId>
-	<version>3.5.0-SNAPSHOT</version>
+	<version>3.5.0</version>
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
 	<url>http://code.google.com/p/conquiris/</url>
 	<scm>
-		<connection>scm:svn:http://conquiris.googlecode.com/svn/trunk/conquiris</connection>
-		<developerConnection>scm:svn:https://conquiris.googlecode.com/svn/trunk/conquiris</developerConnection>
-		<url>http://code.google.com/p/conquiris/source/browse/#svn/trunk/conquiris</url>
+		<connection>scm:svn:http://conquiris.googlecode.com/svn/tags/conquiris-3.5.0</connection>
+		<developerConnection>scm:svn:https://conquiris.googlecode.com/svn/tags/conquiris-3.5.0</developerConnection>
+		<url>http://code.google.com/p/conquiris/source/browse/#svn/tags/conquiris-3.5.0</url>
 	</scm>
 	<properties>
 		<releaseTagBase>https://conquiris.googlecode.com/svn/tags/</releaseTagBase>
