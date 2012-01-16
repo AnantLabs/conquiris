@@ -33,7 +33,7 @@ import com.sun.jersey.api.client.WebResource;
  * Indexer service clients based on Jersey (JAX-RS).
  * @author Andres Rodriguez.
  */
-public final class IndexerServiceClient implements IndexerService {
+final class IndexerServiceClient implements IndexerService {
 	/** Root resource. */
 	private final WebResource resource;
 

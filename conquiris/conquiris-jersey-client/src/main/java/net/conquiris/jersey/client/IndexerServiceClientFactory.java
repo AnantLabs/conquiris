@@ -15,10 +15,16 @@
  */
 package net.conquiris.jersey.client;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.net.URI;
+
+import net.conquiris.api.index.IndexerService;
 import net.derquinse.common.jersey.gson.GsonReader;
 import net.derquinse.common.jersey.gson.GsonWriter;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
@@ -42,6 +48,15 @@ public final class IndexerServiceClientFactory {
 		config.getClasses().add(GsonWriter.class);
 		client = Client.create(config);
 	}
-	
-	
+
+	/**
+	 * Creates a new client.
+	 * @param uri Service URI.
+	 * @return The requested service client.
+	 */
+	public IndexerService get(URI uri) {
+		WebResource resource = client.resource(checkNotNull(uri, "The indexer service URI must be provided"));
+		return new IndexerServiceClient(resource);
+	}
+
 }
