@@ -20,6 +20,7 @@ import net.conquiris.api.index.Delays;
 import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexReport;
 
+import com.google.common.base.Supplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -63,4 +64,23 @@ public final class ConquirisGson {
 		}
 		return instance;
 	}
+
+	/** Returns a supplier for the shared decorated instance. */
+	public static Supplier<Gson> getSupplier() {
+		if (instance == null) {
+			create();
+		}
+		return ConquirisGsonSupplier.INSTANCE;
+	}
+
+	/** Shared decorated instance supplier. */
+	private enum ConquirisGsonSupplier implements Supplier<Gson> {
+		INSTANCE;
+
+		@Override
+		public Gson get() {
+			return ConquirisGson.get();
+		}
+	}
+
 }

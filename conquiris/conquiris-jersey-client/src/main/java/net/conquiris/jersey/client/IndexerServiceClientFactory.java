@@ -20,8 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 
 import net.conquiris.api.index.IndexerService;
-import net.derquinse.common.jersey.gson.GsonReader;
-import net.derquinse.common.jersey.gson.GsonWriter;
+import net.conquiris.jersey.ConquirisJAXRS;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -44,8 +43,7 @@ public final class IndexerServiceClientFactory {
 	/** Constructor. */
 	private IndexerServiceClientFactory() {
 		ClientConfig config = new DefaultClientConfig();
-		config.getClasses().add(GsonReader.class);
-		config.getClasses().add(GsonWriter.class);
+		config.getClasses().addAll(ConquirisJAXRS.providers());
 		client = Client.create(config);
 	}
 
