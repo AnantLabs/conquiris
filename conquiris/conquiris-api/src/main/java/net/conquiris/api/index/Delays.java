@@ -21,6 +21,8 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.base.Objects;
 
 /**
@@ -33,6 +35,7 @@ import com.google.common.base.Objects;
  * </ul>
  * @author Andres Rodriguez
  */
+@Immutable
 public final class Delays implements Serializable {
 	/** Serial UID. */
 	private static final long serialVersionUID = 1969811896715857676L;
@@ -135,6 +138,11 @@ public final class Delays implements Serializable {
 			return this.normal == other.normal && this.idle == other.idle && this.error == other.error;
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Delays(%d, %d, %d)", normal, idle, error);
 	}
 
 	// =================================================================

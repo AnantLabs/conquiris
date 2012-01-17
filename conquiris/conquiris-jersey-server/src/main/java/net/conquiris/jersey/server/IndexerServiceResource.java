@@ -28,8 +28,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import net.conquiris.api.index.Delays;
@@ -56,7 +56,7 @@ public class IndexerServiceResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public final IndexReport getIndexReport(@PathParam(QP_LEVEL) String level) {
+	public final IndexReport getIndexReport(@QueryParam(QP_LEVEL) String level) {
 		IndexReportLevel reportLevel = IndexReportLevel.BASIC;
 		try {
 			reportLevel = Enum.valueOf(IndexReportLevel.class, level);

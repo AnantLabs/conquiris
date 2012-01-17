@@ -44,7 +44,7 @@ final class IndexerServiceClient implements IndexerService {
 	@Override
 	public IndexReport getIndexReport(IndexReportLevel level) {
 		checkNotNull(level, "The index report level must be provided");
-		return resource.queryParam(QP_LEVEL, level.toString()).get(IndexReport.class);
+		return resource.queryParam(QP_LEVEL, level.name()).get(IndexReport.class);
 	}
 
 	@Override

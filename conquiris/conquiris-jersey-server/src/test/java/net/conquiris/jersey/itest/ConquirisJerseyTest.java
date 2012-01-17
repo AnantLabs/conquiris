@@ -17,11 +17,14 @@ package net.conquiris.jersey.itest;
 
 import java.util.Set;
 
+import net.conquiris.api.index.Delays;
+import net.conquiris.api.index.IndexReport;
 import net.conquiris.api.index.IndexReportLevel;
 import net.conquiris.api.index.IndexerService;
 import net.conquiris.jersey.ConquirisJAXRS;
 import net.conquiris.jersey.client.IndexerServiceClientFactory;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.testng.internal.annotations.Sets;
 
@@ -51,7 +54,12 @@ public class ConquirisJerseyTest extends JerseyTest {
 	public void test() {
 		IndexerService server = TestIndexerServiceProvider.get();
 		IndexerService client = IndexerServiceClientFactory.create().get(getBaseURI());
-		client.getIndexReport(IndexReportLevel.BASIC);
-
+		IndexReport report = client.getIndexReport(IndexReportLevel.BASIC);
+		report = client.getIndexReport(IndexReportLevel.NORMAL);
+		IndexReport serverReport = server.getIndexReport(IndexReportLevel.NORMAL);
+		Assert.assertEquals(serverReport.getDelays().get(), report.getDelays().get());
+		client.setDelays(Delays.constant(30L));
+		report = client.getIndexReport(IndexReportLevel.DETAILED);
+		Assert.assertEquals(server.getIndexReport(IndexReportLevel.NORMAL).getDelays().get(), report.getDelays().get());
 	}
 }
