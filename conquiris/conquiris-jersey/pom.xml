@@ -17,7 +17,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.derquinse</groupId>
-			<artifactId>derquinse-common-jersey</artifactId>
+			<artifactId>derquinse-common-jaxrs-gson</artifactId>
 		</dependency>
 	</dependencies>
 </project>

@@ -16,6 +16,8 @@
 package net.conquiris.jersey;
 
 import net.conquiris.gson.ConquirisGson;
+import net.derquinse.common.jersey.gson.GenericGsonProvider;
+
 
 /**
  * Abstract base class for Conquiris Gson-based JSON JAX-RS providers.
@@ -24,6 +26,6 @@ import net.conquiris.gson.ConquirisGson;
 public abstract class ConquirisGsonProvider<T> extends GenericGsonProvider<T> {
 	/** Default constructor. */
 	ConquirisGsonProvider() {
-		super(ConquirisGson.get());
+		super(ConquirisGson.getSupplier());
 	}
 }
