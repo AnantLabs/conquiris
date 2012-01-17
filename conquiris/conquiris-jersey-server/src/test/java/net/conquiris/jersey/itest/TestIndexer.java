@@ -19,6 +19,7 @@ import net.conquiris.api.index.IndexException;
 import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
 import net.conquiris.lucene.document.DocumentBuilder;
+import net.conquiris.lucene.document.NumericFieldBuilder;
 
 /**
  * Test indexer.
@@ -34,8 +35,10 @@ public class TestIndexer implements Indexer {
 		} catch (RuntimeException e) {
 			cp = 0;
 		}
+		System.out.println("Got checkpoint " + cp);
 		cp++;
-		writer.add(DocumentBuilder.create().numeric("ID").add(cp).build());
+		// writer.add(DocumentBuilder.create().numeric("ID").add(cp).build());
+		writer.add(DocumentBuilder.create().add(NumericFieldBuilder.create("ID").build(cp)).build());
 		writer.setCheckpoint(Integer.toString(cp));
 	}
 }

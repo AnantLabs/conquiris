@@ -21,6 +21,7 @@ import net.conquiris.api.index.Delays;
 import net.conquiris.api.index.IndexReport;
 import net.conquiris.api.index.IndexReportLevel;
 import net.conquiris.api.index.IndexerService;
+import net.conquiris.api.index.LocalIndexerService;
 import net.conquiris.jersey.ConquirisJAXRS;
 import net.conquiris.jersey.client.IndexerServiceClientFactory;
 
@@ -51,8 +52,8 @@ public class ConquirisJerseyTest extends JerseyTest {
 	}
 
 	@Test
-	public void test() {
-		IndexerService server = TestIndexerServiceProvider.get();
+	public void test() throws Exception {
+		LocalIndexerService server = TestIndexerServiceProvider.get();
 		IndexerService client = IndexerServiceClientFactory.create().get(getBaseURI());
 		IndexReport report = client.getIndexReport(IndexReportLevel.BASIC);
 		report = client.getIndexReport(IndexReportLevel.NORMAL);
@@ -61,5 +62,13 @@ public class ConquirisJerseyTest extends JerseyTest {
 		client.setDelays(Delays.constant(30L));
 		report = client.getIndexReport(IndexReportLevel.DETAILED);
 		Assert.assertEquals(server.getIndexReport(IndexReportLevel.NORMAL).getDelays().get(), report.getDelays().get());
+		client.stop();
+		Assert.assertFalse(server.isIndexStarted());
+		client.start();
+		Assert.assertTrue(server.isIndexStarted());
+		client.setCheckpoint("100000");
+		Thread.sleep(2000);
+		String scp = server.getIndexInfo().getCheckpoint();
+		Assert.assertTrue(Integer.parseInt(scp) >= 100000);
 	}
 }

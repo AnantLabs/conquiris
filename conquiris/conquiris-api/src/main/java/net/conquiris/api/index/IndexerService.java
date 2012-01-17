@@ -43,13 +43,13 @@ public interface IndexerService {
 
 	/**
 	 * Schedules a tasks that changes the index checkpoint. It is a no-op if the service is stopped or
-	 * the activation policy is disabled.
+	 * the activation policy is disabled. This operation is asynchronous.
 	 */
 	void setCheckpoint(@Nullable String checkpoint);
 
 	/**
 	 * Schedules a tasks that changes the index checkpoint. It is a no-op if the service is stopped or
-	 * the activation policy is disabled.
+	 * the activation policy is disabled. This operation is asynchronous.
 	 */
 	void reindex();
 }

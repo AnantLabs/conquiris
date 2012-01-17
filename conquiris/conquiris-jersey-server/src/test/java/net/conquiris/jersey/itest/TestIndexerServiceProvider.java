@@ -15,7 +15,7 @@
  */
 package net.conquiris.jersey.itest;
 
-import net.conquiris.api.index.IndexerService;
+import net.conquiris.api.index.LocalIndexerService;
 import net.conquiris.index.DirectoryIndexerService;
 import net.conquiris.lucene.Conquiris;
 
@@ -26,9 +26,9 @@ import org.apache.lucene.store.RAMDirectory;
  * @author Andres Rodriguez
  */
 class TestIndexerServiceProvider {
-	private static IndexerService service = null;
+	private static LocalIndexerService service = null;
 
-	public static synchronized IndexerService get() {
+	public static synchronized LocalIndexerService get() {
 		if (service == null) {
 			RAMDirectory d = new RAMDirectory();
 			service = new DirectoryIndexerService(new TestIndexer(), d, Conquiris.writerConfigSupplier());

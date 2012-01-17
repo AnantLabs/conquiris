@@ -30,7 +30,6 @@ import javax.annotation.concurrent.GuardedBy;
 import net.conquiris.api.index.IndexInfo;
 import net.conquiris.api.index.IndexStatus;
 import net.conquiris.api.index.Indexer;
-import net.conquiris.api.index.Writer;
 import net.conquiris.api.index.WriterResult;
 
 import org.apache.lucene.index.CorruptIndexException;
@@ -87,7 +86,7 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 				return; // already started
 			}
 			session = new Session();
-			new IndexTask(session, true, 0L);
+			new Task(session, 0L);
 		} finally {
 			lock.unlock();
 		}
@@ -116,7 +115,7 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 			if (s == null) {
 				return; // already stopped
 			}
-			new SetCheckpointTask(s, checkpoint);
+			new Task(s, checkpoint);
 		} finally {
 			lock.unlock();
 		}
@@ -130,7 +129,7 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 			if (s == null) {
 				return; // already stopped
 			}
-			new ReindexTask(s);
+			new Task(s);
 		} finally {
 			lock.unlock();
 		}
@@ -231,6 +230,10 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 				if (!active) {
 					return null;
 				}
+				// If we are recreating we don't reuse the writer
+				if (create && indexWriter != null) {
+					closeWriter();
+				}
 				if (indexWriter == null) {
 					indexWriter = new OpenWriter(create).get();
 				}
@@ -277,29 +280,51 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 	}
 
 	/** Base task. */
-	private abstract class Task implements Runnable {
+	private final class Task implements Runnable {
 		private final Session session;
 		private final boolean scheduled;
+		/** Whether to override checkpoint. */
+		private final boolean overrideCheckpoint;
+		/** Overridden checkpoint value. */
+		private final String checkpoint;
+		/** Whether to recreate the index. */
+		private final boolean create;
 
-		Task(Session session, boolean scheduled, long delay) {
+		/** Internal constructor. */
+		private Task(Session session, boolean scheduled, long delay, boolean overrideCheckpoint, String checkpoint,
+				boolean create) {
 			this.session = checkNotNull(session);
 			this.scheduled = scheduled;
+			this.overrideCheckpoint = overrideCheckpoint;
+			this.checkpoint = checkpoint;
+			this.create = create;
 			session.schelude(this, delay);
 		}
 
-		boolean create() {
-			return false;
+		/** Scheduled task constructor. */
+		Task(Session session, long delay) {
+			this(session, true, delay, false, null, false);
+		}
+
+		/** Checkpoint setter constructor. */
+		Task(Session session, @Nullable String checkpoint) {
+			this(session, false, 0L, true, checkpoint, false);
+		}
+
+		/** Index recreation. */
+		Task(Session session) {
+			this(session, false, 0L, false, null, true);
 		}
 
 		@Override
 		public final void run() {
 			boolean ok = false;
 			WriterResult result = WriterResult.ERROR;
-			final IndexWriter indexWriter = session.getOpenWriter(create());
+			final IndexWriter indexWriter = session.getOpenWriter(create);
 			try {
-				final DefaultWriter writer = new DefaultWriter(writerLog(), indexWriter);
+				final DefaultWriter writer = new DefaultWriter(writerLog(), indexWriter, overrideCheckpoint, checkpoint, create);
 				try {
-					run(writer);
+					indexer.index(writer);
 					result = writer.done();
 					ok = true;
 				} catch (InterruptedException e) {
@@ -324,52 +349,9 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 						delay = getDelays().getError();
 						break;
 					}
-					new IndexTask(session, true, delay);
+					new Task(session, delay);
 				}
 			}
-		}
-
-		abstract void run(Writer writer) throws InterruptedException;
-
-	}
-
-	/** Main task: indexing. */
-	private final class IndexTask extends Task {
-		IndexTask(Session session, boolean scheduled, long delay) {
-			super(session, scheduled, delay);
-		}
-
-		@Override
-		final void run(Writer writer) throws InterruptedException {
-			indexer.index(writer);
-		}
-	}
-
-	/** Reindex. */
-	private final class ReindexTask extends Task {
-		ReindexTask(Session session) {
-			super(session, false, 0L);
-		}
-
-		@Override
-		final void run(Writer writer) throws InterruptedException {
-			new IndexTask(session, false, 0L);
-		}
-	}
-
-	/** Set checkpoint. */
-	private final class SetCheckpointTask extends Task {
-		private final String checkpoint;
-
-		SetCheckpointTask(Session session, @Nullable String checkpoint) {
-			super(session, false, 0L);
-			this.checkpoint = checkpoint;
-		}
-
-		@Override
-		final void run(Writer writer) throws InterruptedException {
-			writer.setCheckpoint(checkpoint);
-			new IndexTask(session, false, 0L);
 		}
 	}
 

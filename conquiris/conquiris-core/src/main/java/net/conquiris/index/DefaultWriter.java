@@ -34,6 +34,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 
 import net.conquiris.api.index.DocumentWriter;
@@ -57,6 +58,7 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.ThreadInterruptedException;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -109,23 +111,43 @@ final class DefaultWriter extends AbstractWriter {
 	 * Default writer.
 	 * @param log Log context.
 	 * @param writer Lucene index writer to use.
+	 * @param overrideCheckpoint Whether to override the checkpoint.
+	 * @param checkpoint Overridden checkpoint value.
+	 * @param created Whether the index has been requested to be created.
 	 */
-	DefaultWriter(ContextLog log, IndexWriter writer) throws IndexException {
+	DefaultWriter(ContextLog log, IndexWriter writer, boolean overrideCheckpoint, @Nullable String checkpoint,
+			boolean created) throws IndexException {
 		this.log = checkNotNull(log, "The log context must be provided");
 		this.writer = checkNotNull(writer, "The index writer must be provided");
 		this.properties = new MapMaker().makeMap();
 		this.keys = Collections.unmodifiableSet(this.properties.keySet());
 		// Read properties
 		try {
-			final IndexReader reader = IndexReader.open(writer, false);
-			try {
-				this.indexInfo = IndexInfo.fromMap(reader.getCommitUserData());
-				this.checkpoint = this.indexInfo.getCheckpoint();
-				this.targetCheckpoint = this.indexInfo.getTargetCheckpoint();
-				this.properties.putAll(this.indexInfo.getProperties());
-			} finally {
-				Closeables.closeQuietly(reader);
+			final Map<String, String> commitData;
+			if (created) {
+				commitData = ImmutableMap.of();
+			} else {
+				final IndexReader reader = IndexReader.open(writer, false);
+				try {
+					Map<String, String> data = reader.getCommitUserData();
+					if (overrideCheckpoint) {
+						final Map<String, String> modified = Maps.newHashMap();
+						if (data != null) {
+							modified.putAll(data);
+						}
+						modified.put(IndexInfo.CHECKPOINT, checkpoint);
+						commitData = modified;
+					} else {
+						commitData = data;
+					}
+				} finally {
+					Closeables.closeQuietly(reader);
+				}
 			}
+			this.indexInfo = IndexInfo.fromMap(commitData);
+			this.checkpoint = this.indexInfo.getCheckpoint();
+			this.targetCheckpoint = this.indexInfo.getTargetCheckpoint();
+			this.properties.putAll(this.indexInfo.getProperties());
 		} catch (LockObtainFailedException e) {
 			indexStatus.compareAndSet(IndexStatus.OK, IndexStatus.LOCKED);
 			throw new IndexException(e);
