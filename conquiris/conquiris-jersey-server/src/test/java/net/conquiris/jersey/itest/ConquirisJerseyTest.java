@@ -17,6 +17,7 @@ package net.conquiris.jersey.itest;
 
 import java.util.Set;
 
+import net.conquiris.api.index.Checkpoints;
 import net.conquiris.api.index.Delays;
 import net.conquiris.api.index.IndexReport;
 import net.conquiris.api.index.IndexReportLevel;
@@ -50,10 +51,16 @@ public class ConquirisJerseyTest extends JerseyTest {
 	public ConquirisJerseyTest() {
 		super(descriptor());
 	}
+	
+	private int checkpoint(LocalIndexerService service) {
+		String scp = service.getIndexInfo().getCheckpoint();
+		return Checkpoints.ofInt(scp, 0);
+	}
 
 	@Test
 	public void test() throws Exception {
 		LocalIndexerService server = TestIndexerServiceProvider.get();
+		server.start();
 		IndexerService client = IndexerServiceClientFactory.create().get(getBaseURI());
 		IndexReport report = client.getIndexReport(IndexReportLevel.BASIC);
 		report = client.getIndexReport(IndexReportLevel.NORMAL);
@@ -68,7 +75,15 @@ public class ConquirisJerseyTest extends JerseyTest {
 		Assert.assertTrue(server.isIndexStarted());
 		client.setCheckpoint("100000");
 		Thread.sleep(2000);
-		String scp = server.getIndexInfo().getCheckpoint();
-		Assert.assertTrue(Integer.parseInt(scp) >= 100000);
+		Assert.assertTrue(checkpoint(server) > 100000);
+		client.setCheckpoint(null);
+		Thread.sleep(2000);
+		Assert.assertTrue(checkpoint(server) < 1000);
+		client.setCheckpoint("1000000");
+		Thread.sleep(2000);
+		Assert.assertTrue(checkpoint(server) > 1000000);
+		client.reindex();
+		Thread.sleep(200);
+		Assert.assertTrue(checkpoint(server) < 10000);
 	}
 }

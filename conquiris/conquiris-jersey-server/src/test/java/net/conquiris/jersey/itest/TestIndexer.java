@@ -15,11 +15,11 @@
  */
 package net.conquiris.jersey.itest;
 
+import net.conquiris.api.index.Checkpoints;
 import net.conquiris.api.index.IndexException;
 import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
 import net.conquiris.lucene.document.DocumentBuilder;
-import net.conquiris.lucene.document.NumericFieldBuilder;
 
 /**
  * Test indexer.
@@ -29,16 +29,9 @@ public class TestIndexer implements Indexer {
 	@Override
 	public void index(Writer writer) throws InterruptedException, IndexException {
 		String checkpoint = writer.getCheckpoint();
-		int cp;
-		try {
-			cp = Integer.parseInt(checkpoint);
-		} catch (RuntimeException e) {
-			cp = 0;
-		}
-		System.out.println("Got checkpoint " + cp);
+		int cp = Checkpoints.ofInt(checkpoint, 0) + 1;
 		cp++;
-		// writer.add(DocumentBuilder.create().numeric("ID").add(cp).build());
-		writer.add(DocumentBuilder.create().add(NumericFieldBuilder.create("ID").build(cp)).build());
+		writer.add(DocumentBuilder.create().numeric("ID").add(cp).build());
 		writer.setCheckpoint(Integer.toString(cp));
 	}
 }

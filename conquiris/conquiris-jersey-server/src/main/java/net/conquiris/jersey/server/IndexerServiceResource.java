@@ -100,7 +100,7 @@ public class IndexerServiceResource {
 	@POST
 	@Path(REINDEX)
 	public void reindex() {
-		service.stop();
+		service.reindex();
 	}
 
 }
