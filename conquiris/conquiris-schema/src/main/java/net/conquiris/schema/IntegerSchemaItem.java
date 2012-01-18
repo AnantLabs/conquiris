@@ -16,7 +16,7 @@
 package net.conquiris.schema;
 
 /**
- * Marker interface for int schema items.
+ * Marker interface for integer schema items.
  * @author Andres Rodriguez
  */
 public interface IntegerSchemaItem extends NumericSchemaItem<Integer> {

@@ -21,6 +21,8 @@ import java.io.Reader;
 
 import javax.annotation.Nullable;
 
+import net.conquiris.schema.FieldSchemaItem;
+
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
@@ -49,6 +51,28 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 	 */
 	BaseFieldBuilder(String name) {
 		super(name);
+	}
+
+	/**
+	 * Constructor based on a schema item.
+	 * @param item Schema item to base this builder on.
+	 */
+	BaseFieldBuilder(FieldSchemaItem item) {
+		super(item);
+		index = item.isIndexed();
+		tokenize = item.isTokenized();
+		norms = item.isNorms();
+		if (item.isVectors()) {
+			if (item.isPositions()) {
+				this.vector = item.isOffsets() ? TermVector.WITH_POSITIONS_OFFSETS : TermVector.WITH_POSITIONS;
+			} else if (item.isOffsets()) {
+				this.vector = TermVector.WITH_OFFSETS;
+			} else {
+				this.vector = TermVector.YES;
+			}
+		} else {
+			this.vector = TermVector.NO;
+		}
 	}
 
 	/** Returns the field index value. */

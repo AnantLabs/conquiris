@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.io.Reader;
 
 import net.conquiris.schema.DoubleSchemaItem;
+import net.conquiris.schema.FieldSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
 import net.conquiris.schema.LongSchemaItem;
@@ -147,6 +148,16 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/**
+	 * Returns a field builder based on a schema item.
+	 * @param item Schema item to base the builder on.
+	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
+	 */
+	private DocFieldBuilder field(FieldSchemaItem item) {
+		checkItem(item);
+		return new DocFieldBuilder(item);
+	}
+
+	/**
 	 * Adds an integer field based on a schema item.
 	 * @param item Schema item.
 	 * @param value Field value.
@@ -209,7 +220,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 * Constructor based on a schema item.
 		 * @param item Schema item to base this builder on.
 		 */
-		DocNumericFieldBuilder(NumericSchemaItem<?> item) {
+		private DocNumericFieldBuilder(NumericSchemaItem<?> item) {
 			super(item);
 		}
 
@@ -242,6 +253,14 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 */
 		private DocFieldBuilder(String name) {
 			super(name);
+		}
+
+		/**
+		 * Constructor based on a schema item.
+		 * @param item Schema item to base this builder on.
+		 */
+		private DocFieldBuilder(FieldSchemaItem item) {
+			super(item);
 		}
 
 		@Override

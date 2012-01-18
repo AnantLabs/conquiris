@@ -16,7 +16,7 @@
 package net.conquiris.schema;
 
 /**
- * Default int schema item implementation.
+ * Default integer schema item implementation.
  * @author Andres Rodriguez
  */
 class DefaultIntegerSchemaItem extends AbstractNumericSchemaItem<Integer> implements IntegerSchemaItem {

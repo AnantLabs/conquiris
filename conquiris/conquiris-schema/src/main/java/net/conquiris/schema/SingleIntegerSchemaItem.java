@@ -16,7 +16,7 @@
 package net.conquiris.schema;
 
 /**
- * Marker interface for int schema items that have at most one value.
+ * Marker interface for integer schema items that have at most one value.
  * @author Andres Rodriguez
  */
 public interface SingleIntegerSchemaItem extends SingleSchemaItem, IntegerSchemaItem {

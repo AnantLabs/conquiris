@@ -16,20 +16,23 @@
 package net.conquiris.schema;
 
 /**
- * Default integer schema item with a single value implementation.
+ * Default streamed textual schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultSingleIntegerSchemaItem extends DefaultIntegerSchemaItem implements SingleIntegerSchemaItem {
+class DefaultStreamSchemaItem extends DefaultFieldSchemaItem implements StreamSchemaItem {
 	/**
 	 * Constructor.
 	 * @param name Field name.
-	 * @param required Whether the field is required.
+	 * @param minOccurs Minimum number of occurrences.
 	 * @param maxOccurs Maximum number of occurrences.
-	 * @param stored Whether the field is stored.
-	 * @param indexed Whether the field is indexed.
+	 * @param norms Whether norms are stored.
+	 * @param vectors Whether term vectors are stored.
+	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
+	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	DefaultSingleIntegerSchemaItem(String name, boolean required, boolean stored, boolean indexed) {
-		super(name, required ? 1 : 0, 1, stored, indexed);
+	DefaultStreamSchemaItem(String name, int minOccurs, int maxOccurs, boolean norms, boolean vectors, boolean positions,
+			boolean offsets) {
+		super(name, minOccurs, maxOccurs, false, true, true, norms, vectors, positions, offsets);
 	}
 
 }
