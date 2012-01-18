@@ -53,10 +53,10 @@ class DefaultFieldSchemaItem extends AbstractSchemaItem implements FieldSchemaIt
 		super(name, minOccurs, maxOccurs, stored, indexed);
 		this.tokenized = tokenized;
 		this.norms = norms;
-		this.vectors = vectors;
-		this.positions = vectors && positions;
-		this.offsets = vectors && offsets;
-		this.hash = Objects.hashCode(getClass(), name, minOccurs, maxOccurs, stored, indexed, norms, vectors,
+		this.vectors = indexed && vectors;
+		this.positions = this.vectors && positions;
+		this.offsets = this.vectors && offsets;
+		this.hash = Objects.hashCode(getClass(), name, minOccurs, maxOccurs, stored, indexed, norms, this.vectors,
 				this.positions, this.offsets);
 	}
 

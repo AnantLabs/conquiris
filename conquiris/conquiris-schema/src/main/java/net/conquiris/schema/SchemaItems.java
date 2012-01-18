@@ -381,4 +381,51 @@ public final class SchemaItems {
 		return new DefaultSingleStreamSchemaItem(name, required, norms, vectors, positions, offsets);
 	}
 
+	/**
+	 * Creates an id textual schema item. Ids are not tokenized, and have no norms and no vectors.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static FieldSchemaItem newId(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
+		return new IdFieldSchemaItem(name, minOccurs, maxOccurs, stored, indexed);
+	}
+
+	/**
+	 * Creates an id textual schema item with an unbounded number of occurrences. Ids are not
+	 * tokenized, and have no norms and no vectors.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static FieldSchemaItem newId(String name, int minOccurs, boolean stored, boolean indexed) {
+		return newId(name, minOccurs, Integer.MAX_VALUE, stored, indexed);
+	}
+
+	/**
+	 * Creates an id textual schema item with any of occurrences. Ids are not tokenized, and have no
+	 * norms and no vectors.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static FieldSchemaItem newId(String name, boolean stored, boolean indexed) {
+		return newId(name, 0, stored, indexed);
+	}
+
+	/**
+	 * Creates an id textual schema item with a single occurrence. Ids are not tokenized, and have no
+	 * norms and no vectors.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static SingleFieldSchemaItem newId(String name, boolean required, boolean stored, boolean indexed) {
+		return new SingleIdFieldSchemaItem(name, required, stored, indexed);
+	}
+
 }
