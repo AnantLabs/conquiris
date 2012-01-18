@@ -428,4 +428,48 @@ public final class SchemaItems {
 		return new SingleIdFieldSchemaItem(name, required, stored, indexed);
 	}
 
+	/**
+	 * Creates an id textual schema item.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static UUIDSchemaItem newUUID(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
+		return new DefaultUUIDSchemaItem(name, minOccurs, maxOccurs, stored, indexed);
+	}
+
+	/**
+	 * Creates an id textual schema item with an unbounded number of occurrences.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static UUIDSchemaItem newUUID(String name, int minOccurs, boolean stored, boolean indexed) {
+		return newUUID(name, minOccurs, Integer.MAX_VALUE, stored, indexed);
+	}
+
+	/**
+	 * Creates an id textual schema item with any of occurrences.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static UUIDSchemaItem newUUID(String name, boolean stored, boolean indexed) {
+		return newUUID(name, 0, stored, indexed);
+	}
+
+	/**
+	 * Creates an id textual schema item with a single occurrence.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static SingleUUIDSchemaItem newUUID(String name, boolean required, boolean stored, boolean indexed) {
+		return new DefaultSingleUUIDSchemaItem(name, required, stored, indexed);
+	}
+
 }

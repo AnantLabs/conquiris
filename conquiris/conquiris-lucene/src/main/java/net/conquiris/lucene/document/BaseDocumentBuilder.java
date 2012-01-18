@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.io.Reader;
+import java.util.UUID;
 
 import net.conquiris.schema.DoubleSchemaItem;
 import net.conquiris.schema.FieldSchemaItem;
@@ -28,6 +29,7 @@ import net.conquiris.schema.LongSchemaItem;
 import net.conquiris.schema.NumericSchemaItem;
 import net.conquiris.schema.SchemaItem;
 import net.conquiris.schema.StreamSchemaItem;
+import net.conquiris.schema.UUIDSchemaItem;
 import net.derquinse.common.base.Builder;
 import net.derquinse.common.reflect.This;
 
@@ -240,6 +242,18 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 */
 	public final B add(StreamSchemaItem item, TokenStream tokenStream) {
 		return field(item).add(tokenStream);
+	}
+
+	/**
+	 * Adds an UUID field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(UUIDSchemaItem item, UUID value) {
+		return field(item).add(value.toString());
 	}
 
 	/** Numeric field builder that adds to the current document builder. */
