@@ -214,7 +214,7 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static FieldSchemaItem field(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed,
+	public static FieldSchemaItem newField(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed,
 			boolean tokenized, boolean norms, boolean vectors, boolean positions, boolean offsets) {
 		return new DefaultFieldSchemaItem(name, minOccurs, maxOccurs, stored, indexed, tokenized, norms, vectors,
 				positions, offsets);
@@ -232,9 +232,9 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static FieldSchemaItem field(String name, int minOccurs, boolean stored, boolean indexed, boolean tokenized,
-			boolean norms, boolean vectors, boolean positions, boolean offsets) {
-		return field(name, minOccurs, Integer.MAX_VALUE, stored, indexed, tokenized, norms, vectors, positions, offsets);
+	public static FieldSchemaItem newField(String name, int minOccurs, boolean stored, boolean indexed,
+			boolean tokenized, boolean norms, boolean vectors, boolean positions, boolean offsets) {
+		return newField(name, minOccurs, Integer.MAX_VALUE, stored, indexed, tokenized, norms, vectors, positions, offsets);
 	}
 
 	/**
@@ -248,9 +248,9 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static FieldSchemaItem field(String name, boolean stored, boolean indexed, boolean tokenized, boolean norms,
-			boolean vectors, boolean positions, boolean offsets) {
-		return field(name, 0, stored, indexed, tokenized, norms, vectors, positions, offsets);
+	public static FieldSchemaItem newField(String name, boolean stored, boolean indexed, boolean tokenized,
+			boolean norms, boolean vectors, boolean positions, boolean offsets) {
+		return newField(name, 0, stored, indexed, tokenized, norms, vectors, positions, offsets);
 	}
 
 	/**
@@ -265,7 +265,7 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static SingleFieldSchemaItem field(String name, boolean required, boolean stored, boolean indexed,
+	public static SingleFieldSchemaItem newField(String name, boolean required, boolean stored, boolean indexed,
 			boolean tokenized, boolean norms, boolean vectors, boolean positions, boolean offsets) {
 		return new DefaultSingleFieldSchemaItem(name, required, stored, indexed, tokenized, norms, vectors, positions,
 				offsets);
@@ -281,9 +281,9 @@ public final class SchemaItems {
 	 * @param tokenized Whether the field is tokenized.
 	 * @param norms Whether norms are stored.
 	 */
-	public static FieldSchemaItem field(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed,
+	public static FieldSchemaItem newField(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed,
 			boolean tokenized, boolean norms) {
-		return field(name, minOccurs, maxOccurs, stored, indexed, tokenized, norms, false, false, false);
+		return newField(name, minOccurs, maxOccurs, stored, indexed, tokenized, norms, false, false, false);
 	}
 
 	/**
@@ -295,9 +295,9 @@ public final class SchemaItems {
 	 * @param tokenized Whether the field is tokenized.
 	 * @param norms Whether norms are stored.
 	 */
-	public static FieldSchemaItem field(String name, int minOccurs, boolean stored, boolean indexed, boolean tokenized,
-			boolean norms) {
-		return field(name, minOccurs, Integer.MAX_VALUE, stored, indexed, tokenized, norms);
+	public static FieldSchemaItem newField(String name, int minOccurs, boolean stored, boolean indexed,
+			boolean tokenized, boolean norms) {
+		return newField(name, minOccurs, Integer.MAX_VALUE, stored, indexed, tokenized, norms);
 	}
 
 	/**
@@ -308,8 +308,8 @@ public final class SchemaItems {
 	 * @param tokenized Whether the field is tokenized.
 	 * @param norms Whether norms are stored.
 	 */
-	public static FieldSchemaItem field(String name, boolean stored, boolean indexed, boolean tokenized, boolean norms) {
-		return field(name, 0, stored, indexed, tokenized, norms);
+	public static FieldSchemaItem newField(String name, boolean stored, boolean indexed, boolean tokenized, boolean norms) {
+		return newField(name, 0, stored, indexed, tokenized, norms);
 	}
 
 	/**
@@ -321,9 +321,9 @@ public final class SchemaItems {
 	 * @param tokenized Whether the field is tokenized.
 	 * @param norms Whether norms are stored.
 	 */
-	public static SingleFieldSchemaItem field(String name, boolean required, boolean stored, boolean indexed,
+	public static SingleFieldSchemaItem newField(String name, boolean required, boolean stored, boolean indexed,
 			boolean tokenized, boolean norms) {
-		return field(name, required, stored, indexed, tokenized, norms, false, false, false);
+		return newField(name, required, stored, indexed, tokenized, norms, false, false, false);
 	}
 
 	/**
@@ -336,7 +336,7 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static StreamSchemaItem stream(String name, int minOccurs, int maxOccurs, boolean norms, boolean vectors,
+	public static StreamSchemaItem newStream(String name, int minOccurs, int maxOccurs, boolean norms, boolean vectors,
 			boolean positions, boolean offsets) {
 		return new DefaultStreamSchemaItem(name, minOccurs, maxOccurs, norms, vectors, positions, offsets);
 	}
@@ -350,9 +350,9 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static StreamSchemaItem stream(String name, int minOccurs, boolean norms, boolean vectors, boolean positions,
-			boolean offsets) {
-		return stream(name, minOccurs, Integer.MAX_VALUE, norms, vectors, positions, offsets);
+	public static StreamSchemaItem newStream(String name, int minOccurs, boolean norms, boolean vectors,
+			boolean positions, boolean offsets) {
+		return newStream(name, minOccurs, Integer.MAX_VALUE, norms, vectors, positions, offsets);
 	}
 
 	/**
@@ -363,8 +363,9 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static StreamSchemaItem stream(String name, boolean norms, boolean vectors, boolean positions, boolean offsets) {
-		return stream(name, 0, norms, vectors, positions, offsets);
+	public static StreamSchemaItem newStream(String name, boolean norms, boolean vectors, boolean positions,
+			boolean offsets) {
+		return newStream(name, 0, norms, vectors, positions, offsets);
 	}
 
 	/**
@@ -376,7 +377,7 @@ public final class SchemaItems {
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	public static SingleStreamSchemaItem stream(String name, boolean required, boolean norms, boolean vectors,
+	public static SingleStreamSchemaItem newStream(String name, boolean required, boolean norms, boolean vectors,
 			boolean positions, boolean offsets) {
 		return new DefaultSingleStreamSchemaItem(name, required, norms, vectors, positions, offsets);
 	}
@@ -470,6 +471,50 @@ public final class SchemaItems {
 	 */
 	public static SingleUUIDSchemaItem newUUID(String name, boolean required, boolean stored, boolean indexed) {
 		return new DefaultSingleUUIDSchemaItem(name, required, stored, indexed);
+	}
+
+	/**
+	 * Creates a instant schema item.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static InstantSchemaItem newInstant(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
+		return new DefaultInstantSchemaItem(name, minOccurs, maxOccurs, stored, indexed);
+	}
+
+	/**
+	 * Creates a instant schema item with an unbounded number of occurrences.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static InstantSchemaItem newInstant(String name, int minOccurs, boolean stored, boolean indexed) {
+		return newInstant(name, minOccurs, Integer.MAX_VALUE, stored, indexed);
+	}
+
+	/**
+	 * Creates a instant schema item with any of occurrences.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static InstantSchemaItem newInstant(String name, boolean stored, boolean indexed) {
+		return newInstant(name, 0, stored, indexed);
+	}
+
+	/**
+	 * Creates a instant schema item with a single occurrence.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static SingleInstantSchemaItem newInstant(String name, boolean required, boolean stored, boolean indexed) {
+		return new DefaultSingleInstantSchemaItem(name, required, stored, indexed);
 	}
 
 }

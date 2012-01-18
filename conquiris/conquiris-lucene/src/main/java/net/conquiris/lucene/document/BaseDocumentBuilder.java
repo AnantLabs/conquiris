@@ -24,6 +24,7 @@ import java.util.UUID;
 import net.conquiris.schema.DoubleSchemaItem;
 import net.conquiris.schema.FieldSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
+import net.conquiris.schema.InstantSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
 import net.conquiris.schema.LongSchemaItem;
 import net.conquiris.schema.NumericSchemaItem;
@@ -36,6 +37,7 @@ import net.derquinse.common.reflect.This;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
+import org.joda.time.ReadableInstant;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -254,6 +256,18 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 */
 	public final B add(UUIDSchemaItem item, UUID value) {
 		return field(item).add(value.toString());
+	}
+
+	/**
+	 * Adds an instant field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(InstantSchemaItem item, ReadableInstant value) {
+		return numeric(item).add(value.getMillis());
 	}
 
 	/** Numeric field builder that adds to the current document builder. */
