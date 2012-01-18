@@ -54,9 +54,10 @@
 
 	<modules>
 		<module>conquiris-api</module>
+		<module>conquiris-schema</module>
+		<module>conquiris-lucene</module>
 		<module>conquiris-core</module>
 		<module>conquiris-gson</module>
-		<module>conquiris-lucene</module>
 		<module>conquiris-jersey-client</module>
 		<module>conquiris-jersey</module>
 		<module>conquiris-jersey-server</module>

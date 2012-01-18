@@ -15,8 +15,9 @@
 			<artifactId>lucene-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.derquinse</groupId>
-			<artifactId>derquinse-common-base</artifactId>
+			<groupId>net.conquiris</groupId>
+			<artifactId>conquiris-schema</artifactId>
+			<version>3.5.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
