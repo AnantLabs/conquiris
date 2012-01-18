@@ -64,6 +64,39 @@ public class DirectoryIndexerServiceTest extends AbstractDirectoryIndexerService
 		service.reindex();
 		Thread.sleep(100L);
 		assertTrue(checkpoint() < CP1);
+		service.setCheckpoint(Integer.toString(CP2));
+		Thread.sleep(500L);
+		assertTrue(checkpoint() > CP2);
+		service.setCheckpoint(null);
+		Thread.sleep(500L);
+		assertTrue(checkpoint() < CP1);
+		service.stop();
+	}
+	
+	private void checkEmpty() throws InterruptedException {
+		Thread.sleep(200L);
+		assertTrue(checkpoint() == 0);
 	}
 
+	@Test
+	public void empty() throws InterruptedException {
+		create(0);
+		checkEmpty();
+		service.stop();
+		checkEmpty();
+		service.setCheckpoint(Integer.toString(CP1));
+		checkEmpty();
+		service.reindex();
+		checkEmpty();
+		service.start();
+		checkEmpty();
+		service.setCheckpoint(Integer.toString(CP1));
+		checkEmpty();
+		service.reindex();
+		checkEmpty();
+		service.setCheckpoint(Integer.toString(CP2));
+		checkEmpty();
+		service.setCheckpoint(null);
+		checkEmpty();
+	}
 }

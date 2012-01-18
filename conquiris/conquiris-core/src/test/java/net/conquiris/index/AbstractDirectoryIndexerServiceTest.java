@@ -32,8 +32,8 @@ import org.apache.lucene.store.RAMDirectory;
  * @author Andres Rodriguez
  */
 public class AbstractDirectoryIndexerServiceTest {
-	private final Directory directory = new RAMDirectory();
-	private final SearcherService searcher = Searchers.service(ReaderSuppliers.directory(directory));
+	private Directory directory;
+	private SearcherService searcher;
 	DirectoryIndexerService service;
 
 	final int count() {
@@ -53,6 +53,8 @@ public class AbstractDirectoryIndexerServiceTest {
 	}
 
 	final void create(Indexer indexer) {
+		directory = new RAMDirectory();
+		searcher = Searchers.service(ReaderSuppliers.directory(directory));
 		service = new DirectoryIndexerService(indexer, directory, Conquiris.writerConfigSupplier());
 		service.setDelays(Delays.constant(50));
 	}

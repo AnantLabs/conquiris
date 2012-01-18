@@ -29,10 +29,10 @@ import net.conquiris.api.search.ReaderSupplier;
 import net.conquiris.api.search.Searcher;
 import net.conquiris.api.search.SearcherService;
 import net.conquiris.lucene.Conquiris;
+import net.conquiris.lucene.document.DocumentBuilder;
 import net.conquiris.search.ReaderSuppliers;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
@@ -46,7 +46,6 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.NumericUtils;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
 import com.google.common.collect.Multimap;
 
 /**
@@ -88,12 +87,12 @@ public final class TestSupport {
 	};
 
 	public static Document document(int value, String base) {
-		final Document document = new Document();
+		final DocumentBuilder builder = DocumentBuilder.create();
+		builder.numeric(ID).store().add(value);
 		final String text = value(value);
-		document.add(new NumericField(ID, Field.Store.YES, true).setIntValue(value));
-		document.add(new Field(ANALYZED, text, Field.Store.YES, Field.Index.ANALYZED));
-		document.add(new Field(BASE, Objects.firstNonNull(base, BASE), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
-		return document;
+		builder.field(ANALYZED).store().add(text);
+		builder.field(BASE).store().tokenize(false).norms(false).add(text);
+		return builder.build();
 	}
 
 	public static Document document(int value) {
