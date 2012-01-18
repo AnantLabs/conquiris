@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import javax.annotation.Nullable;
 
+import net.conquiris.schema.SchemaItem;
 import net.derquinse.common.reflect.This;
 
 import org.apache.lucene.document.Field;
@@ -40,6 +41,16 @@ public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends Th
 	 */
 	FieldableBuilder(String name) {
 		this.name = checkNotNull(name, "The field name must be provided");
+	}
+
+	/**
+	 * Constructor based on a schema item..
+	 * @param item Schema item to base this builder on.
+	 */
+	FieldableBuilder(SchemaItem item) {
+		checkNotNull(item, "The schema item must be provided");
+		this.name = checkNotNull(item.getName(), "The field name must be provided");
+		this.store = item.isStored();
 	}
 
 	/** Returns the field name. */
