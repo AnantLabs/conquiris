@@ -20,6 +20,12 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.Reader;
 
+import net.conquiris.schema.DoubleSchemaItem;
+import net.conquiris.schema.FloatSchemaItem;
+import net.conquiris.schema.IntegerSchemaItem;
+import net.conquiris.schema.LongSchemaItem;
+import net.conquiris.schema.NumericSchemaItem;
+import net.conquiris.schema.SchemaItem;
 import net.derquinse.common.base.Builder;
 import net.derquinse.common.reflect.This;
 
@@ -120,6 +126,74 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		return new DocFieldBuilder(name);
 	}
 
+	/**
+	 * Checks whether a value for a schema item can be added.
+	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
+	 */
+	private void checkItem(SchemaItem item) {
+		checkNotNull(item, "The schema item must be provided");
+		String name = item.getName();
+		checkState(fields.count(name) < item.getMaxOccurs(), "Maximum number of occurrences for field [%s] reached", name);
+	}
+
+	/**
+	 * Returns a numeric field builder based on a schema item.
+	 * @param item Schema item to base the builder on.
+	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
+	 */
+	private DocNumericFieldBuilder numeric(NumericSchemaItem<?> item) {
+		checkItem(item);
+		return new DocNumericFieldBuilder(item);
+	}
+
+	/**
+	 * Adds an integer field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(IntegerSchemaItem item, int value) {
+		return numeric(item).add(value);
+	}
+
+	/**
+	 * Adds a long field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(LongSchemaItem item, long value) {
+		return numeric(item).add(value);
+	}
+
+	/**
+	 * Adds a float field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(FloatSchemaItem item, float value) {
+		return numeric(item).add(value);
+	}
+
+	/**
+	 * Adds a double field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(DoubleSchemaItem item, double value) {
+		return numeric(item).add(value);
+	}
+
 	/** Numeric field builder that adds to the current document builder. */
 	public final class DocNumericFieldBuilder extends BaseNumericFieldBuilder<DocNumericFieldBuilder> implements
 			NumericFieldAdder<B> {
@@ -129,6 +203,14 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 */
 		private DocNumericFieldBuilder(String name) {
 			super(name);
+		}
+
+		/**
+		 * Constructor based on a schema item.
+		 * @param item Schema item to base this builder on.
+		 */
+		DocNumericFieldBuilder(NumericSchemaItem<?> item) {
+			super(item);
 		}
 
 		@Override

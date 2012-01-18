@@ -16,8 +16,20 @@
 package net.conquiris.schema;
 
 /**
- * Marker interface for float schema items.
+ * Default double schema item with a single value implementation.
  * @author Andres Rodriguez
  */
-public interface FloatSchemaItem extends NumericSchemaItem<Float> {
+class DefaultSingleDoubleSchemaItem extends DefaultDoubleSchemaItem implements SingleDoubleSchemaItem {
+	/**
+	 * Constructor.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	DefaultSingleDoubleSchemaItem(String name, boolean required, boolean stored, boolean indexed) {
+		super(name, required ? 1 : 0, 1, stored, indexed);
+	}
+
 }

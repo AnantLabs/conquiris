@@ -19,5 +19,5 @@ package net.conquiris.schema;
  * Marker interface for double schema items.
  * @author Andres Rodriguez
  */
-public interface DoubleSchemaItem extends SchemaItem {
+public interface DoubleSchemaItem extends NumericSchemaItem<Double> {
 }

@@ -15,6 +15,8 @@
  */
 package net.conquiris.lucene.document;
 
+import net.conquiris.schema.NumericSchemaItem;
+
 import org.apache.lucene.document.NumericField;
 
 /**
@@ -31,6 +33,15 @@ public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<
 	 */
 	BaseNumericFieldBuilder(String name) {
 		super(name);
+	}
+
+	/**
+	 * Constructor based on a schema item.
+	 * @param item Schema item to base this builder on.
+	 */
+	BaseNumericFieldBuilder(NumericSchemaItem<?> item) {
+		super(item);
+		index = item.isIndexed();
 	}
 
 	/** Returns whether the field will be indexed. */

@@ -23,7 +23,7 @@ import org.apache.lucene.util.Version;
 import com.google.common.base.Supplier;
 
 /**
- * Support class the default values related to the lucene version for this lucis version.
+ * Support class the default values related to the lucene version for this conquiris version.
  * @author Andres Rodriguez
  */
 public final class Conquiris {

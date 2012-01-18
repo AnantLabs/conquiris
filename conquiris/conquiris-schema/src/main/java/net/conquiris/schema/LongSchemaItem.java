@@ -19,5 +19,5 @@ package net.conquiris.schema;
  * Marker interface for long schema items.
  * @author Andres Rodriguez
  */
-public interface LongSchemaItem extends SchemaItem {
+public interface LongSchemaItem extends NumericSchemaItem<Long> {
 }

@@ -15,9 +15,7 @@
  */
 package net.conquiris.schema;
 
-import net.derquinse.common.meta.IntegerMetaProperty;
-import net.derquinse.common.meta.MetaFlag;
-import net.derquinse.common.meta.StringMetaProperty;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Base class for schema item implementations.
@@ -34,9 +32,20 @@ abstract class AbstractSchemaItem implements SchemaItem {
 	private boolean stored;
 	/** Whether the field is indexed. */
 	private boolean indexed;
-	
+
+	/**
+	 * Constructor.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
 	AbstractSchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
 		this.name = NAME.checkValue(name);
+		checkArgument(minOccurs >= 0, "The minimum number of occurrences of field %s must be >= 0", name);
+		checkArgument(maxOccurs >= minOccurs, "The maximum number of occurrences of field %s must be >= minimum", name);
+		checkArgument(stored || indexed, "Field %s must be either stored or indexed", name);
 		this.minOccurs = minOccurs;
 		this.maxOccurs = maxOccurs;
 		this.stored = stored;
@@ -51,54 +60,50 @@ abstract class AbstractSchemaItem implements SchemaItem {
 	public final String getName() {
 		return name;
 	}
-	
-	public int getMinOccurs() {
-		
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#getMinOccurs()
+	 */
+	@Override
+	public final int getMinOccurs() {
+		return minOccurs;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#getMaxOccurs()
+	 */
+	@Override
+	public final int getMaxOccurs() {
+		return maxOccurs;
+	}
 
-	/** Maximum number of occurrences property. */
-	IntegerMetaProperty<AbstractSchemaItem> MAX_OCCURS = new IntegerMetaProperty<AbstractSchemaItem>("maxOccurs", true) {
-		@Override
-		public Integer apply(AbstractSchemaItem input) {
-			return input.getMaxOccurs();
-		}
-	};
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#isStored()
+	 */
+	@Override
+	public final boolean isStored() {
+		return stored;
+	}
 
-	/** Returns the maximum number of occurrences. */
-	int getMaxOccurs();
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#isIndexed()
+	 */
+	@Override
+	public final boolean isIndexed() {
+		return indexed;
+	}
 
-	/** Stored field flag. */
-	MetaFlag<AbstractSchemaItem> STORED = new MetaFlag<AbstractSchemaItem>("stored") {
-		@Override
-		public boolean apply(AbstractSchemaItem input) {
-			return input.isStored();
-		}
-	};
-
-	/** Whether the field is stored. */
-	boolean isStored();
-
-	/** Indexed field flag. */
-	MetaFlag<AbstractSchemaItem> INDEXED = new MetaFlag<AbstractSchemaItem>("indexed") {
-		@Override
-		public boolean apply(AbstractSchemaItem input) {
-			return input.isIndexed();
-		}
-	};
-
-	/** Whether the field is indexed. */
-	boolean isIndexed();
-
-	/** Required field flag. */
-	MetaFlag<AbstractSchemaItem> REQUIRED = new MetaFlag<AbstractSchemaItem>("required") {
-		@Override
-		public boolean apply(AbstractSchemaItem input) {
-			return input.isRequired();
-		}
-	};
-
-	/** Whether the field is required, ie, the minimum number of occurrences is greater than zero. */
-	boolean isRequired();
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#isRequired()
+	 */
+	@Override
+	public final boolean isRequired() {
+		return minOccurs > 0;
+	}
 
 }

@@ -16,8 +16,8 @@
 package net.conquiris.schema;
 
 /**
- * Marker interface for float schema items.
+ * Marker interface for numeric schema items.
  * @author Andres Rodriguez
  */
-public interface FloatSchemaItem extends NumericSchemaItem<Float> {
+public interface NumericSchemaItem<T extends Number> extends SchemaItem {
 }
