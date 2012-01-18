@@ -22,6 +22,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 
+import net.conquiris.api.search.AbstractDocMapper;
 import net.conquiris.api.search.DocMapper;
 import net.conquiris.api.search.ItemResult;
 import net.conquiris.api.search.PageResult;
@@ -58,9 +59,9 @@ public final class TestSupport {
 		throw new AssertionError();
 	}
 
-	static final String ID = "CQ-ID";
+	public static final String ID = "CQ-ID";
 	public static final String BASE = "BASE";
-	static final String ANALYZED = "ANALYZED";
+	public static final String ANALYZED = "ANALYZED";
 
 	private static final String value(int value) {
 		return "value_" + value;
@@ -77,7 +78,7 @@ public final class TestSupport {
 
 	}
 
-	public static final DocMapper<Node> MAPPER = new DocMapper<Node>() {
+	public static final DocMapper<Node> MAPPER = new AbstractDocMapper<Node>() {
 		public Node map(int id, float score, Document doc, Multimap<String, String> fragments) {
 			final Node node = new Node();
 			node.id = ((NumericField) doc.getFieldable(ID)).getNumericValue().intValue();

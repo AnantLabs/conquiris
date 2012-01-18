@@ -16,6 +16,7 @@
 package net.conquiris.api.search;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.FieldSelector;
 
 import com.google.common.collect.Multimap;
 
@@ -27,11 +28,18 @@ import com.google.common.collect.Multimap;
  */
 public interface DocMapper<T> {
 	/**
+	 * Returns the field selector to use.
+	 * @return The field selector or {@code null} if no selector is used.
+	 */
+	FieldSelector getFieldSelector();
+	
+	/**
+	 * Maps a document into an object.
 	 * @param id
 	 * @param score
 	 * @param doc
 	 * @param fragments not null multimap of highlighter fragments
-	 * @return
+	 * @return The mapped object.
 	 */
 	T map(int id, float score, Document doc, Multimap<String, String> fragments);
 }
