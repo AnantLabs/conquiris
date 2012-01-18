@@ -15,31 +15,21 @@
  */
 package net.conquiris.api.search;
 
-import org.apache.lucene.document.Document;
+import net.conquiris.lucene.search.Hit;
+
 import org.apache.lucene.document.FieldSelector;
 
-import com.google.common.collect.Multimap;
+import com.google.common.base.Function;
 
 /**
- * Mapper from a Lucene document to a custom object.
+ * Mapper from a search hit to a custom object.
  * @author Andres Rodriguez
- * @author Emilio Escobar Reyero
  * @param <T> Type of the custom object.
  */
-public interface DocMapper<T> {
+public interface HitMapper<T> extends Function<Hit, T> {
 	/**
 	 * Returns the field selector to use.
 	 * @return The field selector or {@code null} if no selector is used.
 	 */
 	FieldSelector getFieldSelector();
-	
-	/**
-	 * Maps a document into an object.
-	 * @param id
-	 * @param score
-	 * @param doc
-	 * @param fragments not null multimap of highlighter fragments
-	 * @return The mapped object.
-	 */
-	T map(int id, float score, Document doc, Multimap<String, String> fragments);
 }

@@ -71,7 +71,7 @@ public interface Searcher {
 	 * @param highlight Highlight configuration.
 	 * @return The item result.
 	 */
-	<T> ItemResult<T> getFirst(DocMapper<T> mapper, Query query, @Nullable Filter filter, @Nullable Sort sort,
+	<T> ItemResult<T> getFirst(HitMapper<T> mapper, Query query, @Nullable Filter filter, @Nullable Sort sort,
 			@Nullable Highlight highlight);
 
 	/**
@@ -85,7 +85,7 @@ public interface Searcher {
 	 * @param highlight Highlight configuration.
 	 * @return The page result.
 	 */
-	<T> PageResult<T> getPage(DocMapper<T> mapper, Query query, int firstRecord, int maxRecords, @Nullable Filter filter,
+	<T> PageResult<T> getPage(HitMapper<T> mapper, Query query, int firstRecord, int maxRecords, @Nullable Filter filter,
 			@Nullable Sort sort, @Nullable Highlight highlight);
 
 	/**

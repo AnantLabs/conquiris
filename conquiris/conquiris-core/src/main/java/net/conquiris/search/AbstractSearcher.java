@@ -21,17 +21,19 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import net.conquiris.api.search.CountResult;
-import net.conquiris.api.search.DocMapper;
 import net.conquiris.api.search.Highlight;
 import net.conquiris.api.search.Highlight.HighlightedQuery;
+import net.conquiris.api.search.HitMapper;
 import net.conquiris.api.search.IndexNotAvailableException;
 import net.conquiris.api.search.ItemResult;
 import net.conquiris.api.search.PageResult;
 import net.conquiris.api.search.SearchException;
 import net.conquiris.api.search.Searcher;
+import net.conquiris.lucene.search.Hit;
 import net.conquiris.lucene.search.ScoredTotalHitCountCollector;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.IndexSearcher;
@@ -165,7 +167,7 @@ abstract class AbstractSearcher implements Searcher {
 	 * org.apache.lucene.search.Query, org.apache.lucene.search.Filter, org.apache.lucene.search.Sort,
 	 * net.conquiris.api.search.Highlight)
 	 */
-	public final <T> ItemResult<T> getFirst(final DocMapper<T> mapper, final Query query, final @Nullable Filter filter,
+	public final <T> ItemResult<T> getFirst(final HitMapper<T> mapper, final Query query, final @Nullable Filter filter,
 			final @Nullable Sort sort, final @Nullable Highlight highlight) {
 		return perform(new Op<ItemResult<T>>() {
 			public ItemResult<T> perform(IndexSearcher searcher) throws Exception {
@@ -174,10 +176,9 @@ abstract class AbstractSearcher implements Searcher {
 				TopDocs docs = getTopDocs(searcher, query, filter, sort, 1);
 				if (docs.totalHits > 0) {
 					ScoreDoc sd = docs.scoreDocs[0];
-					Document doc = searcher.doc(sd.doc);
 					HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 					float score = sd.score;
-					T item = mapper.map(sd.doc, score, doc, highlighted.getFragments(doc));
+					T item = map(searcher, sd, highlighted, mapper);
 					return ItemResult.found(docs.totalHits, score, w.elapsedMillis(), item);
 				} else {
 					return ItemResult.notFound(w.elapsedMillis());
@@ -192,7 +193,7 @@ abstract class AbstractSearcher implements Searcher {
 	 * org.apache.lucene.search.Query, int, int, org.apache.lucene.search.Filter,
 	 * org.apache.lucene.search.Sort, net.conquiris.api.search.Highlight)
 	 */
-	public final <T> PageResult<T> getPage(final DocMapper<T> mapper, final Query query, final int firstRecord,
+	public final <T> PageResult<T> getPage(final HitMapper<T> mapper, final Query query, final int firstRecord,
 			final int maxRecords, final @Nullable Filter filter, final @Nullable Sort sort,
 			final @Nullable Highlight highlight) {
 		return perform(new Op<PageResult<T>>() {
@@ -209,8 +210,7 @@ abstract class AbstractSearcher implements Searcher {
 						HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 						for (int i = firstRecord; i < n; i++) {
 							ScoreDoc sd = docs.scoreDocs[i];
-							Document doc = searcher.doc(sd.doc);
-							T item = mapper.map(sd.doc, score, doc, highlighted.getFragments(doc));
+							T item = map(searcher, sd, highlighted, mapper);
 							items.add(item);
 						}
 						return PageResult.found(docs.totalHits, score, w.elapsedMillis(), firstRecord, items);
@@ -264,6 +264,20 @@ abstract class AbstractSearcher implements Searcher {
 			} catch (Exception e) {
 				throw new IndexNotAvailableException(e);
 			}
+		}
+
+		final <H> H map(IndexSearcher searcher, ScoreDoc sd, HighlightedQuery q, HitMapper<H> mapper) throws Exception {
+			final int id = sd.doc;
+			final float score = sd.score;
+			final Document doc;
+			FieldSelector selector = mapper.getFieldSelector();
+			if (selector == null) {
+				doc = searcher.doc(id);
+			} else {
+				doc = searcher.doc(id, selector);
+			}
+			final Hit hit = Hit.of(id, score, doc, q.getFragments(doc));
+			return mapper.apply(hit);
 		}
 
 		abstract T perform(IndexSearcher searcher) throws Exception;

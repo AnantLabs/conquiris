@@ -17,28 +17,27 @@ package net.conquiris.search;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import net.conquiris.api.search.AbstractDocMapper;
-import net.conquiris.api.search.DocMapper;
+import net.conquiris.api.search.AbstractHitMapper;
+import net.conquiris.api.search.HitMapper;
 import net.conquiris.api.search.Searcher;
+import net.conquiris.lucene.search.Hit;
 import net.conquiris.support.TestSupport;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 
 /**
  * Simple tests for a searcher.
  * @author Andres Rodriguez
  */
 public class FieldSelectorTest {
-	private static final DocMapper<Integer> MAPPER = new AbstractDocMapper<Integer>(ImmutableSet.of(TestSupport.ID)) {
-		public Integer map(int id, float score, Document doc, Multimap<String, String> fragments) {
-			return ((NumericField) doc.getFieldable(TestSupport.ID)).getNumericValue().intValue();
+	private static final HitMapper<Integer> MAPPER = new AbstractHitMapper<Integer>(ImmutableSet.of(TestSupport.ID)) {
+		public Integer apply(Hit hit) {
+			return ((NumericField) hit.get().getFieldable(TestSupport.ID)).getNumericValue().intValue();
 		}
 	};
 

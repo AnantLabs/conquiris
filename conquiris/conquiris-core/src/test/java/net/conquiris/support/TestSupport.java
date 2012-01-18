@@ -22,8 +22,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 
-import net.conquiris.api.search.AbstractDocMapper;
-import net.conquiris.api.search.DocMapper;
+import net.conquiris.api.search.AbstractHitMapper;
+import net.conquiris.api.search.HitMapper;
 import net.conquiris.api.search.ItemResult;
 import net.conquiris.api.search.PageResult;
 import net.conquiris.api.search.ReaderSupplier;
@@ -31,6 +31,7 @@ import net.conquiris.api.search.Searcher;
 import net.conquiris.api.search.SearcherService;
 import net.conquiris.lucene.Conquiris;
 import net.conquiris.lucene.document.DocumentBuilder;
+import net.conquiris.lucene.search.Hit;
 import net.conquiris.search.ReaderSuppliers;
 
 import org.apache.lucene.document.Document;
@@ -47,7 +48,6 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.NumericUtils;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Multimap;
 
 /**
  * Document support methods for tests.
@@ -78,9 +78,10 @@ public final class TestSupport {
 
 	}
 
-	public static final DocMapper<Node> MAPPER = new AbstractDocMapper<Node>() {
-		public Node map(int id, float score, Document doc, Multimap<String, String> fragments) {
+	public static final HitMapper<Node> MAPPER = new AbstractHitMapper<Node>() {
+		public Node apply(Hit hit) {
 			final Node node = new Node();
+			final Document doc = hit.get();
 			node.id = ((NumericField) doc.getFieldable(ID)).getNumericValue().intValue();
 			node.analyzed = doc.get(ANALYZED);
 			return node;

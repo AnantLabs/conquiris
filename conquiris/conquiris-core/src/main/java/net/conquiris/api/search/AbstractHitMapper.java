@@ -25,21 +25,21 @@ import org.apache.lucene.document.SetBasedFieldSelector;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Abstract implementation of a document mapper.
+ * Abstract implementation of a hit mapper.
  * @author Andres Rodriguez
  * @param <T> Type of the custom object.
  */
-public abstract class AbstractDocMapper<T> implements DocMapper<T> {
+public abstract class AbstractHitMapper<T> implements HitMapper<T> {
 	/** Field selector. */
 	private final FieldSelector selector;
 
 	/** Constructor with no selector. */
-	protected AbstractDocMapper() {
+	protected AbstractHitMapper() {
 		this.selector = null;
 	}
 
 	/** Constructor with a provided selector. */
-	protected AbstractDocMapper(@Nullable FieldSelector selector) {
+	protected AbstractHitMapper(@Nullable FieldSelector selector) {
 		this.selector = selector;
 	}
 
@@ -50,7 +50,7 @@ public abstract class AbstractDocMapper<T> implements DocMapper<T> {
 	 * @param fieldsToLoadLazily Fields to load lazily.
 	 * @throws NullPointerException if any of the argument or any of their members is {@code null}.
 	 */
-	protected AbstractDocMapper(Iterable<String> fieldsToLoad, Iterable<String> fieldsToLoadLazily) {
+	protected AbstractHitMapper(Iterable<String> fieldsToLoad, Iterable<String> fieldsToLoadLazily) {
 		Set<String> eager = ImmutableSet.copyOf(fieldsToLoad);
 		Set<String> lazy = ImmutableSet.copyOf(fieldsToLoadLazily);
 		this.selector = new SetBasedFieldSelector(eager, lazy);
@@ -61,7 +61,7 @@ public abstract class AbstractDocMapper<T> implements DocMapper<T> {
 	 * @param fieldsToLoad Fields to load.
 	 * @throws NullPointerException if the argument or any of its members is {@code null}.
 	 */
-	protected AbstractDocMapper(Iterable<String> fieldsToLoad) {
+	protected AbstractHitMapper(Iterable<String> fieldsToLoad) {
 		this(fieldsToLoad, ImmutableSet.<String> of());
 	}
 
