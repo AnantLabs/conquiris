@@ -79,4 +79,15 @@ public interface SchemaItem {
 	/** Whether the field is indexed. */
 	boolean isIndexed();
 
+	/** Required field flag. */
+	MetaFlag<SchemaItem> REQUIRED = new MetaFlag<SchemaItem>("required") {
+		@Override
+		public boolean apply(SchemaItem input) {
+			return input.isRequired();
+		}
+	};
+
+	/** Whether the field is required, ie, the minimum number of occurrences is greater than zero. */
+	boolean isRequired();
+
 }
