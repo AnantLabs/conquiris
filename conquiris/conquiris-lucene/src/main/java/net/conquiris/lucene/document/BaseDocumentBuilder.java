@@ -21,8 +21,8 @@ import static com.google.common.base.Preconditions.checkState;
 import java.io.Reader;
 import java.util.UUID;
 
+import net.conquiris.schema.BinarySchemaItem;
 import net.conquiris.schema.DoubleSchemaItem;
-import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.InstantSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
@@ -30,6 +30,7 @@ import net.conquiris.schema.LongSchemaItem;
 import net.conquiris.schema.NumericSchemaItem;
 import net.conquiris.schema.SchemaItem;
 import net.conquiris.schema.StreamSchemaItem;
+import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.schema.UUIDSchemaItem;
 import net.derquinse.common.base.Builder;
 import net.derquinse.common.reflect.This;
@@ -367,7 +368,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 * Constructor based on a schema item.
 		 * @param item Schema item to base this builder on.
 		 */
-		private DocBinaryFieldBuilder(SchemaItem item) {
+		private DocBinaryFieldBuilder(BinarySchemaItem item) {
 			super(item);
 		}
 

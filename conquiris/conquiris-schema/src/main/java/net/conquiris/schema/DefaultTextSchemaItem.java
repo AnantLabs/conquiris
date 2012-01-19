@@ -21,7 +21,7 @@ import com.google.common.base.Objects;
  * Default textual schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultTextSchemaItem extends AbstractSchemaItem implements TextSchemaItem {
+class DefaultTextSchemaItem extends AbstractIndexableSchemaItem implements TextSchemaItem {
 	/** Hash code. */
 	private final int hash;
 	/** Whether the field is tokenized. */

@@ -515,4 +515,49 @@ public final class SchemaItems {
 		return instant(name, required ? 1 : 0, 1, stored, indexed);
 	}
 
+	/**
+	 * Creates a binary schema item.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BinarySchemaItem binary(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
+		return new DefaultBinarySchemaItem(name, minOccurs, maxOccurs, stored, indexed);
+	}
+
+	/**
+	 * Creates a binary schema item with an unbounded number of occurrences.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BinarySchemaItem binary(String name, int minOccurs, boolean stored, boolean indexed) {
+		return binary(name, minOccurs, Integer.MAX_VALUE, stored, indexed);
+	}
+
+	/**
+	 * Creates a binary schema item with any of occurrences.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BinarySchemaItem binary(String name, boolean stored, boolean indexed) {
+		return binary(name, 0, stored, indexed);
+	}
+
+	/**
+	 * Creates a binary schema item with a single occurrence.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BinarySchemaItem binary(String name, boolean required, boolean stored, boolean indexed) {
+		return binary(name, required ? 1 : 0, 1, stored, indexed);
+	}
+
+	
 }

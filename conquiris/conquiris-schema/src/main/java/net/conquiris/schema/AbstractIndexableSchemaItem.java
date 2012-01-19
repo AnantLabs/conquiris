@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Base class for schema item implementations.
  * @author Andres Rodriguez
  */
-abstract class AbstractSchemaItem implements SchemaItem {
+abstract class AbstractIndexableSchemaItem implements SchemaItem {
 	/** Field name. */
 	private final String name;
 	/** Minimum number of occurrences. */
@@ -41,7 +41,7 @@ abstract class AbstractSchemaItem implements SchemaItem {
 	 * @param stored Whether the field is stored.
 	 * @param indexed Whether the field is indexed.
 	 */
-	AbstractSchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
+	AbstractIndexableSchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
 		this.name = NAME.checkValue(name);
 		checkArgument(minOccurs >= 0, "The minimum number of occurrences of field %s must be >= 0", name);
 		checkArgument(maxOccurs >= minOccurs, "The maximum number of occurrences of field %s must be >= minimum", name);

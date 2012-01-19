@@ -21,7 +21,7 @@ import com.google.common.base.Objects;
  * Base class for numeric schema item implementations.
  * @author Andres Rodriguez
  */
-abstract class AbstractNumericSchemaItem<T extends Number> extends AbstractSchemaItem implements NumericSchemaItem<T> {
+abstract class AbstractNumericSchemaItem<T extends Number> extends AbstractIndexableSchemaItem implements NumericSchemaItem<T> {
 	/** Hash code. */
 	private final int hash;
 

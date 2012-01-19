@@ -16,7 +16,7 @@
 package net.conquiris.lucene.document;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import net.conquiris.schema.SchemaItem;
+import net.conquiris.schema.BinarySchemaItem;
 
 import org.apache.lucene.document.Field;
 
@@ -37,7 +37,7 @@ public abstract class BaseBinaryFieldBuilder<B extends BaseBinaryFieldBuilder<B>
 	 * Constructor based on a schema item..
 	 * @param item Schema item to base this builder on.
 	 */
-	BaseBinaryFieldBuilder(SchemaItem item) {
+	BaseBinaryFieldBuilder(BinarySchemaItem item) {
 		super(item);
 	}
 
