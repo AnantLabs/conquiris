@@ -16,7 +16,7 @@
 package net.conquiris.schema;
 
 /**
- * Marker interface for binary items.
+ * Marker interface for binary items. Binary items are stored but not indexed.
  * @author Andres Rodriguez
  */
 public interface BinarySchemaItem extends SchemaItem {

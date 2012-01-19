@@ -19,17 +19,33 @@ package net.conquiris.schema;
  * Default binary schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultBinarySchemaItem extends AbstractNumericSchemaItem<Long> implements BinarySchemaItem {
+class DefaultBinarySchemaItem extends AbstractSchemaItem implements BinarySchemaItem {
 	/**
 	 * Constructor.
 	 * @param name Field name.
 	 * @param minOccurs Minimum number of occurrences.
 	 * @param maxOccurs Maximum number of occurrences.
-	 * @param stored Whether the field is stored.
-	 * @param indexed Whether the field is indexed.
 	 */
-	DefaultBinarySchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
-		super(name, minOccurs, maxOccurs, stored, indexed);
+	DefaultBinarySchemaItem(String name, int minOccurs, int maxOccurs) {
+		super(name, minOccurs, maxOccurs);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#isStored()
+	 */
+	@Override
+	public final boolean isStored() {
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.SchemaItem#isIndexed()
+	 */
+	@Override
+	public final boolean isIndexed() {
+		return false;
 	}
 
 }

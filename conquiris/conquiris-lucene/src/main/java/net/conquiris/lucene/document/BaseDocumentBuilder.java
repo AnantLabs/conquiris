@@ -172,6 +172,16 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/**
+	 * Returns a binary builder based on a schema item.
+	 * @param item Schema item to base the builder on.
+	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
+	 */
+	private DocBinaryFieldBuilder binary(BinarySchemaItem item) {
+		checkItem(item);
+		return new DocBinaryFieldBuilder(item);
+	}
+
+	/**
 	 * Adds an integer field based on a schema item.
 	 * @param item Schema item.
 	 * @param value Field value.
@@ -265,6 +275,18 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 */
 	public final B add(UUIDSchemaItem item, UUID value) {
 		return text(item).add(value.toString());
+	}
+
+	/**
+	 * Adds a binary field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(BinarySchemaItem item, byte[] value) {
+		return binary(item).add(value);
 	}
 
 	/**
