@@ -125,11 +125,11 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/**
-	 * Creates a new field builder that adds to the current document.
+	 * Creates a new text field builder that adds to the current document.
 	 * @param name Field name.
 	 */
-	public final DocFieldBuilder field(String name) {
-		return new DocFieldBuilder(name);
+	public final DocTextFieldBuilder text(String name) {
+		return new DocTextFieldBuilder(name);
 	}
 
 	/**
@@ -153,13 +153,13 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/**
-	 * Returns a field builder based on a schema item.
+	 * Returns a text builder based on a schema item.
 	 * @param item Schema item to base the builder on.
 	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
 	 */
-	private DocFieldBuilder field(FieldSchemaItem item) {
+	private DocTextFieldBuilder text(FieldSchemaItem item) {
 		checkItem(item);
-		return new DocFieldBuilder(item);
+		return new DocTextFieldBuilder(item);
 	}
 
 	/**
@@ -219,7 +219,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 *           reached.
 	 */
 	public final B add(FieldSchemaItem item, String value) {
-		return field(item).add(value);
+		return text(item).add(value);
 	}
 
 	/**
@@ -231,7 +231,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 *           reached.
 	 */
 	public final B add(StreamSchemaItem item, Reader reader) {
-		return field(item).add(reader);
+		return text(item).add(reader);
 	}
 
 	/**
@@ -243,7 +243,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 *           reached.
 	 */
 	public final B add(StreamSchemaItem item, TokenStream tokenStream) {
-		return field(item).add(tokenStream);
+		return text(item).add(tokenStream);
 	}
 
 	/**
@@ -255,7 +255,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 *           reached.
 	 */
 	public final B add(UUIDSchemaItem item, UUID value) {
-		return field(item).add(value.toString());
+		return text(item).add(value.toString());
 	}
 
 	/**
@@ -310,13 +310,13 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		}
 	}
 
-	/** Numeric field builder that adds to the current document builder. */
-	public final class DocFieldBuilder extends BaseTextFieldBuilder<DocFieldBuilder> implements FieldAdder<B> {
+	/** Text field builder that adds to the current document builder. */
+	public final class DocTextFieldBuilder extends BaseTextFieldBuilder<DocTextFieldBuilder> implements FieldAdder<B> {
 		/**
 		 * Constructor.
 		 * @param name Field name.
 		 */
-		private DocFieldBuilder(String name) {
+		private DocTextFieldBuilder(String name) {
 			super(name);
 		}
 
@@ -324,7 +324,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 * Constructor based on a schema item.
 		 * @param item Schema item to base this builder on.
 		 */
-		private DocFieldBuilder(FieldSchemaItem item) {
+		private DocTextFieldBuilder(FieldSchemaItem item) {
 			super(item);
 		}
 

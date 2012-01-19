@@ -31,13 +31,11 @@ import org.apache.lucene.document.Field.TermVector;
 import com.google.common.base.Objects;
 
 /**
- * Base class for text field builders. Text fields are indexed, tokenized but not stored by default. Term
- * vectors are not stored by default.
+ * Base class for text field builders. Text fields are indexed, tokenized but not stored by default.
+ * Term vectors are not stored by default.
  * @author Andres Rodriguez
  */
-public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> extends FieldableBuilder<B> {
-	/** Whether to index the field. */
-	private boolean index = true;
+public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> extends IndexableFieldBuilder<B> {
 	/** Whether to tokenize the field. */
 	private boolean tokenize = true;
 	/** Whether to store norms. */
@@ -59,7 +57,6 @@ public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> ex
 	 */
 	BaseTextFieldBuilder(FieldSchemaItem item) {
 		super(item);
-		index = item.isIndexed();
 		tokenize = item.isTokenized();
 		norms = item.isNorms();
 		if (item.isVectors()) {
@@ -77,7 +74,7 @@ public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> ex
 
 	/** Returns the field index value. */
 	private Index fieldIndex() {
-		if (index) {
+		if (isIndexed()) {
 			if (tokenize) {
 				return norms ? Index.ANALYZED : Index.ANALYZED_NO_NORMS;
 			} else {
@@ -87,34 +84,28 @@ public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> ex
 		return Index.NO;
 	}
 
-	/** Sets whether to index the field. */
-	public final B index(boolean index) {
-		this.index = index;
-		return thisValue();
-	}
-
 	/**
 	 * Sets whether to index the field. The field will not be indexed if the argument is {@code null}.
 	 */
 	public final B index(@Nullable Index index) {
 		if (index == Index.ANALYZED) {
-			this.index = true;
+			index(true);
 			this.tokenize = true;
 			this.norms = true;
 		} else if (index == Index.ANALYZED_NO_NORMS) {
-			this.index = true;
+			index(true);
 			this.tokenize = true;
 			this.norms = false;
 		} else if (index == Index.NOT_ANALYZED) {
-			this.index = true;
+			index(true);
 			this.tokenize = false;
 			this.norms = true;
 		} else if (index == Index.NOT_ANALYZED_NO_NORMS) {
-			this.index = true;
+			index(true);
 			this.tokenize = false;
 			this.norms = false;
 		} else {
-			this.index = false;
+			index(false);
 		}
 		return thisValue();
 	}
@@ -145,7 +136,7 @@ public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> ex
 	 */
 	public final Field build(String value) {
 		checkNotNull(value, "The field value must be provided");
-		return new Field(name(), value, checkUsed(index), fieldIndex(), vector);
+		return new Field(name(), value, checkUsed(), fieldIndex(), vector);
 	}
 
 	private Field decorateIndexed(Field field) {

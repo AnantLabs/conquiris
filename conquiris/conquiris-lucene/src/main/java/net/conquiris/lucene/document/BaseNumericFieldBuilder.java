@@ -23,10 +23,7 @@ import org.apache.lucene.document.NumericField;
  * Base class for numeric field builders. Numeric fields are indexed but not stored by default.
  * @author Andres Rodriguez
  */
-public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<B>> extends FieldableBuilder<B> {
-	/** Whether to index the field. */
-	private boolean index = true;
-
+public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<B>> extends IndexableFieldBuilder<B> {
 	/**
 	 * Constructor.
 	 * @param name Field name.
@@ -41,12 +38,6 @@ public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<
 	 */
 	BaseNumericFieldBuilder(NumericSchemaItem<?> item) {
 		super(item);
-		index = item.isIndexed();
-	}
-
-	/** Returns whether the field will be indexed. */
-	public final boolean isIndexed() {
-		return index;
 	}
 
 	/**
@@ -55,13 +46,7 @@ public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<
 	 * @throws IllegalStateException if the field is neither stored nor indexed.
 	 */
 	private NumericField buildField() {
-		return new NumericField(name(), checkUsed(index), index);
-	}
-
-	/** Sets whether to index the field. */
-	public final B index(boolean index) {
-		this.index = index;
-		return thisValue();
+		return new NumericField(name(), checkUsed(), isIndexed());
 	}
 
 	/**

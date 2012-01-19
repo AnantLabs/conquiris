@@ -17,9 +17,6 @@ package net.conquiris.lucene.document;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-
-import javax.annotation.Nullable;
-
 import net.conquiris.schema.IsIndexedFlag;
 import net.conquiris.schema.IsStoredFlag;
 import net.conquiris.schema.SchemaItem;
@@ -28,20 +25,19 @@ import net.derquinse.common.reflect.This;
 import org.apache.lucene.document.Field;
 
 /**
- * Fieldable builder base class. Fieldables are not stored by default. Builders are NOT THREAD SAFE.
+ * Field builders base class. Builders are NOT THREAD SAFE.
  * @author Andres Rodriguez
  */
-public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends This<B> implements IsStoredFlag, IsIndexedFlag {
+public abstract class FieldBuilder<B extends FieldBuilder<B>> extends This<B> implements IsStoredFlag,
+		IsIndexedFlag {
 	/** Field name. */
 	private final String name;
-	/** Whether to store the field. */
-	private boolean store = false;
 
 	/**
 	 * Constructor.
 	 * @param name Field name.
 	 */
-	FieldableBuilder(String name) {
+	FieldBuilder(String name) {
 		this.name = checkNotNull(name, "The field name must be provided");
 	}
 
@@ -49,61 +45,28 @@ public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends Th
 	 * Constructor based on a schema item..
 	 * @param item Schema item to base this builder on.
 	 */
-	FieldableBuilder(SchemaItem item) {
+	FieldBuilder(SchemaItem item) {
 		checkNotNull(item, "The schema item must be provided");
 		this.name = checkNotNull(item.getName(), "The field name must be provided");
-		this.store = item.isStored();
 	}
 
 	/** Returns the field name. */
 	final String name() {
 		return name;
 	}
-	
-	// TODO
-	
-	@Override
-	public boolean isStored() {
-		return store;
-	}
-	
-	@Override
-	public boolean isIndexed() {
-		return false;
-	}
 
 	/** Returns the field store value. */
 	final Field.Store fieldStore() {
-		return store ? Field.Store.YES : Field.Store.NO;
-	}
-
-	/** Sets whether to store the field. */
-	public final B store(boolean store) {
-		this.store = store;
-		return thisValue();
-	}
-
-	/** Sets the field to be stored. */
-	public final B store() {
-		return store(true);
+		return isStored() ? Field.Store.YES : Field.Store.NO;
 	}
 
 	/**
-	 * Sets whether to store the field.
-	 * @param store The field will be stored if the argument is Field.Store.YES.
-	 */
-	public final B store(@Nullable Field.Store store) {
-		return store(Field.Store.YES == store);
-	}
-
-	/**
-	 * Checks the fieldable is either indexed or stored.
-	 * @param index Whether to index the field.
+	 * Checks the field is either indexed or stored.
 	 * @return The store value.
 	 * @throws IllegalStateException if the field is neither stored nor indexed.
 	 */
-	final Field.Store checkUsed(boolean index) {
-		checkState(index || store, "Field neither stored nor indexed");
+	final Field.Store checkUsed() {
+		checkState(isIndexed() || isStored(), "Field neither stored nor indexed");
 		return fieldStore();
 	}
 
