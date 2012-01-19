@@ -311,7 +311,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/** Numeric field builder that adds to the current document builder. */
-	public final class DocFieldBuilder extends BaseFieldBuilder<DocFieldBuilder> implements FieldAdder<B> {
+	public final class DocFieldBuilder extends BaseTextFieldBuilder<DocFieldBuilder> implements FieldAdder<B> {
 		/**
 		 * Constructor.
 		 * @param name Field name.

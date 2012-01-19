@@ -31,11 +31,11 @@ import org.apache.lucene.document.Field.TermVector;
 import com.google.common.base.Objects;
 
 /**
- * Base class for field builders. Fields are indexed, tokenized but not stored by default. Term
+ * Base class for text field builders. Text fields are indexed, tokenized but not stored by default. Term
  * vectors are not stored by default.
  * @author Andres Rodriguez
  */
-public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends FieldableBuilder<B> {
+public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> extends FieldableBuilder<B> {
 	/** Whether to index the field. */
 	private boolean index = true;
 	/** Whether to tokenize the field. */
@@ -49,7 +49,7 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 	 * Constructor.
 	 * @param name Field name.
 	 */
-	BaseFieldBuilder(String name) {
+	BaseTextFieldBuilder(String name) {
 		super(name);
 	}
 
@@ -57,7 +57,7 @@ public abstract class BaseFieldBuilder<B extends BaseFieldBuilder<B>> extends Fi
 	 * Constructor based on a schema item.
 	 * @param item Schema item to base this builder on.
 	 */
-	BaseFieldBuilder(FieldSchemaItem item) {
+	BaseTextFieldBuilder(FieldSchemaItem item) {
 		super(item);
 		index = item.isIndexed();
 		tokenize = item.isTokenized();

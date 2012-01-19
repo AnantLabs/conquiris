@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.conquiris.lucene.document;
+package net.conquiris.schema;
+
+import net.derquinse.common.meta.MetaFlag;
 
 /**
- * Field builder.
+ * Field is indexed flag.
  * @author Andres Rodriguez
  */
-public final class FieldBuilder extends BaseFieldBuilder<FieldBuilder> {
-	/**
-	 * Creates a new builder.
-	 * @param name Field name.
-	 */
-	public static FieldBuilder create(String name) {
-		return new FieldBuilder(name);
-	}
+public interface IsIndexedFlag {
+	/** Indexed field flag. */
+	MetaFlag<IsIndexedFlag> INDEXED = new MetaFlag<IsIndexedFlag>("indexed") {
+		@Override
+		public boolean apply(IsIndexedFlag input) {
+			return input.isIndexed();
+		}
+	};
 
-	/**
-	 * Constructor.
-	 * @param name Field name.
-	 */
-	private FieldBuilder(String name) {
-		super(name);
-	}
-
+	/** Whether the field is indexed. */
+	boolean isIndexed();
 }

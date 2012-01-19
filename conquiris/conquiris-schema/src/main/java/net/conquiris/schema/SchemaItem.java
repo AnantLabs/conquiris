@@ -23,7 +23,7 @@ import net.derquinse.common.meta.StringMetaProperty;
  * Conquiris Lucene document schema item base interface. Schema items MUST be immutable.
  * @author Andres Rodriguez
  */
-public interface SchemaItem {
+public interface SchemaItem extends IsStoredFlag, IsIndexedFlag {
 	/** Name property. */
 	StringMetaProperty<SchemaItem> NAME = new StringMetaProperty<SchemaItem>("name", true) {
 		@Override
@@ -56,28 +56,6 @@ public interface SchemaItem {
 
 	/** Returns the maximum number of occurrences. */
 	int getMaxOccurs();
-
-	/** Stored field flag. */
-	MetaFlag<SchemaItem> STORED = new MetaFlag<SchemaItem>("stored") {
-		@Override
-		public boolean apply(SchemaItem input) {
-			return input.isStored();
-		}
-	};
-
-	/** Whether the field is stored. */
-	boolean isStored();
-
-	/** Indexed field flag. */
-	MetaFlag<SchemaItem> INDEXED = new MetaFlag<SchemaItem>("indexed") {
-		@Override
-		public boolean apply(SchemaItem input) {
-			return input.isIndexed();
-		}
-	};
-
-	/** Whether the field is indexed. */
-	boolean isIndexed();
 
 	/** Required field flag. */
 	MetaFlag<SchemaItem> REQUIRED = new MetaFlag<SchemaItem>("required") {

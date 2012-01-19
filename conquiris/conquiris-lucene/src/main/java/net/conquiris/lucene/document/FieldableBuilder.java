@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 import javax.annotation.Nullable;
 
+import net.conquiris.schema.IsIndexedFlag;
+import net.conquiris.schema.IsStoredFlag;
 import net.conquiris.schema.SchemaItem;
 import net.derquinse.common.reflect.This;
 
@@ -29,7 +31,7 @@ import org.apache.lucene.document.Field;
  * Fieldable builder base class. Fieldables are not stored by default. Builders are NOT THREAD SAFE.
  * @author Andres Rodriguez
  */
-public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends This<B> {
+public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends This<B> implements IsStoredFlag, IsIndexedFlag {
 	/** Field name. */
 	private final String name;
 	/** Whether to store the field. */
@@ -56,6 +58,18 @@ public abstract class FieldableBuilder<B extends FieldableBuilder<B>> extends Th
 	/** Returns the field name. */
 	final String name() {
 		return name;
+	}
+	
+	// TODO
+	
+	@Override
+	public boolean isStored() {
+		return store;
+	}
+	
+	@Override
+	public boolean isIndexed() {
+		return false;
 	}
 
 	/** Returns the field store value. */
