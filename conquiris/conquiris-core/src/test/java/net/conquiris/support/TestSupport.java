@@ -92,8 +92,8 @@ public final class TestSupport {
 		final DocumentBuilder builder = DocumentBuilder.create();
 		builder.numeric(ID).store().add(value);
 		final String text = value(value);
-		builder.field(ANALYZED).store().add(text);
-		builder.field(BASE).store().tokenize(false).norms(false).add(text);
+		builder.text(ANALYZED).store().add(text);
+		builder.text(BASE).store().tokenize(false).norms(false).add(text);
 		return builder.build();
 	}
 
