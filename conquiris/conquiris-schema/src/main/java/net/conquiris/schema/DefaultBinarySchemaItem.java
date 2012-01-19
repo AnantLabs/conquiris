@@ -15,11 +15,16 @@
  */
 package net.conquiris.schema;
 
+import com.google.common.base.Objects;
+
 /**
  * Default binary schema item implementation.
  * @author Andres Rodriguez
  */
 class DefaultBinarySchemaItem extends AbstractSchemaItem implements BinarySchemaItem {
+	/** Hash code. */
+	private final int hash;
+
 	/**
 	 * Constructor.
 	 * @param name Field name.
@@ -28,6 +33,7 @@ class DefaultBinarySchemaItem extends AbstractSchemaItem implements BinarySchema
 	 */
 	DefaultBinarySchemaItem(String name, int minOccurs, int maxOccurs) {
 		super(name, minOccurs, maxOccurs);
+		this.hash = Objects.hashCode(BinarySchemaItem.class, name, minOccurs, maxOccurs);
 	}
 
 	/*
@@ -45,6 +51,29 @@ class DefaultBinarySchemaItem extends AbstractSchemaItem implements BinarySchema
 	 */
 	@Override
 	public final boolean isIndexed() {
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public final int hashCode() {
+		return hash;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public final boolean equals(Object obj) {
+		if (obj instanceof BinarySchemaItem) {
+			BinarySchemaItem other = (BinarySchemaItem) obj;
+			return hash == other.hashCode() && getName().equals(other.getName()) && getMinOccurs() == other.getMinOccurs()
+					&& getMaxOccurs() == other.getMaxOccurs();
+		}
 		return false;
 	}
 
