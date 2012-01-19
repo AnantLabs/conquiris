@@ -19,7 +19,7 @@ package net.conquiris.schema;
  * Default UUID schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultUUIDSchemaItem extends IdFieldSchemaItem implements UUIDSchemaItem {
+class DefaultUUIDSchemaItem extends IdSchemaItem implements UUIDSchemaItem {
 	/**
 	 * Constructor.
 	 * @param name Field name.

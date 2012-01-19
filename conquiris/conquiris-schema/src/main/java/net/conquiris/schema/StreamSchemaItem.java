@@ -19,5 +19,5 @@ package net.conquiris.schema;
  * Marker interface for streamed textual schema items.
  * @author Andres Rodriguez
  */
-public interface StreamSchemaItem extends FieldSchemaItem {
+public interface StreamSchemaItem extends TextSchemaItem {
 }

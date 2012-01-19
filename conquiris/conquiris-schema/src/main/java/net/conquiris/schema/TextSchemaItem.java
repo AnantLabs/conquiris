@@ -21,11 +21,11 @@ import net.derquinse.common.meta.MetaFlag;
  * Marker interface for textual schema items.
  * @author Andres Rodriguez
  */
-public interface FieldSchemaItem extends SchemaItem {
+public interface TextSchemaItem extends SchemaItem {
 	/** Tokenized field flag. */
-	MetaFlag<FieldSchemaItem> TOKENIZED = new MetaFlag<FieldSchemaItem>("tokenized") {
+	MetaFlag<TextSchemaItem> TOKENIZED = new MetaFlag<TextSchemaItem>("tokenized") {
 		@Override
-		public boolean apply(FieldSchemaItem input) {
+		public boolean apply(TextSchemaItem input) {
 			return input.isTokenized();
 		}
 	};
@@ -34,9 +34,9 @@ public interface FieldSchemaItem extends SchemaItem {
 	boolean isTokenized();
 
 	/** Norms stored flag. */
-	MetaFlag<FieldSchemaItem> NORMS = new MetaFlag<FieldSchemaItem>("norms") {
+	MetaFlag<TextSchemaItem> NORMS = new MetaFlag<TextSchemaItem>("norms") {
 		@Override
-		public boolean apply(FieldSchemaItem input) {
+		public boolean apply(TextSchemaItem input) {
 			return input.isNorms();
 		}
 	};
@@ -45,9 +45,9 @@ public interface FieldSchemaItem extends SchemaItem {
 	boolean isNorms();
 
 	/** Term vectors stored flag. */
-	MetaFlag<FieldSchemaItem> VECTORS = new MetaFlag<FieldSchemaItem>("vectors") {
+	MetaFlag<TextSchemaItem> VECTORS = new MetaFlag<TextSchemaItem>("vectors") {
 		@Override
-		public boolean apply(FieldSchemaItem input) {
+		public boolean apply(TextSchemaItem input) {
 			return input.isVectors();
 		}
 	};
@@ -56,9 +56,9 @@ public interface FieldSchemaItem extends SchemaItem {
 	boolean isVectors();
 
 	/** Term vectors positions stored flag. */
-	MetaFlag<FieldSchemaItem> POSITIONS = new MetaFlag<FieldSchemaItem>("positions") {
+	MetaFlag<TextSchemaItem> POSITIONS = new MetaFlag<TextSchemaItem>("positions") {
 		@Override
-		public boolean apply(FieldSchemaItem input) {
+		public boolean apply(TextSchemaItem input) {
 			return input.isPositions();
 		}
 	};
@@ -67,9 +67,9 @@ public interface FieldSchemaItem extends SchemaItem {
 	boolean isPositions();
 
 	/** Term vectors positions stored flag. */
-	MetaFlag<FieldSchemaItem> OFFSETS = new MetaFlag<FieldSchemaItem>("offsets") {
+	MetaFlag<TextSchemaItem> OFFSETS = new MetaFlag<TextSchemaItem>("offsets") {
 		@Override
-		public boolean apply(FieldSchemaItem input) {
+		public boolean apply(TextSchemaItem input) {
 			return input.isOffsets();
 		}
 	};

@@ -20,5 +20,5 @@ package net.conquiris.schema;
  * tokenized and have no norms and no vectors.
  * @author Andres Rodriguez
  */
-public interface UUIDSchemaItem extends FieldSchemaItem {
+public interface UUIDSchemaItem extends TextSchemaItem {
 }

@@ -22,7 +22,7 @@ import java.io.Reader;
 import java.util.UUID;
 
 import net.conquiris.schema.DoubleSchemaItem;
-import net.conquiris.schema.FieldSchemaItem;
+import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.InstantSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
@@ -165,7 +165,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 * @param item Schema item to base the builder on.
 	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
 	 */
-	private DocTextFieldBuilder text(FieldSchemaItem item) {
+	private DocTextFieldBuilder text(TextSchemaItem item) {
 		checkItem(item);
 		return new DocTextFieldBuilder(item);
 	}
@@ -226,7 +226,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
 	 *           reached.
 	 */
-	public final B add(FieldSchemaItem item, String value) {
+	public final B add(TextSchemaItem item, String value) {
 		return text(item).add(value);
 	}
 
@@ -332,7 +332,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 * Constructor based on a schema item.
 		 * @param item Schema item to base this builder on.
 		 */
-		private DocTextFieldBuilder(FieldSchemaItem item) {
+		private DocTextFieldBuilder(TextSchemaItem item) {
 			super(item);
 		}
 

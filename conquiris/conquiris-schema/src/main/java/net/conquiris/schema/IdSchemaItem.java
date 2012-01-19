@@ -16,18 +16,19 @@
 package net.conquiris.schema;
 
 /**
- * Default UUID schema item with a single value implementation.
+ * Default textual id schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultSingleUUIDSchemaItem extends SingleIdFieldSchemaItem implements SingleUUIDSchemaItem {
+class IdSchemaItem extends DefaultTextSchemaItem {
 	/**
 	 * Constructor.
 	 * @param name Field name.
-	 * @param required Whether the field is required.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
 	 * @param stored Whether the field is stored.
 	 * @param indexed Whether the field is indexed.
 	 */
-	DefaultSingleUUIDSchemaItem(String name, boolean required, boolean stored, boolean indexed) {
-		super(name, required, stored, indexed);
+	IdSchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed) {
+		super(name, minOccurs, maxOccurs, stored, indexed, false, false, false, false, false);
 	}
 }

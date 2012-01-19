@@ -21,7 +21,7 @@ import java.io.Reader;
 
 import javax.annotation.Nullable;
 
-import net.conquiris.schema.FieldSchemaItem;
+import net.conquiris.schema.TextSchemaItem;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.Field;
@@ -55,7 +55,7 @@ public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> ex
 	 * Constructor based on a schema item.
 	 * @param item Schema item to base this builder on.
 	 */
-	BaseTextFieldBuilder(FieldSchemaItem item) {
+	BaseTextFieldBuilder(TextSchemaItem item) {
 		super(item);
 		tokenize = item.isTokenized();
 		norms = item.isNorms();

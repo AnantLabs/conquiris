@@ -21,7 +21,7 @@ import com.google.common.base.Objects;
  * Default textual schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultFieldSchemaItem extends AbstractSchemaItem implements FieldSchemaItem {
+class DefaultTextSchemaItem extends AbstractSchemaItem implements TextSchemaItem {
 	/** Hash code. */
 	private final int hash;
 	/** Whether the field is tokenized. */
@@ -48,7 +48,7 @@ class DefaultFieldSchemaItem extends AbstractSchemaItem implements FieldSchemaIt
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
 	 */
-	DefaultFieldSchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed, boolean tokenized,
+	DefaultTextSchemaItem(String name, int minOccurs, int maxOccurs, boolean stored, boolean indexed, boolean tokenized,
 			boolean norms, boolean vectors, boolean positions, boolean offsets) {
 		super(name, minOccurs, maxOccurs, stored, indexed);
 		this.tokenized = tokenized;
@@ -120,8 +120,8 @@ class DefaultFieldSchemaItem extends AbstractSchemaItem implements FieldSchemaIt
 	 */
 	@Override
 	public final boolean equals(Object obj) {
-		if (obj instanceof DefaultFieldSchemaItem) {
-			DefaultFieldSchemaItem other = (DefaultFieldSchemaItem) obj;
+		if (obj instanceof DefaultTextSchemaItem) {
+			DefaultTextSchemaItem other = (DefaultTextSchemaItem) obj;
 			return hash == other.hash && getClass() == other.getClass() && getName().equals(other.getName())
 					&& getMinOccurs() == other.getMinOccurs() && getMaxOccurs() == other.getMaxOccurs()
 					&& isStored() == other.isStored() && isIndexed() == other.isIndexed() && tokenized == other.tokenized

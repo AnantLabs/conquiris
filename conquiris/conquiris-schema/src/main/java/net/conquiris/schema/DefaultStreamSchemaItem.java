@@ -19,7 +19,7 @@ package net.conquiris.schema;
  * Default streamed textual schema item implementation.
  * @author Andres Rodriguez
  */
-class DefaultStreamSchemaItem extends DefaultFieldSchemaItem implements StreamSchemaItem {
+class DefaultStreamSchemaItem extends DefaultTextSchemaItem implements StreamSchemaItem {
 	/**
 	 * Constructor.
 	 * @param name Field name.
