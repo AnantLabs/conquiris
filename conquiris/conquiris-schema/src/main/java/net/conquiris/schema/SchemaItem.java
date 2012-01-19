@@ -17,24 +17,12 @@ package net.conquiris.schema;
 
 import net.derquinse.common.meta.IntegerMetaProperty;
 import net.derquinse.common.meta.MetaFlag;
-import net.derquinse.common.meta.StringMetaProperty;
 
 /**
  * Conquiris Lucene document schema item base interface. Schema items MUST be immutable.
  * @author Andres Rodriguez
  */
-public interface SchemaItem extends IsStoredFlag, IsIndexedFlag {
-	/** Name property. */
-	StringMetaProperty<SchemaItem> NAME = new StringMetaProperty<SchemaItem>("name", true) {
-		@Override
-		public String apply(SchemaItem input) {
-			return input.getName();
-		}
-	};
-
-	/** Returns the field name. */
-	String getName();
-
+public interface SchemaItem extends FieldNameProperty, IsStoredFlag, IsIndexedFlag {
 	/** Minimum number of occurrences property. */
 	IntegerMetaProperty<SchemaItem> MIN_OCCURS = new IntegerMetaProperty<SchemaItem>("minOccurs", true) {
 		@Override

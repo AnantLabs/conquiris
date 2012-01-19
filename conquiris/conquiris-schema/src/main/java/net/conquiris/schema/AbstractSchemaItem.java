@@ -21,9 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Base class for schema item implementations.
  * @author Andres Rodriguez
  */
-abstract class AbstractSchemaItem implements SchemaItem {
-	/** Field name. */
-	private final String name;
+abstract class AbstractSchemaItem extends AbstractWithFieldNameProperty implements SchemaItem {
 	/** Minimum number of occurrences. */
 	private final int minOccurs;
 	/** Maximum number of occurrences. */
@@ -36,20 +34,11 @@ abstract class AbstractSchemaItem implements SchemaItem {
 	 * @param maxOccurs Maximum number of occurrences.
 	 */
 	AbstractSchemaItem(String name, int minOccurs, int maxOccurs) {
-		this.name = NAME.checkValue(name);
+		super(name);
 		checkArgument(minOccurs >= 0, "The minimum number of occurrences of field %s must be >= 0", name);
 		checkArgument(maxOccurs >= minOccurs, "The maximum number of occurrences of field %s must be >= minimum", name);
 		this.minOccurs = minOccurs;
 		this.maxOccurs = maxOccurs;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.conquiris.schema.SchemaItem#getName()
-	 */
-	@Override
-	public final String getName() {
-		return name;
 	}
 
 	/*
