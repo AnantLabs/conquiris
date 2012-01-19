@@ -23,7 +23,7 @@ import org.apache.lucene.analysis.TokenStream;
  * Base interface for field adders.
  * @author Andres Rodriguez
  */
-public interface FieldAdder<B extends BaseDocumentBuilder<B>> {
+public interface TextFieldAdder<B extends BaseDocumentBuilder<B>> {
 	/**
 	 * Adds the field to the document field with the current information and the provided value.
 	 * @param value Field value.

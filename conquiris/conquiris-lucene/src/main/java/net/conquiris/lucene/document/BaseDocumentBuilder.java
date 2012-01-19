@@ -133,6 +133,14 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/**
+	 * Creates a new binary field builder that adds to the current document.
+	 * @param name Field name.
+	 */
+	public final DocBinaryFieldBuilder binary(String name) {
+		return new DocBinaryFieldBuilder(name);
+	}
+
+	/**
 	 * Checks whether a value for a schema item can be added.
 	 * @throws IllegalStateException if the maximum number of occurrences has been reached.
 	 */
@@ -311,7 +319,7 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/** Text field builder that adds to the current document builder. */
-	public final class DocTextFieldBuilder extends BaseTextFieldBuilder<DocTextFieldBuilder> implements FieldAdder<B> {
+	public final class DocTextFieldBuilder extends BaseTextFieldBuilder<DocTextFieldBuilder> implements TextFieldAdder<B> {
 		/**
 		 * Constructor.
 		 * @param name Field name.
@@ -341,6 +349,31 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		@Override
 		public B add(TokenStream tokenStream) {
 			return BaseDocumentBuilder.this.add(build(tokenStream));
+		}
+	}
+
+	/** Binary field builder that adds to the current document builder. */
+	public final class DocBinaryFieldBuilder extends BaseBinaryFieldBuilder<DocBinaryFieldBuilder> implements
+			BinaryFieldAdder<B> {
+		/**
+		 * Constructor.
+		 * @param name Field name.
+		 */
+		private DocBinaryFieldBuilder(String name) {
+			super(name);
+		}
+
+		/**
+		 * Constructor based on a schema item.
+		 * @param item Schema item to base this builder on.
+		 */
+		private DocBinaryFieldBuilder(SchemaItem item) {
+			super(item);
+		}
+
+		@Override
+		public B add(byte[] value) {
+			return BaseDocumentBuilder.this.add(build(value));
 		}
 	}
 
