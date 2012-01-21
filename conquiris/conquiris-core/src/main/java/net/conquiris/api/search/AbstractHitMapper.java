@@ -15,14 +15,9 @@
  */
 package net.conquiris.api.search;
 
-import java.util.Set;
-
 import javax.annotation.Nullable;
 
 import org.apache.lucene.document.FieldSelector;
-import org.apache.lucene.document.SetBasedFieldSelector;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Abstract implementation of a hit mapper.
@@ -41,28 +36,6 @@ public abstract class AbstractHitMapper<T> implements HitMapper<T> {
 	/** Constructor with a provided selector. */
 	protected AbstractHitMapper(@Nullable FieldSelector selector) {
 		this.selector = selector;
-	}
-
-	/**
-	 * Creates a mapper with a selector that loads a certain set of fields eagerly, another set lazily
-	 * and the rest are not loaded.
-	 * @param fieldsToLoad Fields to load eagerly.
-	 * @param fieldsToLoadLazily Fields to load lazily.
-	 * @throws NullPointerException if any of the argument or any of their members is {@code null}.
-	 */
-	protected AbstractHitMapper(Iterable<String> fieldsToLoad, Iterable<String> fieldsToLoadLazily) {
-		Set<String> eager = ImmutableSet.copyOf(fieldsToLoad);
-		Set<String> lazy = ImmutableSet.copyOf(fieldsToLoadLazily);
-		this.selector = new SetBasedFieldSelector(eager, lazy);
-	}
-
-	/**
-	 * Creates a mapper with a selector that loads only a certain set of fields.
-	 * @param fieldsToLoad Fields to load.
-	 * @throws NullPointerException if the argument or any of its members is {@code null}.
-	 */
-	protected AbstractHitMapper(Iterable<String> fieldsToLoad) {
-		this(fieldsToLoad, ImmutableSet.<String> of());
 	}
 
 	/*

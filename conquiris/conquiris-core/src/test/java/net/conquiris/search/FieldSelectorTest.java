@@ -15,6 +15,7 @@
  */
 package net.conquiris.search;
 
+import static net.conquiris.lucene.document.FieldSelectors.loadItems;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import net.conquiris.api.search.AbstractHitMapper;
@@ -23,21 +24,18 @@ import net.conquiris.api.search.Searcher;
 import net.conquiris.lucene.search.Hit;
 import net.conquiris.support.TestSupport;
 
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Simple tests for a searcher.
  * @author Andres Rodriguez
  */
 public class FieldSelectorTest {
-	private static final HitMapper<Integer> MAPPER = new AbstractHitMapper<Integer>(ImmutableSet.of(TestSupport.ID)) {
+	private static final HitMapper<Integer> MAPPER = new AbstractHitMapper<Integer>(loadItems(TestSupport.ID)) {
 		public Integer apply(Hit hit) {
-			return ((NumericField) hit.get().getFieldable(TestSupport.ID)).getNumericValue().intValue();
+			return hit.item(TestSupport.ID).get();
 		}
 	};
 

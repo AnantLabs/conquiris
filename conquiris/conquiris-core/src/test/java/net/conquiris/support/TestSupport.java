@@ -32,10 +32,12 @@ import net.conquiris.api.search.SearcherService;
 import net.conquiris.lucene.Conquiris;
 import net.conquiris.lucene.document.DocumentBuilder;
 import net.conquiris.lucene.search.Hit;
+import net.conquiris.schema.IntegerSchemaItem;
+import net.conquiris.schema.SchemaItems;
+import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.search.ReaderSuppliers;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Filter;
@@ -59,9 +61,9 @@ public final class TestSupport {
 		throw new AssertionError();
 	}
 
-	public static final String ID = "CQ-ID";
-	public static final String BASE = "BASE";
-	public static final String ANALYZED = "ANALYZED";
+	public static final IntegerSchemaItem ID = SchemaItems.intValue("CQ-ID", true, true, true);
+	public static final TextSchemaItem BASE = SchemaItems.id("BASE", true, true, true);
+	public static final TextSchemaItem ANALYZED = SchemaItems.tokenized("ANALYZED", true);
 
 	private static final String value(int value) {
 		return "value_" + value;
@@ -81,28 +83,28 @@ public final class TestSupport {
 	public static final HitMapper<Node> MAPPER = new AbstractHitMapper<Node>() {
 		public Node apply(Hit hit) {
 			final Node node = new Node();
-			final Document doc = hit.get();
-			node.id = ((NumericField) doc.getFieldable(ID)).getNumericValue().intValue();
-			node.analyzed = doc.get(ANALYZED);
+			node.id = hit.item(ID).get();
+			;
+			node.analyzed = hit.item(ANALYZED).get();
 			return node;
 		}
 	};
 
 	public static Document document(int value, String base) {
 		final DocumentBuilder builder = DocumentBuilder.create();
-		builder.numeric(ID).store().add(value);
+		builder.add(ID, value);
 		final String text = value(value);
-		builder.text(ANALYZED).store().add(text);
-		builder.text(BASE).store().tokenize(false).norms(false).add(text);
+		builder.add(BASE, text);
+		builder.add(ANALYZED, text);
 		return builder.build();
 	}
 
 	public static Document document(int value) {
-		return document(value, BASE);
+		return document(value, BASE.getName());
 	}
 
 	public static Term termId(int value) {
-		return new Term(ID, NumericUtils.intToPrefixCoded(value));
+		return new Term(ID.getName(), NumericUtils.intToPrefixCoded(value));
 	}
 
 	public static ItemResult<Node> getFirst(Searcher searcher, Query query, Filter filter) {
@@ -122,8 +124,8 @@ public final class TestSupport {
 	}
 
 	public static PageResult<Node> getPage(Searcher searcher, int from, int to, int first, int max, Filter filter) {
-		return searcher.getPage(MAPPER, NumericRangeQuery.newIntRange(ID, from, to, true, true), first, max, filter, null,
-				null);
+		return searcher.getPage(MAPPER, NumericRangeQuery.newIntRange(ID.getName(), from, to, true, true), first, max,
+				filter, null, null);
 	}
 
 	public static PageResult<Node> getPage(Searcher searcher, int from, int to, int first, int max) {
@@ -255,11 +257,4 @@ public final class TestSupport {
 			}
 		});
 	}
-
-	/*
-	 * static Batch<Long> batch(int from, int to, long cp) throws InterruptedException { final
-	 * Batch.Builder<Long> builder = Batch.builder(); for (int i = from; i <= to; i++) {
-	 * builder.add(document(i)); } return builder.build(cp); }
-	 */
-
 }

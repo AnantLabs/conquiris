@@ -326,6 +326,110 @@ public final class SchemaItems {
 	}
 
 	/**
+	 * Creates an indexed and tokenized textual schema item. Norms are stored.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param vectors Whether term vectors are stored.
+	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
+	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
+	 */
+	public static TextSchemaItem tokenized(String name, int minOccurs, int maxOccurs, boolean stored, boolean vectors,
+			boolean positions, boolean offsets) {
+		return new DefaultTextSchemaItem(name, minOccurs, maxOccurs, stored, true, true, true, vectors, positions, offsets);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema item with an unbounded number of occurrences.
+	 * Norms are stored.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param vectors Whether term vectors are stored.
+	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
+	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
+	 */
+	public static TextSchemaItem tokenized(String name, int minOccurs, boolean stored, boolean vectors,
+			boolean positions, boolean offsets) {
+		return tokenized(name, minOccurs, Integer.MAX_VALUE, stored, vectors, positions, offsets);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema item with any of occurrences. Norms are stored.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 * @param vectors Whether term vectors are stored.
+	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
+	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
+	 */
+	public static TextSchemaItem tokenized(String name, boolean stored, boolean vectors, boolean positions,
+			boolean offsets) {
+		return tokenized(name, 0, stored, vectors, positions, offsets);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema item with a single occurrence. Norms are
+	 * stored.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 * @param tokenized Whether the field is tokenized.
+	 * @param norms Whether norms are stored.
+	 * @param vectors Whether term vectors are stored.
+	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
+	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).
+	 */
+	public static TextSchemaItem tokenized(String name, boolean required, boolean stored, boolean vectors,
+			boolean positions, boolean offsets) {
+		return tokenized(name, required ? 1 : 0, 1, stored, vectors, positions, offsets);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema itemand no term vectors. Norms are stored.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 */
+	public static TextSchemaItem tokenized(String name, int minOccurs, int maxOccurs, boolean stored) {
+		return tokenized(name, minOccurs, maxOccurs, stored, false, false, false);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema item with an unbounded number of occurrences
+	 * and no term vectors. Norms are stored.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 */
+	public static TextSchemaItem tokenized(String name, int minOccurs, boolean stored) {
+		return tokenized(name, minOccurs, Integer.MAX_VALUE, stored);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema item with any of occurrences and no term
+	 * vectors. Norms are stored.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 */
+	public static TextSchemaItem tokenized(String name, boolean stored) {
+		return tokenized(name, 0, stored);
+	}
+
+	/**
+	 * Creates an indexed and tokenized textual schema item with a single occurrence and no term
+	 * vectors. Norms are stored.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 */
+	public static TextSchemaItem tokenized(String name, boolean required, boolean stored) {
+		return tokenized(name, required ? 1 : 0, 1, stored);
+	}
+
+	/**
 	 * Creates a streamed textual schema item.
 	 * @param name Field name.
 	 * @param minOccurs Minimum number of occurrences.
