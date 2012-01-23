@@ -16,7 +16,7 @@
 package net.conquiris.jersey;
 
 import net.conquiris.gson.ConquirisGson;
-import net.derquinse.common.jersey.gson.GenericGsonProvider;
+import net.derquinse.common.jaxrs.gson.GenericGsonProvider;
 
 
 /**
