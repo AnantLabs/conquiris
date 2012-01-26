@@ -17,6 +17,7 @@ package net.conquiris.search;
 
 import net.conquiris.api.search.ManagedReaderSupplier;
 import net.conquiris.api.search.ReaderSupplier;
+import net.derquinse.common.base.NotInstantiable;
 
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
@@ -25,10 +26,9 @@ import org.apache.lucene.store.Directory;
  * Reader suppliers support class.
  * @author Andres Rodriguez
  */
-public final class ReaderSuppliers {
+public final class ReaderSuppliers extends NotInstantiable {
 	/** Not instantiable. */
 	private ReaderSuppliers() {
-		throw new AssertionError();
 	}
 
 	/** Returns a non-reopenable reader supplier using an empty index. */

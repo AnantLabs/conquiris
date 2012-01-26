@@ -17,13 +17,14 @@ package net.conquiris.api.index;
 
 import javax.annotation.Nullable;
 
+import net.derquinse.common.base.NotInstantiable;
+
 /**
  * Checkpoints support class.
  * @author Andres Rodriguez
  */
-public final class Checkpoints {
+public final class Checkpoints extends NotInstantiable {
 	private Checkpoints() {
-		throw new AssertionError();
 	}
 
 	/**

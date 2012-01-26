@@ -18,6 +18,7 @@ package net.conquiris.search;
 import net.conquiris.api.search.ReaderSupplier;
 import net.conquiris.api.search.Searcher;
 import net.conquiris.api.search.SearcherService;
+import net.derquinse.common.base.NotInstantiable;
 
 import org.apache.lucene.search.IndexSearcher;
 
@@ -25,10 +26,9 @@ import org.apache.lucene.search.IndexSearcher;
  * Searchers support class.
  * @author Andres Rodriguez
  */
-public final class Searchers {
+public final class Searchers extends NotInstantiable {
 	/** Not instantiable. */
 	private Searchers() {
-		throw new AssertionError();
 	}
 
 	/**
