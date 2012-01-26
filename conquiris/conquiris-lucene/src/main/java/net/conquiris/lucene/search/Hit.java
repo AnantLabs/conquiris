@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 
 import net.conquiris.schema.AbstractWithFieldNameProperty;
 import net.conquiris.schema.BinarySchemaItem;
+import net.conquiris.schema.BooleanSchemaItem;
 import net.conquiris.schema.DoubleSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
@@ -159,6 +160,11 @@ public final class Hit implements Supplier<Document> {
 		return new DoubleValues(name);
 	}
 
+	/** Returns the boolean values of the numeric fields with the given name. */
+	public FieldValues<Boolean> booleanValues(String name) {
+		return new BooleanValues(name);
+	}
+
 	/** Returns the values of the binary fields with the given name. */
 	public FieldValues<InputSupplier<ByteArrayInputStream>> binary(String name) {
 		return new BinaryValues(name);
@@ -203,6 +209,11 @@ public final class Hit implements Supplier<Document> {
 	/** Returns the values of the fields corresponding to the given schema item. */
 	public FieldValues<Double> item(DoubleSchemaItem item) {
 		return doubleValues(checkName(item));
+	}
+
+	/** Returns the values of the fields corresponding to the given schema item. */
+	public FieldValues<Boolean> item(BooleanSchemaItem item) {
+		return booleanValues(checkName(item));
 	}
 
 	/** Returns the values of the fields corresponding to the given schema item. */
@@ -349,6 +360,23 @@ public final class Hit implements Supplier<Document> {
 				return (Double) input;
 			}
 			return input.doubleValue();
+		}
+	}
+
+	/** Boolean values. */
+	private final class BooleanValues extends AbstractFieldValues<Number, Boolean> {
+		BooleanValues(String name) {
+			super(name);
+		}
+
+		@Override
+		final ImmutableListMultimap<String, Number> map() {
+			return numeric;
+		}
+
+		@Override
+		public Boolean apply(Number input) {
+			return input.intValue() == 0;
 		}
 	}
 

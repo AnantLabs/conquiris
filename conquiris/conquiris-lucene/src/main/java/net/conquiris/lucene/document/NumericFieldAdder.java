@@ -55,4 +55,14 @@ public interface NumericFieldAdder<B extends BaseDocumentBuilder<B>> {
 	 * @throws IllegalStateException if the document was already built.
 	 */
 	B add(double value);
+
+	/**
+	 * Adds the field to the document with the current information and a boolean value. True is mapped
+	 * to 1 and false to 0.
+	 * @param value Field value.
+	 * @return The document builder.
+	 * @throws IllegalStateException if the field is neither stored nor indexed.
+	 * @throws IllegalStateException if the document was already built.
+	 */
+	B add(boolean value);
 }

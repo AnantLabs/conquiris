@@ -15,6 +15,7 @@
  */
 package net.conquiris.lucene.document;
 
+import net.conquiris.schema.BooleanSchemaItem;
 import net.conquiris.schema.NumericSchemaItem;
 
 import org.apache.lucene.document.NumericField;
@@ -37,6 +38,14 @@ public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<
 	 * @param item Schema item to base this builder on.
 	 */
 	BaseNumericFieldBuilder(NumericSchemaItem<?> item) {
+		super(item);
+	}
+
+	/**
+	 * Constructor based on a boolean schema item.
+	 * @param item Schema item to base this builder on.
+	 */
+	BaseNumericFieldBuilder(BooleanSchemaItem item) {
 		super(item);
 	}
 
@@ -87,6 +96,17 @@ public abstract class BaseNumericFieldBuilder<B extends BaseNumericFieldBuilder<
 	 */
 	public final NumericField build(double value) {
 		return buildField().setDoubleValue(value);
+	}
+
+	/**
+	 * Builds a numeric field with the current information and a boolean value. True is mapped to 1
+	 * and false to 0.
+	 * @param value Field value.
+	 * @return The created field.
+	 * @throws IllegalStateException if the field is neither stored nor indexed.
+	 */
+	public final NumericField build(boolean value) {
+		return build(value ? 1 : 0);
 	}
 
 }

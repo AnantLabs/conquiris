@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.util.UUID;
 
 import net.conquiris.schema.BinarySchemaItem;
+import net.conquiris.schema.BooleanSchemaItem;
 import net.conquiris.schema.DoubleSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.InstantSchemaItem;
@@ -301,6 +302,18 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		return numeric(item).add(value.getMillis());
 	}
 
+	/**
+	 * Adds a boolean field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(BooleanSchemaItem item, boolean value) {
+		return new DocNumericFieldBuilder(item).add(value);
+	}
+
 	/** Numeric field builder that adds to the current document builder. */
 	public final class DocNumericFieldBuilder extends BaseNumericFieldBuilder<DocNumericFieldBuilder> implements
 			NumericFieldAdder<B> {
@@ -317,6 +330,14 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 		 * @param item Schema item to base this builder on.
 		 */
 		private DocNumericFieldBuilder(NumericSchemaItem<?> item) {
+			super(item);
+		}
+
+		/**
+		 * Constructor based on a boolean schema item.
+		 * @param item Schema item to base this builder on.
+		 */
+		private DocNumericFieldBuilder(BooleanSchemaItem item) {
 			super(item);
 		}
 
@@ -337,6 +358,11 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 
 		@Override
 		public B add(double value) {
+			return BaseDocumentBuilder.this.add(build(value));
+		}
+
+		@Override
+		public B add(boolean value) {
 			return BaseDocumentBuilder.this.add(build(value));
 		}
 	}
