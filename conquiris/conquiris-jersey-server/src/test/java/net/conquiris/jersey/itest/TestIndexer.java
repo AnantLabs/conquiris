@@ -20,6 +20,7 @@ import net.conquiris.api.index.IndexException;
 import net.conquiris.api.index.Indexer;
 import net.conquiris.api.index.Writer;
 import net.conquiris.lucene.document.DocumentBuilder;
+import net.conquiris.support.TestSupport;
 
 /**
  * Test indexer.
@@ -31,7 +32,7 @@ public class TestIndexer implements Indexer {
 		String checkpoint = writer.getCheckpoint();
 		int cp = Checkpoints.ofInt(checkpoint, 0) + 1;
 		cp++;
-		writer.add(DocumentBuilder.create().numeric("ID").add(cp).build());
+		writer.add(DocumentBuilder.create().add(TestSupport.ID, cp).build());
 		writer.setCheckpoint(Integer.toString(cp));
 	}
 }

@@ -31,6 +31,7 @@ import net.conquiris.api.search.Searcher;
 import net.conquiris.api.search.SearcherService;
 import net.conquiris.lucene.Conquiris;
 import net.conquiris.lucene.document.DocumentBuilder;
+import net.conquiris.lucene.index.Terms;
 import net.conquiris.lucene.search.Hit;
 import net.conquiris.schema.IntegerSchemaItem;
 import net.conquiris.schema.SchemaItems;
@@ -47,7 +48,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.NumericUtils;
 
 import com.google.common.base.Function;
 
@@ -104,7 +104,7 @@ public final class TestSupport {
 	}
 
 	public static Term termId(int value) {
-		return new Term(ID.getName(), NumericUtils.intToPrefixCoded(value));
+		return Terms.term(ID, value);
 	}
 
 	public static ItemResult<Node> getFirst(Searcher searcher, Query query, Filter filter) {

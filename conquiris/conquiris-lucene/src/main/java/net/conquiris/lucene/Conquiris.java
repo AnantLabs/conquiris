@@ -15,6 +15,8 @@
  */
 package net.conquiris.lucene;
 
+import net.derquinse.common.base.NotInstantiable;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -26,10 +28,9 @@ import com.google.common.base.Supplier;
  * Support class the default values related to the lucene version for this conquiris version.
  * @author Andres Rodriguez
  */
-public final class Conquiris {
+public final class Conquiris extends NotInstantiable {
 	/** Not instantiable. */
 	private Conquiris() {
-		throw new AssertionError();
 	}
 
 	/** Supplier. */
