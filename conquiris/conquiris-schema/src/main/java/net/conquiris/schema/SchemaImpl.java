@@ -16,6 +16,7 @@
 package net.conquiris.schema;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -77,14 +78,21 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 		return delegate().values();
 	}
 
-	private Schema extend(Map<String, SchemaItem> items) {
-		final Map<String, SchemaItem> newMap;
-		if (isEmpty()) {
-			newMap = items;
-		} else {
-			newMap = Maps.newHashMap(map);
-			newMap.putAll(items);
+	private Schema extendWithMap(Map<String, SchemaItem> items) {
+		if (items.isEmpty()) {
+			return this;
 		}
+		if (isEmpty()) {
+			return new SchemaImpl(items);
+		}
+		Set<String> intersect = Sets.intersection(map.keySet(), items.keySet());
+		checkArgument(intersect.isEmpty(), "Extending with existing keys %s", intersect);
+		return putItems(items);
+	}
+
+	private Schema putItems(Map<String, SchemaItem> items) {
+		final Map<String, SchemaItem> newMap = Maps.newHashMap(map);
+		newMap.putAll(items);
 		return new SchemaImpl(newMap);
 	}
 
@@ -101,9 +109,20 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 		if (others.isEmpty()) {
 			return this;
 		}
-		Set<String> intersect = Sets.intersection(map.keySet(), others.keySet());
-		checkArgument(intersect.isEmpty(), "Extending with existing keys %s", intersect);
-		return extend(others);
+		return extendWithMap(others);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.Schema#extend(net.conquiris.schema.Schema)
+	 */
+	@Override
+	public Schema extend(Schema schema) {
+		checkNotNull("The schema must be provided");
+		if (isEmpty()) {
+			return schema;
+		}
+		return extendWithMap(schema);
 	}
 
 	/*
@@ -119,7 +138,23 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 		if (others.isEmpty()) {
 			return this;
 		}
-		return extend(others);
+		return putItems(others);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.Schema#override(net.conquiris.schema.Schema)
+	 */
+	@Override
+	public Schema override(Schema schema) {
+		checkNotNull("The schema must be provided");
+		if (isEmpty()) {
+			return schema;
+		}
+		if (schema.isEmpty()) {
+			return this;
+		}
+		return putItems(schema);
 	}
 
 	/*
