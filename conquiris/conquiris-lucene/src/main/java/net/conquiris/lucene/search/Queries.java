@@ -17,6 +17,7 @@ package net.conquiris.lucene.search;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Arrays.asList;
 import static net.conquiris.lucene.index.Terms.term;
 
 import java.text.Collator;
@@ -65,18 +66,18 @@ public final class Queries extends NotInstantiable {
 		return checkNotNull(field, "The field name must be provided");
 	}
 
-	private static <T extends Comparable<T>> Range<T> checkRange(Range<T> range) {
-		return checkNotNull(range, "The value range must be provided");
+	private static void checkRange(Range<?> range) {
+		checkNotNull(range, "The value range must be provided");
 	}
 
-	private static <T extends Comparable<T>> T min(Range<T> range) {
+	private static <T extends Comparable<T>> T min(Range<? extends T> range) {
 		if (range.hasLowerBound()) {
 			return range.lowerEndpoint();
 		}
 		return null;
 	}
 
-	private static <T extends Comparable<T>> T max(Range<T> range) {
+	private static <T extends Comparable<T>> T max(Range<? extends T> range) {
 		if (range.hasUpperBound()) {
 			return range.upperEndpoint();
 		}
@@ -409,12 +410,51 @@ public final class Queries extends NotInstantiable {
 	}
 
 	/**
+	 * Creates a new range query. If both limits are {@code null} a {@link MatchAllDocsQuery} is
+	 * returned.
+	 */
+	public static Query instantRange(String field, @Nullable ReadableInstant min, @Nullable ReadableInstant max,
+			boolean minInclusive, boolean maxInclusive) {
+		checkField(field);
+		if (min == null && max == null) {
+			return new MatchAllDocsQuery();
+		}
+		return NumericRangeQuery.newLongRange(field, min != null ? min.getMillis() : null, max != null ? max.getMillis()
+				: null, minInclusive, maxInclusive);
+	}
+
+	/**
+	 * Creates a new range query. If both limits are {@code null} a {@link MatchAllDocsQuery} is
+	 * returned.
+	 */
+	public static Query instantRange(InstantSchemaItem field, @Nullable ReadableInstant min,
+			@Nullable ReadableInstant max, boolean minInclusive, boolean maxInclusive) {
+		return instantRange(checkItem(field), min, max, minInclusive, maxInclusive);
+	}
+
+	/**
+	 * Creates a new range query. If the range has no bounds a {@link MatchAllDocsQuery} is returned.
+	 */
+	public static Query instantRange(String field, Range<? extends ReadableInstant> range) {
+		checkField(field);
+		checkRange(range);
+		return instantRange(field, min(range), max(range), minIncluded(range), maxIncluded(range));
+	}
+
+	/**
+	 * Creates a new range query. If the range has no bounds a {@link MatchAllDocsQuery} is returned.
+	 */
+	public static Query instantRange(InstantSchemaItem field, Range<? extends ReadableInstant> range) {
+		return instantRange(checkItem(field), range);
+	}
+
+	/**
 	 * Adds clauses to a boolean query.
 	 * @param query Boolean query to which the clauses are added.
 	 * @param occur Specifies how clauses are to occur in matching documents.
 	 * @param queries Queries to use to build the clauses.
 	 * @return The provided boolean query.
-	 * @throws IllegalArgumentException if the queries iterable is empty.
+	 * @throws IllegalArgumentException if the queries argument is empty.
 	 */
 	public static BooleanQuery addClauses(BooleanQuery query, Occur occur, Iterable<? extends Query> queries) {
 		checkNotNull(query, "The destination boolean query must be provided");
@@ -427,4 +467,15 @@ public final class Queries extends NotInstantiable {
 		return query;
 	}
 
+	/**
+	 * Adds clauses to a boolean query.
+	 * @param query Boolean query to which the clauses are added.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param queries Queries to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery addClauses(BooleanQuery query, Occur occur, Query... queries) {
+		return addClauses(query, occur, asList(queries));
+	}
 }

@@ -34,6 +34,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.util.NumericUtils;
 import org.joda.time.ReadableInstant;
 
+import com.google.common.base.Function;
+
 /**
  * Term building support class.
  * @author Andres Rodriguez
@@ -133,4 +135,191 @@ public final class Terms extends NotInstantiable {
 	public static Term term(InstantSchemaItem field, ReadableInstant value) {
 		return term(checkItem(field), value);
 	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<String, Term> stringTermBuilder(String field) {
+		return new StringTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Integer, Term> intTermBuilder(String field) {
+		return new IntTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Long, Term> longTermBuilder(String field) {
+		return new LongTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Float, Term> floatTermBuilder(String field) {
+		return new FloatTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Double, Term> doubleTermBuilder(String field) {
+		return new DoubleTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Boolean, Term> booleanTermBuilder(String field) {
+		return new BooleanTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<ReadableInstant, Term> instantTermBuilder(String field) {
+		return new InstantTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<UUID, Term> uuidTermBuilder(String field) {
+		return new UUIDTermBuilder(field);
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<String, Term> termBuilder(TextSchemaItem field) {
+		return stringTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Integer, Term> termBuilder(IntegerSchemaItem field) {
+		return intTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Long, Term> termBuilder(LongSchemaItem field) {
+		return longTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Float, Term> termBuilder(FloatSchemaItem field) {
+		return floatTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Double, Term> termBuilder(DoubleSchemaItem field) {
+		return doubleTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<Boolean, Term> termBuilder(BooleanSchemaItem field) {
+		return booleanTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<ReadableInstant, Term> termBuilder(InstantSchemaItem field) {
+		return instantTermBuilder(checkItem(field));
+	}
+
+	/** Creates a function from a value to a term. */
+	public static Function<UUID, Term> termBuilder(UUIDSchemaItem field) {
+		return uuidTermBuilder(checkItem(field));
+	}
+
+	/** Term builder function. */
+	private static abstract class TermBuilder<F> implements Function<F, Term> {
+		/** Field. */
+		final String field;
+
+		TermBuilder(String field) {
+			this.field = checkField(field);
+		}
+	}
+
+	/** String value to term function. */
+	private static final class StringTermBuilder extends TermBuilder<String> {
+		StringTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(String input) {
+			return term(field, input);
+		}
+	}
+
+	/** Int value to term function. */
+	private static final class IntTermBuilder extends TermBuilder<Integer> {
+		IntTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(Integer input) {
+			return term(field, input);
+		}
+	}
+
+	/** Long value to term function. */
+	private static final class LongTermBuilder extends TermBuilder<Long> {
+		LongTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(Long input) {
+			return term(field, input);
+		}
+	}
+
+	/** Float value to term function. */
+	private static final class FloatTermBuilder extends TermBuilder<Float> {
+		FloatTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(Float input) {
+			return term(field, input);
+		}
+	}
+
+	/** BooleanInt value to term function. */
+	private static final class BooleanTermBuilder extends TermBuilder<Boolean> {
+		BooleanTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(Boolean input) {
+			return term(field, input);
+		}
+	}
+
+	/** Double value to term function. */
+	private static final class DoubleTermBuilder extends TermBuilder<Double> {
+		DoubleTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(Double input) {
+			return term(field, input);
+		}
+	}
+
+	/** UUID value to term function. */
+	private static final class UUIDTermBuilder extends TermBuilder<UUID> {
+		UUIDTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(UUID input) {
+			return term(field, input);
+		}
+	}
+
+	/** Instant value to term function. */
+	private static final class InstantTermBuilder extends TermBuilder<ReadableInstant> {
+		InstantTermBuilder(String field) {
+			super(field);
+		}
+
+		@Override
+		public Term apply(ReadableInstant input) {
+			return term(field, input);
+		}
+	}
+
 }

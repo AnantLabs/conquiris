@@ -202,6 +202,51 @@ public final class SchemaItems {
 	}
 
 	/**
+	 * Creates a boolean schema item.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BooleanSchemaItem booleanValue(String name, int minOccurs, int maxOccurs, boolean stored,
+			boolean indexed) {
+		return new DefaultBooleanSchemaItem(name, minOccurs, maxOccurs, stored, indexed);
+	}
+
+	/**
+	 * Creates a boolean schema item with an unbounded number of occurrences.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BooleanSchemaItem booleanValue(String name, int minOccurs, boolean stored, boolean indexed) {
+		return booleanValue(name, minOccurs, Integer.MAX_VALUE, stored, indexed);
+	}
+
+	/**
+	 * Creates a boolean schema item with any of occurrences.
+	 * @param name Field name.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BooleanSchemaItem booleanValue(String name, boolean stored, boolean indexed) {
+		return booleanValue(name, 0, stored, indexed);
+	}
+
+	/**
+	 * Creates a boolean schema item with a single occurrence.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 * @param stored Whether the field is stored.
+	 * @param indexed Whether the field is indexed.
+	 */
+	public static BooleanSchemaItem booleanValue(String name, boolean required, boolean stored, boolean indexed) {
+		return booleanValue(name, required ? 1 : 0, 1, stored, indexed);
+	}
+
+	/**
 	 * Creates a textual schema item.
 	 * @param name Field name.
 	 * @param minOccurs Minimum number of occurrences.
