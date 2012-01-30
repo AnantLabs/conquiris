@@ -17,6 +17,7 @@ package net.conquiris.lucene.search;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static net.conquiris.lucene.index.Terms.term;
 
@@ -46,8 +47,10 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.joda.time.ReadableInstant;
 
+import com.google.common.base.Function;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 
 /**
@@ -103,6 +106,20 @@ public final class Queries extends NotInstantiable {
 	/** Creates a term query. */
 	public static TermQuery termQuery(Term term) {
 		return new TermQuery(checkTerm(term));
+	}
+
+	/** Returns a term query builder. */
+	public static Function<Term, TermQuery> termQueryBuilder() {
+		return TermQueryBuilder.INSTANCE;
+	}
+
+	private enum TermQueryBuilder implements Function<Term, TermQuery> {
+		INSTANCE;
+
+		@Override
+		public TermQuery apply(Term input) {
+			return termQuery(input);
+		}
 	}
 
 	/** Creates a term query. */
@@ -478,4 +495,73 @@ public final class Queries extends NotInstantiable {
 	public static BooleanQuery addClauses(BooleanQuery query, Occur occur, Query... queries) {
 		return addClauses(query, occur, asList(queries));
 	}
+
+	/**
+	 * Adds term query clauses to a boolean query.
+	 * @param query Boolean query to which the clauses are added.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param terms Terms to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the terms argument is empty.
+	 */
+	public static BooleanQuery addTermClauses(BooleanQuery query, Occur occur, Iterable<? extends Term> terms) {
+		return addClauses(query, occur, transform(terms, termQueryBuilder()));
+	}
+
+	/**
+	 * Adds term query clauses to a boolean query.
+	 * @param query Boolean query to which the clauses are added.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param terms Terms to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the terms argument is empty.
+	 */
+	public static BooleanQuery addTermClauses(BooleanQuery query, Occur occur, Term... terms) {
+		return addTermClauses(query, occur, asList(terms));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param queries Queries to use to build the clauses.
+	 * @return The boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, Iterable<? extends Query> queries) {
+		return addClauses(new BooleanQuery(), occur, queries);
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param queries Queries to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, Query... queries) {
+		return addClauses(new BooleanQuery(), occur, queries);
+	}
+
+	/**
+	 * Creates a boolean query based on term queries.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param terms Terms to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the terms argument is empty.
+	 */
+	public static BooleanQuery booleanTermQuery(Occur occur, Iterable<? extends Term> terms) {
+		return addTermClauses(new BooleanQuery(), occur, terms);
+	}
+
+	/**
+	 * Creates a boolean query based on term queries.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param terms Terms to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the terms argument is empty.
+	 */
+	public static BooleanQuery addTermClauses(Occur occur, Term... terms) {
+		return addTermClauses(new BooleanQuery(), occur, asList(terms));
+	}
+
 }
