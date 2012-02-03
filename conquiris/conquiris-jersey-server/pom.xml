@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>conquiris</artifactId>
 		<groupId>net.conquiris</groupId>
-		<version>3.5.4-SNAPSHOT</version>
+		<version>3.5.4</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>conquiris-jersey-server</artifactId>
@@ -14,24 +13,24 @@
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-jersey</artifactId>
-			<version>3.5.4-SNAPSHOT</version>
+			<version>3.5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-jersey-client</artifactId>
-			<version>3.5.4-SNAPSHOT</version>
+			<version>3.5.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-core</artifactId>
-			<version>3.5.4-SNAPSHOT</version>
+			<version>3.5.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-core</artifactId>
-			<version>3.5.4-SNAPSHOT</version>
+			<version>3.5.4</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
