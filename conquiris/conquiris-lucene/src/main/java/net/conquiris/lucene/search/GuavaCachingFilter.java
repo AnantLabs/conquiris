@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.CachingWrapperFilter.DeletesMode;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
@@ -36,7 +35,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 /**
  * A wrapping filter based on Guava {@link Cache}. Uses a caching mode equivalent to Lucene's
- * {@link DeletesMode.RECACHE}.
+ * DeletesMode.RECACHE.
  * @author Andres Rodriguez
  */
 public final class GuavaCachingFilter extends Filter {
@@ -93,8 +92,8 @@ public final class GuavaCachingFilter extends Filter {
 			throw new UncheckedExecutionException(cause);
 		}
 	}
-	
-	/**  Returns a current snapshot of this cache's cumulative statistics. */
+
+	/** Returns a current snapshot of this cache's cumulative statistics. */
 	public CacheStats stats() {
 		return cache.stats();
 	}

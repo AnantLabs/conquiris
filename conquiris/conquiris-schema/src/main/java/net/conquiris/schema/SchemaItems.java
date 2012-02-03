@@ -419,9 +419,6 @@ public final class SchemaItems {
 	 * @param name Field name.
 	 * @param required Whether the field is required.
 	 * @param stored Whether the field is stored.
-	 * @param indexed Whether the field is indexed.
-	 * @param tokenized Whether the field is tokenized.
-	 * @param norms Whether norms are stored.
 	 * @param vectors Whether term vectors are stored.
 	 * @param positions Whether term vectors are stored with positions (ignored if vectors is false).
 	 * @param offsets Whether term vectors are stored with offsets (ignored if vectors is false).

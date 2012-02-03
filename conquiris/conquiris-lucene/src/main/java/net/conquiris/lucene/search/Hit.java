@@ -76,7 +76,6 @@ public final class Hit implements Supplier<Document> {
 	 * @param score Score.
 	 * @param document Document. Use only documents loaded with an IndexReader or IndexSearcher.
 	 * @param fragments Highlight fragments.
-	 * @return
 	 */
 	public static Hit of(int docId, float score, Document document, @Nullable Multimap<String, String> fragments) {
 		return new Hit(docId, score, document, fragments);

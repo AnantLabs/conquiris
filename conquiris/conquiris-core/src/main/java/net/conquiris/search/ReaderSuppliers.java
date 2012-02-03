@@ -51,7 +51,7 @@ public final class ReaderSuppliers extends NotInstantiable {
 	public static ReaderSupplier writer(IndexWriter writer) {
 		return new IndexWriterReaderSupplier(writer);
 	}
-	
+
 	/**
 	 * Returns a managed reader supplier based on another one.
 	 * @param supplier Source reader supplier.
@@ -81,12 +81,11 @@ public final class ReaderSuppliers extends NotInstantiable {
 	/**
 	 * Returns a managed reader supplier based on a directory with no hold time.
 	 * @param directory Directory to use.
-	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
 	 */
 	public static ReaderSupplier managed(Directory directory) {
 		return managed(directory(directory), 0);
 	}
-	
+
 	/**
 	 * Returns an unmanaged near-real-time reader supplier using the provided index writer.
 	 * @param holdTime Reader hold time (ms). If negative, zero will be used.
@@ -103,6 +102,5 @@ public final class ReaderSuppliers extends NotInstantiable {
 	public static ReaderSupplier managed(IndexWriter writer) {
 		return managed(writer(writer), 0);
 	}
-
 
 }

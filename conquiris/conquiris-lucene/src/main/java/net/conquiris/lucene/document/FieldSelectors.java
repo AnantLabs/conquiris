@@ -27,9 +27,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 /**
- * Support class for field selectors.
+ * Support class for {@link FieldSelector field selectors}.
  * @author Andres Rodriguez
- * @see FieldSelector.
  */
 public final class FieldSelectors {
 	/** Constructor with no selector. */
