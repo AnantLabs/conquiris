@@ -20,8 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static net.conquiris.lucene.index.Terms.term;
+import static net.conquiris.lucene.index.Terms.termBuilder;
 
 import java.text.Collator;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -50,8 +52,12 @@ import org.joda.time.ReadableInstant;
 import com.google.common.base.Function;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
+import com.google.common.primitives.Booleans;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 
 /**
  * Query building support class.
@@ -93,10 +99,6 @@ public final class Queries extends NotInstantiable {
 
 	private static boolean maxIncluded(Range<?> range) {
 		return range.hasUpperBound() && range.upperBoundType() == BoundType.CLOSED;
-	}
-
-	private static <T> T checkValue(T value) {
-		return checkNotNull(value, "The term value must be provided");
 	}
 
 	private static String checkItem(SchemaItem field) {
@@ -560,8 +562,200 @@ public final class Queries extends NotInstantiable {
 	 * @return The provided boolean query.
 	 * @throws IllegalArgumentException if the terms argument is empty.
 	 */
-	public static BooleanQuery addTermClauses(Occur occur, Term... terms) {
+	public static BooleanQuery booleanTermQuery(Occur occur, Term... terms) {
 		return addTermClauses(new BooleanQuery(), occur, asList(terms));
 	}
 
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, TextSchemaItem field, Iterable<String> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, TextSchemaItem field, String... values) {
+		return booleanQuery(occur, field, Arrays.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, IntegerSchemaItem field, Iterable<Integer> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, IntegerSchemaItem field, int... values) {
+		return booleanQuery(occur, field, Ints.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, LongSchemaItem field, Iterable<Long> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, LongSchemaItem field, long... values) {
+		return booleanQuery(occur, field, Longs.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, FloatSchemaItem field, Iterable<Float> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, FloatSchemaItem field, float... values) {
+		return booleanQuery(occur, field, Floats.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, DoubleSchemaItem field, Iterable<Double> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, DoubleSchemaItem field, double... values) {
+		return booleanQuery(occur, field, Doubles.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, BooleanSchemaItem field, Iterable<Boolean> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, BooleanSchemaItem field, boolean... values) {
+		return booleanQuery(occur, field, Booleans.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, InstantSchemaItem field,
+			Iterable<? extends ReadableInstant> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, InstantSchemaItem field, ReadableInstant... values) {
+		return booleanQuery(occur, field, Arrays.asList(values));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, UUIDSchemaItem field, Iterable<UUID> values) {
+		return booleanTermQuery(occur, transform(values, termBuilder(field)));
+	}
+
+	/**
+	 * Creates a boolean query.
+	 * @param occur Specifies how clauses are to occur in matching documents.
+	 * @param field Schema item to use to build the clauses.
+	 * @param values Values to use to build the clauses.
+	 * @return The provided boolean query.
+	 * @throws IllegalArgumentException if the queries argument is empty.
+	 */
+	public static BooleanQuery booleanQuery(Occur occur, UUIDSchemaItem field, UUID... values) {
+		return booleanQuery(occur, field, Arrays.asList(values));
+	}
 }

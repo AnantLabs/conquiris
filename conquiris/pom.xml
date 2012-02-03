@@ -54,7 +54,6 @@
 		</plugins>
 	</build>
 
-
 	<modules>
 		<module>conquiris-api</module>
 		<module>conquiris-schema</module>
