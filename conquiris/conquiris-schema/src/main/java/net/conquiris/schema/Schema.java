@@ -32,6 +32,15 @@ public interface Schema extends BiMap<String, SchemaItem> {
 	Schema extend(Iterable<? extends SchemaItem> items);
 
 	/**
+	 * Creates a new schema extending this one. No item with an existing name is allowed,
+	 * @param items Schema items to add.
+	 * @return The extended schema.
+	 * @throws NullPointerException if the argument or any of the items is {@code null}.
+	 * @throws IllegalArgumentException if an item with an existing name is added.
+	 */
+	Schema extend(SchemaItem... items);
+
+	/**
 	 * Creates a new schema extending this one with another. No item with an existing name is allowed,
 	 * @param schema Schema to add.
 	 * @return The extended schema.
@@ -39,6 +48,16 @@ public interface Schema extends BiMap<String, SchemaItem> {
 	 * @throws IllegalArgumentException if an item with an existing name is added.
 	 */
 	Schema extend(Schema schema);
+
+	/**
+	 * Creates a new schema extending this one. Provided items override existing ones, but no new
+	 * items with the same name are allowed.
+	 * @param items Schema items to add.
+	 * @return The extended schema.
+	 * @throws NullPointerException if the argument or any of the items is {@code null}.
+	 * @throws IllegalArgumentException if an item with an existing name is added.
+	 */
+	Schema override(SchemaItem... items);
 
 	/**
 	 * Creates a new schema extending this one. Provided items override existing ones, but no new

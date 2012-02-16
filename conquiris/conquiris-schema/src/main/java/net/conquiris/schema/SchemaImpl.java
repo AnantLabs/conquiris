@@ -18,6 +18,7 @@ package net.conquiris.schema;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,6 +115,15 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 
 	/*
 	 * (non-Javadoc)
+	 * @see net.conquiris.schema.Schema#extend(net.conquiris.schema.SchemaItem[])
+	 */
+	@Override
+	public Schema extend(SchemaItem... items) {
+		return extend(Arrays.asList(items));
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see net.conquiris.schema.Schema#extend(net.conquiris.schema.Schema)
 	 */
 	@Override
@@ -139,6 +149,15 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 			return this;
 		}
 		return putItems(others);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.conquiris.schema.Schema#override(net.conquiris.schema.SchemaItem[])
+	 */
+	@Override
+	public Schema override(SchemaItem... items) {
+		return override(Arrays.asList(items));
 	}
 
 	/*
