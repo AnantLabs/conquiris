@@ -29,6 +29,7 @@ import net.conquiris.schema.BinarySchemaItem;
 import net.conquiris.schema.BooleanSchemaItem;
 import net.conquiris.schema.DoubleSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
+import net.conquiris.schema.InstantSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
 import net.conquiris.schema.LongSchemaItem;
 import net.conquiris.schema.SchemaItem;
@@ -38,6 +39,7 @@ import net.conquiris.schema.UUIDSchemaItem;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.document.NumericField;
+import org.joda.time.Instant;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -174,6 +176,11 @@ public final class Hit implements Supplier<Document> {
 		return new UUIDValues(name);
 	}
 
+	/** Returns the instant values of the numeric fields with the given name. */
+	public FieldValues<Instant> instant(String name) {
+		return new InstantValues(name);
+	}
+
 	/**
 	 * Returns the string values of the fields with the given name. Includes all non-binary fields
 	 * with the given name.
@@ -223,6 +230,11 @@ public final class Hit implements Supplier<Document> {
 	/** Returns the values of the fields corresponding to the given schema item. */
 	public FieldValues<UUID> item(UUIDSchemaItem item) {
 		return uuid(checkName(item));
+	}
+
+	/** Returns the values of the fields corresponding to the given schema item. */
+	public FieldValues<Instant> item(InstantSchemaItem item) {
+		return instant(checkName(item));
 	}
 
 	/** Field values implementation. */
@@ -291,7 +303,7 @@ public final class Hit implements Supplier<Document> {
 	}
 
 	/** Numeric values. */
-	private abstract class NumericValues<T extends Number> extends AbstractFieldValues<Number, T> {
+	private abstract class NumericValues<T> extends AbstractFieldValues<Number, T> {
 		NumericValues(String name) {
 			super(name);
 		}
@@ -407,6 +419,18 @@ public final class Hit implements Supplier<Document> {
 		@Override
 		public UUID apply(Fieldable input) {
 			return UUID.fromString(input.stringValue());
+		}
+	}
+
+	/** Instant value function. */
+	private final class InstantValues extends NumericValues<Instant> {
+		InstantValues(String name) {
+			super(name);
+		}
+
+		@Override
+		public Instant apply(Number input) {
+			return new Instant(input.longValue());
 		}
 	}
 

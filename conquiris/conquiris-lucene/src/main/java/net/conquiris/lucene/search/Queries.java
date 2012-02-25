@@ -34,10 +34,8 @@ import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.InstantSchemaItem;
 import net.conquiris.schema.IntegerSchemaItem;
 import net.conquiris.schema.LongSchemaItem;
-import net.conquiris.schema.SchemaItem;
 import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.schema.UUIDSchemaItem;
-import net.derquinse.common.base.NotInstantiable;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -50,7 +48,6 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.joda.time.ReadableInstant;
 
 import com.google.common.base.Function;
-import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import com.google.common.primitives.Booleans;
@@ -63,46 +60,8 @@ import com.google.common.primitives.Longs;
  * Query building support class.
  * @author Andres Rodriguez
  */
-public final class Queries extends NotInstantiable {
+public final class Queries extends SearchSupport {
 	private Queries() {
-	}
-
-	private static Term checkTerm(Term term) {
-		return checkNotNull(term, "The term must be provided");
-	}
-
-	private static String checkField(String field) {
-		return checkNotNull(field, "The field name must be provided");
-	}
-
-	private static void checkRange(Range<?> range) {
-		checkNotNull(range, "The value range must be provided");
-	}
-
-	private static <T extends Comparable<T>> T min(Range<? extends T> range) {
-		if (range.hasLowerBound()) {
-			return range.lowerEndpoint();
-		}
-		return null;
-	}
-
-	private static <T extends Comparable<T>> T max(Range<? extends T> range) {
-		if (range.hasUpperBound()) {
-			return range.upperEndpoint();
-		}
-		return null;
-	}
-
-	private static boolean minIncluded(Range<?> range) {
-		return range.hasLowerBound() && range.lowerBoundType() == BoundType.CLOSED;
-	}
-
-	private static boolean maxIncluded(Range<?> range) {
-		return range.hasUpperBound() && range.upperBoundType() == BoundType.CLOSED;
-	}
-
-	private static String checkItem(SchemaItem field) {
-		return checkNotNull(field, "The term field schema item must be provided").getName();
 	}
 
 	/** Creates a term query. */
