@@ -15,6 +15,7 @@
  */
 package net.conquiris.lucene.search;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
@@ -30,7 +31,9 @@ import org.apache.lucene.util.FixedBitSet;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheStats;
+import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 /**
@@ -48,6 +51,58 @@ public final class GuavaCachingFilter extends Filter {
 	private final Cache<Object, DocIdSet> cache;
 
 	/**
+	 * Caching factory method. The primary cache is that from the filter key to the cachinf filter.
+	 * The seondary cache is that contained in the caching filter itself.
+	 * @param loader Filter loader. Its result will be wrapped in a caching filter.
+	 * @param primarySize the maximum size of the primary cache.
+	 * @param primaryDuration the length of time after an entry is last accessed that it should be
+	 *          automatically removed from the primary cache.
+	 * @param primaryUnit the unit that {@code primaryDuration} is expressed in
+	 * @param secondarySize the maximum size of the secondary cache.
+	 * @param secondaryDuration the length of time after an entry is last accessed that it should be
+	 *          automatically removed from the secondary cache.
+	 * @param secondaryUnit the unit that {@code secondaryDuration} is expressed in
+	 * @throws IllegalArgumentException if any of the sizes is negative
+	 * @throws IllegalArgumentException if any of the durations is negative
+	 */
+	public static <K, V extends Filter> LoadingCache<K, Filter> cachingFactory(final CacheLoader<K, V> loader,
+			final int primarySize, final long primaryDuration, final TimeUnit primaryUnit, final int secondarySize,
+			final long secondaryDuration, final TimeUnit secondaryUnit) {
+		checkArgument(primarySize >= 0 && primaryDuration >= 0 && secondarySize >= 0 && secondaryDuration >= 0);
+		checkNotNull(primaryUnit);
+		checkNotNull(secondaryUnit);
+		final CacheLoader<K, Filter> primaryLoader = new CacheLoader<K, Filter>() {
+			public Filter load(K key) throws Exception {
+				return new GuavaCachingFilter(loader.load(key), secondarySize, secondaryDuration, secondaryUnit);
+			}
+		};
+		return CacheBuilder.newBuilder().softValues().maximumSize(primarySize)
+				.expireAfterAccess(primaryDuration, primaryUnit).build(primaryLoader);
+	}
+
+	/**
+	 * Factory method.
+	 * @param filter Filter to cache results of.
+	 * @param size the maximum size of the cache.
+	 * @param duration the length of time after an entry is last accessed that it should be
+	 *          automatically removed.
+	 * @param unit the unit that {@code duration} is expressed in
+	 * @throws IllegalArgumentException if {@code size} is negative
+	 * @throws IllegalArgumentException if {@code duration} is negative
+	 */
+	public GuavaCachingFilter of(Filter filter, int size, long duration, TimeUnit unit) {
+		return new GuavaCachingFilter(filter, size, duration, unit);
+	}
+
+	/**
+	 * Factory method with a maximum size of 100 elements and a expiration time of 10 minutes.
+	 * @param filter Filter to cache results of
+	 */
+	public GuavaCachingFilter of(Filter filter) {
+		return of(filter, 100, 10, TimeUnit.MINUTES);
+	}
+
+	/**
 	 * Constructor.
 	 * @param filter Filter to cache results of.
 	 * @param size the maximum size of the cache.
@@ -57,17 +112,9 @@ public final class GuavaCachingFilter extends Filter {
 	 * @throws IllegalArgumentException if {@code size} is negative
 	 * @throws IllegalArgumentException if {@code duration} is negative
 	 */
-	public GuavaCachingFilter(Filter filter, int size, long duration, TimeUnit unit) {
+	private GuavaCachingFilter(Filter filter, int size, long duration, TimeUnit unit) {
 		this.filter = Preconditions.checkNotNull(filter, "The filter to cache must be provided");
 		this.cache = CacheBuilder.newBuilder().softValues().maximumSize(size).expireAfterAccess(duration, unit).build();
-	}
-
-	/**
-	 * Constructor with a maximum size of 100 elements and a expiration time of 10 minutes.
-	 * @param filter Filter to cache results of
-	 */
-	public GuavaCachingFilter(Filter filter) {
-		this(filter, 100, 10, TimeUnit.MINUTES);
 	}
 
 	@Override
