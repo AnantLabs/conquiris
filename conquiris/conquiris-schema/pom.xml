@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>conquiris</artifactId>
 		<groupId>net.conquiris</groupId>
-		<version>3.5.7</version>
+		<version>3.5.8-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>conquiris-schema</artifactId>
