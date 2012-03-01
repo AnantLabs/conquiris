@@ -196,6 +196,14 @@ abstract class AbstractSearcher implements Searcher {
 	public final <T> PageResult<T> getPage(final HitMapper<T> mapper, final Query query, final int firstRecord,
 			final int maxRecords, final @Nullable Filter filter, final @Nullable Sort sort,
 			final @Nullable Highlight highlight) {
+
+		// Corner case
+		if (maxRecords < 1) {
+			CountResult r = getCount(query, filter, true);
+			return PageResult.notFound(r.getTotalHits(), r.getMaxScore(), r.getTime(), firstRecord);
+		}
+
+		// Normal operation
 		return perform(new Op<PageResult<T>>() {
 			public PageResult<T> perform(IndexSearcher searcher) throws Exception {
 				Stopwatch w = new Stopwatch().start();

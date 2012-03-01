@@ -24,7 +24,7 @@ import com.google.common.base.Supplier;
  */
 public interface ReaderSupplier extends Supplier<Reader> {
 	/**
-	 * Returns an index reader. Whether a new instance of a shared one is returned is
+	 * Returns an index reader. Whether a new instance or a shared one is returned is
 	 * implementation-dependant.
 	 * @return An index reader.
 	 * @throws IndexNotAvailableException if an error occurs.
