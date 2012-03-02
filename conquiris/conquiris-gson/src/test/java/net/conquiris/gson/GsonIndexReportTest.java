@@ -30,11 +30,13 @@ import com.google.common.collect.ImmutableMap;
  * @author Andres Rodriguez
  */
 public class GsonIndexReportTest {
-	private static final IndexInfo INFO = IndexInfo.fromMap(ImmutableMap.of(IndexInfo.CHECKPOINT, "test", "key",
-			"value"));
+	private static final IndexInfo INFO = IndexInfo.fromMap(7,
+			ImmutableMap.of(IndexInfo.CHECKPOINT, "test", "key", "value"));
 	private static final IndexReport BASIC = IndexReport.basic(true, false, IndexStatus.CORRUPT);
-	private static final IndexReport NORMAL = IndexReport.normal(true, true, IndexStatus.IOERROR, Delays.constant(4L), INFO);
-	private static final IndexReport DETAILED = IndexReport.detailed(true, true, IndexStatus.OK, Delays.constant(10L), INFO);
+	private static final IndexReport NORMAL = IndexReport.normal(true, true, IndexStatus.IOERROR, Delays.constant(4L),
+			INFO);
+	private static final IndexReport DETAILED = IndexReport.detailed(true, true, IndexStatus.OK, Delays.constant(10L),
+			INFO);
 
 	/** Serializability. */
 	@Test

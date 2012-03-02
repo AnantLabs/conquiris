@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableMap;
  * @author Andres Rodriguez
  */
 public class GsonIndexInfoTest {
-	private static final IndexInfo SAMPLE = IndexInfo.fromMap(ImmutableMap.of(IndexInfo.CHECKPOINT, "test", "key",
-			"value"));
+	private static final IndexInfo SAMPLE = IndexInfo.fromMap(7,
+			ImmutableMap.of(IndexInfo.CHECKPOINT, "test", "key", "value"));
 
 	/** Serializability. */
 	@Test

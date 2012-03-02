@@ -113,10 +113,10 @@ public final class IndexInfo {
 	public static Predicate<Entry<String, String>> isUserProperty() {
 		return IsUserProperty.INSTANCE;
 	}
-	
+
 	/** Empty object. */
-	private static final IndexInfo EMPTY = IndexInfo.of(null, null, 0, 0, ImmutableMap.<String, String>of());
-	
+	private static final IndexInfo EMPTY = IndexInfo.of(null, null, 0, 0, 0, ImmutableMap.<String, String> of());
+
 	/** Returns the empty object. */
 	public static IndexInfo empty() {
 		return EMPTY;
@@ -125,15 +125,17 @@ public final class IndexInfo {
 	/**
 	 * Creates a new index info object.
 	 * @param checkpoint Checkpoint.
+	 * @param targetCheckpoint Target checkpoint.
+	 * @param documents Number of documents. Must be >= 0.
 	 * @param timestamp Commit timestamp. Must be >= 0.
 	 * @param sequence Commit sequence. Must be >= 0.
 	 * @param properties User properties. Must be non-null and contain no reserved properties.
 	 * @return The created object.
 	 * @throws IllegalArgumentException if any of the arguments is invalid.
 	 */
-	public static IndexInfo of(@Nullable String checkpoint, @Nullable String targetCheckpoint, long timestamp,
-			long sequence, Map<String, String> properties) {
-		return new IndexInfo(checkpoint, targetCheckpoint, timestamp, sequence, properties);
+	public static IndexInfo of(@Nullable String checkpoint, @Nullable String targetCheckpoint, int documents,
+			long timestamp, long sequence, Map<String, String> properties) {
+		return new IndexInfo(checkpoint, targetCheckpoint, documents, timestamp, sequence, properties);
 	}
 
 	private static long safe2Long(String s) {
@@ -150,14 +152,15 @@ public final class IndexInfo {
 	/**
 	 * Creates a new index info object from a string map. Reserved properties are extracted with
 	 * default values provided if needed. Invalid user properties are filtered out.
+	 * @param documents Number of documents. Must be >= 0.
 	 * @param data Commit data.
 	 * @return The created object.
 	 */
-	public static IndexInfo fromMap(Map<String, String> data) {
+	public static IndexInfo fromMap(int documents, Map<String, String> data) {
 		if (data == null || data.isEmpty()) {
-			return of(null, null, 0L, 0L, ImmutableMap.<String, String> of());
+			return of(null, null, documents, 0L, 0L, ImmutableMap.<String, String> of());
 		}
-		return of(data.get(CHECKPOINT), data.get(TARGET_CHECKPOINT), safe2Long(data.get(TIMESTAMP)),
+		return of(data.get(CHECKPOINT), data.get(TARGET_CHECKPOINT), documents, safe2Long(data.get(TIMESTAMP)),
 				safe2Long(data.get(SEQUENCE)), Maps.filterEntries(data, isUserProperty()));
 	}
 
@@ -165,6 +168,8 @@ public final class IndexInfo {
 	private final String checkpoint;
 	/** Last known target checkpoint. */
 	private final String targetCheckpoint;
+	/** Number of documents. */
+	private final int documents;
 	/** Last commit timestamp. */
 	private final long timestamp;
 	/** Last commit sequence. */
@@ -172,14 +177,16 @@ public final class IndexInfo {
 	/** User properties. */
 	private final ImmutableMap<String, String> properties;
 
-	private IndexInfo(String checkpoint, String targetCheckpoint, long timestamp, long sequence,
+	private IndexInfo(String checkpoint, String targetCheckpoint, int documents, long timestamp, long sequence,
 			Map<String, String> properties) {
+		checkArgument(documents >= 0);
 		checkArgument(timestamp >= 0);
 		checkArgument(sequence >= 0);
 		checkNotNull(properties);
 		checkArgument(Iterables.all(properties.entrySet(), isUserProperty()));
 		this.checkpoint = checkpoint;
 		this.targetCheckpoint = targetCheckpoint;
+		this.documents = documents;
 		this.timestamp = timestamp;
 		this.sequence = sequence;
 		this.properties = ImmutableMap.copyOf(properties);
@@ -190,7 +197,8 @@ public final class IndexInfo {
 		if (properties.isEmpty()) {
 			return this;
 		}
-		return new IndexInfo(checkpoint, targetCheckpoint, timestamp, sequence, ImmutableMap.<String, String> of());
+		return new IndexInfo(checkpoint, targetCheckpoint, documents, timestamp, sequence,
+				ImmutableMap.<String, String> of());
 	}
 
 	/** Returns the checkpoint. */
@@ -201,6 +209,11 @@ public final class IndexInfo {
 	/** Returns the last known target checkpoint. */
 	public String getTargetCheckpoint() {
 		return targetCheckpoint;
+	}
+
+	/** Returns the number of documents. */
+	public int getDocuments() {
+		return documents;
 	}
 
 	/** Returns the commit timestamp. */
@@ -220,7 +233,7 @@ public final class IndexInfo {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(checkpoint, targetCheckpoint, timestamp, sequence, properties);
+		return Objects.hashCode(checkpoint, targetCheckpoint, documents, timestamp, sequence, properties);
 	}
 
 	@Override
@@ -230,7 +243,7 @@ public final class IndexInfo {
 		}
 		if (obj instanceof IndexInfo) {
 			IndexInfo other = (IndexInfo) obj;
-			return this.timestamp == other.timestamp && this.sequence == other.sequence
+			return this.documents == other.documents && this.timestamp == other.timestamp && this.sequence == other.sequence
 					&& equal(checkpoint, other.checkpoint) && equal(targetCheckpoint, other.targetCheckpoint)
 					&& equal(properties, other.properties);
 		}
@@ -239,7 +252,7 @@ public final class IndexInfo {
 
 	@Override
 	public String toString() {
-		ToStringHelper h = Objects.toStringHelper(this).add(CHECKPOINT_NAME, checkpoint)
+		ToStringHelper h = Objects.toStringHelper(this).add(CHECKPOINT_NAME, checkpoint).add("documents", documents)
 				.add(TARGET_CHECKPOINT_NAME, targetCheckpoint).add(TIMESTAMP_NAME, timestamp).add(SEQUENCE_NAME, sequence);
 		if (!properties.isEmpty()) {
 			h.add("properties", properties);

@@ -37,6 +37,8 @@ import com.google.gson.JsonSerializer;
  */
 public final class GsonIndexInfo implements JsonSerializer<IndexInfo>, JsonDeserializer<IndexInfo> {
 	private static final String PROPERTIES = "properties";
+	/** Number of documents. */
+	private static final String N = "n";
 
 	/** Constructor. */
 	public GsonIndexInfo() {
@@ -51,6 +53,7 @@ public final class GsonIndexInfo implements JsonSerializer<IndexInfo>, JsonDeser
 		if (src.getTargetCheckpoint() != null) {
 			object.addProperty(IndexInfo.TARGET_CHECKPOINT_NAME, src.getTargetCheckpoint());
 		}
+		object.addProperty(N, src.getDocuments());
 		object.addProperty(IndexInfo.TIMESTAMP_NAME, src.getTimestamp());
 		object.addProperty(IndexInfo.SEQUENCE_NAME, src.getSequence());
 		if (!src.getProperties().isEmpty()) {
@@ -77,6 +80,7 @@ public final class GsonIndexInfo implements JsonSerializer<IndexInfo>, JsonDeser
 		final JsonObject object = json.getAsJsonObject();
 		final String checkpoint = getOptionalString(object, IndexInfo.CHECKPOINT_NAME);
 		final String targetCheckpoint = getOptionalString(object, IndexInfo.TARGET_CHECKPOINT_NAME);
+		final int documents = object.getAsJsonPrimitive(N).getAsInt();
 		final long timestamp = object.getAsJsonPrimitive(IndexInfo.TIMESTAMP_NAME).getAsLong();
 		final long sequence = object.getAsJsonPrimitive(IndexInfo.SEQUENCE_NAME).getAsLong();
 		final ImmutableMap.Builder<String, String> b = ImmutableMap.builder();
@@ -86,6 +90,6 @@ public final class GsonIndexInfo implements JsonSerializer<IndexInfo>, JsonDeser
 				b.put(entry.getKey(), entry.getValue().getAsString());
 			}
 		}
-		return IndexInfo.of(checkpoint, targetCheckpoint, timestamp, sequence, b.build());
+		return IndexInfo.of(checkpoint, targetCheckpoint, documents, timestamp, sequence, b.build());
 	}
 }

@@ -124,8 +124,10 @@ final class DefaultWriter extends AbstractWriter {
 		// Read properties
 		try {
 			final Map<String, String> commitData;
+			final int documents;
 			if (created) {
 				commitData = ImmutableMap.of();
+				documents = 0;
 			} else {
 				final IndexReader reader = IndexReader.open(writer, false);
 				try {
@@ -140,11 +142,12 @@ final class DefaultWriter extends AbstractWriter {
 					} else {
 						commitData = data;
 					}
+					documents = reader.numDocs();
 				} finally {
 					Closeables.closeQuietly(reader);
 				}
 			}
-			this.indexInfo = IndexInfo.fromMap(commitData);
+			this.indexInfo = IndexInfo.fromMap(documents, commitData);
 			this.checkpoint = this.indexInfo.getCheckpoint();
 			this.targetCheckpoint = this.indexInfo.getTargetCheckpoint();
 			this.properties.putAll(this.indexInfo.getProperties());
