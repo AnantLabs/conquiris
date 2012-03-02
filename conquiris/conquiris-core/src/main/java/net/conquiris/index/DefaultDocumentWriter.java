@@ -41,6 +41,11 @@ final class DefaultDocumentWriter implements DocumentWriter {
 	}
 
 	@Override
+	public void cancel() throws InterruptedException {
+		writer.cancel();
+	}
+
+	@Override
 	public DocumentWriter add(Document document) throws InterruptedException, IndexException {
 		writer.add(document);
 		return this;

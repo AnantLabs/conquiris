@@ -30,6 +30,12 @@ import org.apache.lucene.index.Term;
  */
 public interface DocumentWriter {
 	/**
+	 * Cancels the operation of this writer. Indexer can continue but all operations from all children
+	 * and sibling subwriters will be ignored and the index writer will be rolled back.
+	 */
+	void cancel() throws InterruptedException;
+
+	/**
 	 * Adds a document. The service default analyzer will be used.
 	 * @param document Document to add. If {@code null} the method is a no-op.
 	 * @return This writer for method chaining.
