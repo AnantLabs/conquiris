@@ -15,6 +15,8 @@
  */
 package net.conquiris.lucene.document;
 
+import net.derquinse.common.base.ByteString;
+
 /**
  * Base interface for binary field adders.
  * @author Andres Rodriguez
@@ -27,4 +29,13 @@ public interface BinaryFieldAdder<B extends BaseDocumentBuilder<B>> {
 	 * @throws IllegalStateException if the document was already built.
 	 */
 	B add(byte[] value);
+
+	/**
+	 * Adds the field to the document with the provided value.
+	 * @param value Field value.
+	 * @return The document builder.
+	 * @throws IllegalStateException if the document was already built.
+	 */
+	B add(ByteString value);
+
 }

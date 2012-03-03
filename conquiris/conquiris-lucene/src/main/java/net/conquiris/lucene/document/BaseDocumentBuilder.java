@@ -34,6 +34,7 @@ import net.conquiris.schema.StreamSchemaItem;
 import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.schema.UUIDSchemaItem;
 import net.derquinse.common.base.Builder;
+import net.derquinse.common.base.ByteString;
 import net.derquinse.common.reflect.This;
 
 import org.apache.lucene.analysis.TokenStream;
@@ -291,6 +292,18 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 	}
 
 	/**
+	 * Adds a binary field based on a schema item.
+	 * @param item Schema item.
+	 * @param value Field value.
+	 * @return This builder.
+	 * @throws IllegalStateException if the maximum number of occurrences for this field has been
+	 *           reached.
+	 */
+	public final B add(BinarySchemaItem item, ByteString value) {
+		return binary(item).add(value);
+	}
+
+	/**
 	 * Adds an instant field based on a schema item.
 	 * @param item Schema item.
 	 * @param value Field value.
@@ -422,6 +435,11 @@ public abstract class BaseDocumentBuilder<B extends BaseDocumentBuilder<B>> exte
 
 		@Override
 		public B add(byte[] value) {
+			return BaseDocumentBuilder.this.add(build(value));
+		}
+
+		@Override
+		public B add(ByteString value) {
 			return BaseDocumentBuilder.this.add(build(value));
 		}
 	}

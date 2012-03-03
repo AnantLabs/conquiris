@@ -17,6 +17,7 @@ package net.conquiris.lucene.document;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import net.conquiris.schema.BinarySchemaItem;
+import net.derquinse.common.base.ByteString;
 
 import org.apache.lucene.document.Field;
 
@@ -68,6 +69,17 @@ public abstract class BaseBinaryFieldBuilder<B extends BaseBinaryFieldBuilder<B>
 	public final Field build(byte[] value) {
 		checkNotNull(value, "The field value must be provided");
 		return new Field(name(), value);
+	}
+
+	/**
+	 * Builds a binary field with the provided value.
+	 * @param value Field value.
+	 * @return The created field.
+	 * @throws IllegalStateException if the field is neither stored nor indexed.
+	 */
+	public final Field build(ByteString value) {
+		checkNotNull(value, "The field value must be provided");
+		return new Field(name(), value.toByteArray());
 	}
 
 }

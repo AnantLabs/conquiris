@@ -697,4 +697,40 @@ public final class SchemaItems {
 		return binary(name, required ? 1 : 0, 1);
 	}
 
+	/**
+	 * Creates a byte string schema item.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 * @param maxOccurs Maximum number of occurrences.
+	 */
+	public static ByteStringSchemaItem byteString(String name, int minOccurs, int maxOccurs) {
+		return new DefaultByteStringSchemaItem(name, minOccurs, maxOccurs);
+	}
+
+	/**
+	 * Creates a byte string schema item with an unbounded number of occurrences.
+	 * @param name Field name.
+	 * @param minOccurs Minimum number of occurrences.
+	 */
+	public static ByteStringSchemaItem byteString(String name, int minOccurs) {
+		return byteString(name, minOccurs, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Creates a byte string schema item with any of occurrences.
+	 * @param name Field name.
+	 */
+	public static ByteStringSchemaItem byteString(String name) {
+		return byteString(name, 0);
+	}
+
+	/**
+	 * Creates a byte string schema item with a single occurrence.
+	 * @param name Field name.
+	 * @param required Whether the field is required.
+	 */
+	public static ByteStringSchemaItem byteString(String name, boolean required) {
+		return byteString(name, required ? 1 : 0, 1);
+	}
+
 }

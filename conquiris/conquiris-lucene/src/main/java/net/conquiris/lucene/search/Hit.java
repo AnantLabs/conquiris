@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import net.conquiris.schema.AbstractWithFieldNameProperty;
 import net.conquiris.schema.BinarySchemaItem;
 import net.conquiris.schema.BooleanSchemaItem;
+import net.conquiris.schema.ByteStringSchemaItem;
 import net.conquiris.schema.DoubleSchemaItem;
 import net.conquiris.schema.FloatSchemaItem;
 import net.conquiris.schema.InstantSchemaItem;
@@ -35,6 +36,7 @@ import net.conquiris.schema.LongSchemaItem;
 import net.conquiris.schema.SchemaItem;
 import net.conquiris.schema.TextSchemaItem;
 import net.conquiris.schema.UUIDSchemaItem;
+import net.derquinse.common.base.ByteString;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
@@ -171,6 +173,11 @@ public final class Hit implements Supplier<Document> {
 		return new BinaryValues(name);
 	}
 
+	/** Returns the values of the binary fields with the given name. */
+	public FieldValues<ByteString> byteString(String name) {
+		return new ByteStringValues(name);
+	}
+
 	/** Returns the values of the UUID fields with the given name. */
 	public FieldValues<UUID> uuid(String name) {
 		return new UUIDValues(name);
@@ -228,6 +235,11 @@ public final class Hit implements Supplier<Document> {
 	}
 
 	/** Returns the values of the fields corresponding to the given schema item. */
+	public FieldValues<ByteString> item(ByteStringSchemaItem item) {
+		return byteString(checkName(item));
+	}
+
+	/** Returns the values of the fields corresponding to the given schema item. */
 	public FieldValues<UUID> item(UUIDSchemaItem item) {
 		return uuid(checkName(item));
 	}
@@ -267,7 +279,7 @@ public final class Hit implements Supplier<Document> {
 				return Optional.of(list.get(0));
 			}
 		}
-		
+
 		/*
 		 * (non-Javadoc)
 		 * @see net.conquiris.lucene.search.FieldValues#orNull()
@@ -276,7 +288,7 @@ public final class Hit implements Supplier<Document> {
 		public final T orNull() {
 			return getOptional().orNull();
 		}
-		
+
 		/*
 		 * (non-Javadoc)
 		 * @see net.conquiris.lucene.search.FieldValues#or(java.lang.Object)
@@ -433,6 +445,24 @@ public final class Hit implements Supplier<Document> {
 			checkArgument(input.isBinary());
 			return ByteStreams.newInputStreamSupplier(input.getBinaryValue(), input.getBinaryOffset(),
 					input.getBinaryLength());
+		}
+	}
+
+	/** ByteString values. */
+	private final class ByteStringValues extends AbstractFieldValues<Fieldable, ByteString> {
+		ByteStringValues(String name) {
+			super(name);
+		}
+
+		@Override
+		final ImmutableListMultimap<String, Fieldable> map() {
+			return binary;
+		}
+
+		@Override
+		public ByteString apply(Fieldable input) {
+			checkArgument(input.isBinary());
+			return ByteString.copyFrom(input.getBinaryValue(), input.getBinaryOffset(), input.getBinaryLength());
 		}
 	}
 
