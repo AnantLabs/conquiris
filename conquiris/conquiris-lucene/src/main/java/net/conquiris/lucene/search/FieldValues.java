@@ -34,6 +34,18 @@ public interface FieldValues<T> extends FieldNameProperty {
 	Optional<T> getOptional();
 
 	/**
+	 * Returns the field value of the field or {@code null} if the document contains no value for the
+	 * field.
+	 */
+	T orNull();
+
+	/**
+	 * Returns the field value of the field or the provided non-null value if the document contains no
+	 * value for the field.
+	 */
+	T or(T defaultValue);
+
+	/**
 	 * Returns the required first value of the field.
 	 * @throws IllegalStateException if the document contains no value for the field.
 	 */

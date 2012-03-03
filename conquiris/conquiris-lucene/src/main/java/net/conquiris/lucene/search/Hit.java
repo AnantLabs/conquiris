@@ -254,6 +254,10 @@ public final class Hit implements Supplier<Document> {
 			return all;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see net.conquiris.lucene.search.FieldValues#getOptional()
+		 */
 		@Override
 		public final Optional<T> getOptional() {
 			List<T> list = getAll();
@@ -263,7 +267,29 @@ public final class Hit implements Supplier<Document> {
 				return Optional.of(list.get(0));
 			}
 		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see net.conquiris.lucene.search.FieldValues#orNull()
+		 */
+		@Override
+		public final T orNull() {
+			return getOptional().orNull();
+		}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see net.conquiris.lucene.search.FieldValues#or(java.lang.Object)
+		 */
+		@Override
+		public T or(T defaultValue) {
+			return getOptional().or(defaultValue);
+		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see net.conquiris.lucene.search.FieldValues#get()
+		 */
 		@Override
 		public final T get() {
 			List<T> list = getAll();

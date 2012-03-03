@@ -18,6 +18,7 @@ package net.conquiris.lucene.search;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import net.conquiris.schema.BooleanSchemaItem;
@@ -35,9 +36,13 @@ import org.apache.lucene.search.SortField;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 
 /**
- * Sort building class.
+ * Sort building class. The comparators rovided as arguments MUST support null values.
  * @author Andres Rodriguez
  */
 public final class SortBuilder implements Builder<Sort> {
@@ -52,6 +57,11 @@ public final class SortBuilder implements Builder<Sort> {
 		String name = SearchSupport.checkItem(item);
 		checkArgument(item.isIndexed(), "The provided field [%s] is not indexed", name);
 		return name;
+	}
+
+	/** Creates a new builder. */
+	public static SortBuilder newBuilder() {
+		return new SortBuilder();
 	}
 
 	/**
@@ -185,6 +195,214 @@ public final class SortBuilder implements Builder<Sort> {
 	 */
 	public static SortField field(InstantSchemaItem field) {
 		return field(field, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(IntegerSchemaItem field, Comparator<Integer> comparator, boolean reverse) {
+		return new SortField(checkSortable(field), new IntComparatorSource(comparator), reverse);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(IntegerSchemaItem field, Comparator<Integer> comparator) {
+		return field(field, comparator, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(IntegerSchemaItem field, Iterable<Integer> values, boolean reverse) {
+		return field(field, ExplicitComparator.of(values), false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(IntegerSchemaItem field, Iterable<Integer> values) {
+		return field(field, values, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(IntegerSchemaItem field, int... values) {
+		return field(field, Ints.asList(values));
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(LongSchemaItem field, Comparator<Long> comparator, boolean reverse) {
+		return new SortField(checkSortable(field), new LongComparatorSource(comparator), reverse);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(LongSchemaItem field, Comparator<Long> comparator) {
+		return field(field, comparator, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(LongSchemaItem field, Iterable<Long> values, boolean reverse) {
+		return field(field, ExplicitComparator.of(values), false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(LongSchemaItem field, Iterable<Long> values) {
+		return field(field, values, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(LongSchemaItem field, long... values) {
+		return field(field, Longs.asList(values));
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(FloatSchemaItem field, Comparator<Float> comparator, boolean reverse) {
+		return new SortField(checkSortable(field), new FloatComparatorSource(comparator), reverse);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(FloatSchemaItem field, Comparator<Float> comparator) {
+		return field(field, comparator, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(FloatSchemaItem field, Iterable<Float> values, boolean reverse) {
+		return field(field, ExplicitComparator.of(values), false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(FloatSchemaItem field, Iterable<Float> values) {
+		return field(field, values, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(FloatSchemaItem field, float... values) {
+		return field(field, Floats.asList(values));
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(DoubleSchemaItem field, Comparator<Double> comparator, boolean reverse) {
+		return new SortField(checkSortable(field), new DoubleComparatorSource(comparator), reverse);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(DoubleSchemaItem field, Comparator<Double> comparator) {
+		return field(field, comparator, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(DoubleSchemaItem field, Iterable<Double> values, boolean reverse) {
+		return field(field, ExplicitComparator.of(values), false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(DoubleSchemaItem field, Iterable<Double> values) {
+		return field(field, values, false);
+	}
+
+	/**
+	 * Creates a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public static SortField field(DoubleSchemaItem field, double... values) {
+		return field(field, Doubles.asList(values));
 	}
 
 	/** Creates the sort specification. */
@@ -372,6 +590,214 @@ public final class SortBuilder implements Builder<Sort> {
 	 */
 	public SortBuilder add(InstantSchemaItem field) {
 		return add(field, false);
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(IntegerSchemaItem field, Comparator<Integer> comparator, boolean reverse) {
+		return add(field(field, comparator, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(IntegerSchemaItem field, Comparator<Integer> comparator) {
+		return add(field(field, comparator));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(IntegerSchemaItem field, Iterable<Integer> values, boolean reverse) {
+		return add(field(field, values, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(IntegerSchemaItem field, Iterable<Integer> values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(IntegerSchemaItem field, int... values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(LongSchemaItem field, Comparator<Long> comparator, boolean reverse) {
+		return add(field(field, comparator, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(LongSchemaItem field, Comparator<Long> comparator) {
+		return add(field(field, comparator));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(LongSchemaItem field, Iterable<Long> values, boolean reverse) {
+		return add(field(field, values, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(LongSchemaItem field, Iterable<Long> values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(LongSchemaItem field, long... values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(FloatSchemaItem field, Comparator<Float> comparator, boolean reverse) {
+		return add(field(field, comparator, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(FloatSchemaItem field, Comparator<Float> comparator) {
+		return add(field(field, comparator));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(FloatSchemaItem field, Iterable<Float> values, boolean reverse) {
+		return add(field(field, values, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(FloatSchemaItem field, Iterable<Float> values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(FloatSchemaItem field, float... values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(DoubleSchemaItem field, Comparator<Double> comparator, boolean reverse) {
+		return add(field(field, comparator, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided comparator.
+	 * @param field Field identified by an schema item.
+	 * @param comparator Comparator to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(DoubleSchemaItem field, Comparator<Double> comparator) {
+		return add(field(field, comparator));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @param reverse True if natural order should be reversed.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(DoubleSchemaItem field, Iterable<Double> values, boolean reverse) {
+		return add(field(field, values, reverse));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(DoubleSchemaItem field, Iterable<Double> values) {
+		return add(field(field, values));
+	}
+
+	/**
+	 * Adds a sort field specified by the provided value list.
+	 * @param field Field identified by an schema item.
+	 * @param values Value list to use.
+	 * @throws IllegalArgumentException if the provided schema item is not indexed.
+	 */
+	public SortBuilder add(DoubleSchemaItem field, double... values) {
+		return add(field(field, values));
 	}
 
 }
