@@ -15,10 +15,15 @@
  */
 package net.conquiris.search;
 
+import static net.conquiris.support.TestSupport.found;
+import static net.conquiris.support.TestSupport.notFound;
 import static org.testng.Assert.assertEquals;
 import net.conquiris.api.search.Searcher;
+import net.conquiris.lucene.index.Terms;
+import net.conquiris.lucene.search.Filters;
 import net.conquiris.support.TestSupport;
 
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.store.Directory;
 import org.testng.annotations.Test;
 
@@ -35,6 +40,14 @@ public class SimpleSearcherTest {
 		assertEquals(TestSupport.getCount(s), 10);
 		TestSupport.write(d, 11, 15);
 		assertEquals(TestSupport.getCount(s), 15);
+		found(s, 2);
+		found(s, 6);
+		Filter f1 = Filters.terms(Terms.termBuilder(TestSupport.ID), 2, 3, 4);
+		found(s, 2, f1);
+		notFound(s, 6, f1);
+		Filter f2 = Filters.negate(f1);
+		notFound(s, 2, f2);
+		found(s, 6, f2);
 	}
 
 }

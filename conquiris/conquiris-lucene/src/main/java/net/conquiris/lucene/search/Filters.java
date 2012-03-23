@@ -52,6 +52,11 @@ import com.google.common.collect.Range;
 public final class Filters extends SearchSupport {
 	private Filters() {
 	}
+	
+	/** Returns a filter that negates the provided one. */
+	public static Filter negate(Filter filter) {
+		return new NegatingFilter(filter);
+	}
 
 	/** Constructs a filter for docs matching any of the terms added to it. */
 	public static TermsFilter terms(Iterable<Term> terms) {

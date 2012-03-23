@@ -425,7 +425,7 @@ public final class Hit implements Supplier<Document> {
 
 		@Override
 		public Boolean apply(Number input) {
-			return input.intValue() == 0;
+			return input.intValue() != 0;
 		}
 	}
 
