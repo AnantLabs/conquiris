@@ -90,7 +90,7 @@ public final class GuavaCachingFilter extends Filter {
 	 * @throws IllegalArgumentException if {@code size} is negative
 	 * @throws IllegalArgumentException if {@code duration} is negative
 	 */
-	public GuavaCachingFilter of(Filter filter, int size, long duration, TimeUnit unit) {
+	public static GuavaCachingFilter of(Filter filter, int size, long duration, TimeUnit unit) {
 		return new GuavaCachingFilter(filter, size, duration, unit);
 	}
 
@@ -98,7 +98,7 @@ public final class GuavaCachingFilter extends Filter {
 	 * Factory method with a maximum size of 100 elements and a expiration time of 10 minutes.
 	 * @param filter Filter to cache results of
 	 */
-	public GuavaCachingFilter of(Filter filter) {
+	public static GuavaCachingFilter of(Filter filter) {
 		return of(filter, 100, 10, TimeUnit.MINUTES);
 	}
 
