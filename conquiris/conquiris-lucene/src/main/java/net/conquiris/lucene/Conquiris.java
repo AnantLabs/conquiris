@@ -38,7 +38,7 @@ public final class Conquiris extends NotInstantiable {
 
 	/** Returns the used lucene version. */
 	public static Version version() {
-		return Version.LUCENE_35;
+		return Version.LUCENE_36;
 	}
 
 	/** Returns the default standard analyzer. */

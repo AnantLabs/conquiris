@@ -16,6 +16,7 @@
 package net.conquiris.search;
 
 import static net.conquiris.support.TestSupport.found;
+import static net.conquiris.support.TestSupport.getCount;
 import static net.conquiris.support.TestSupport.notFound;
 import static org.testng.Assert.assertEquals;
 import net.conquiris.api.search.Searcher;
@@ -23,7 +24,9 @@ import net.conquiris.lucene.index.Terms;
 import net.conquiris.lucene.search.Filters;
 import net.conquiris.support.TestSupport;
 
+import org.apache.lucene.search.BooleanFilter;
 import org.apache.lucene.search.Filter;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.testng.annotations.Test;
 
@@ -37,17 +40,23 @@ public class SimpleSearcherTest {
 	public void test() throws Exception {
 		Directory d = TestSupport.createRAMDirectory(1, 10);
 		Searcher s = Searchers.service(ReaderSuppliers.managed(d));
-		assertEquals(TestSupport.getCount(s), 10);
+		assertEquals(getCount(s), 10);
 		TestSupport.write(d, 11, 15);
-		assertEquals(TestSupport.getCount(s), 15);
+		assertEquals(getCount(s), 15);
 		found(s, 2);
 		found(s, 6);
 		Filter f1 = Filters.terms(Terms.termBuilder(TestSupport.ID), 2, 3, 4);
 		found(s, 2, f1);
 		notFound(s, 6, f1);
+		assertEquals(getCount(s, f1), 3);
 		Filter f2 = Filters.negate(f1);
 		notFound(s, 2, f2);
 		found(s, 6, f2);
+		assertEquals(getCount(s, f2), 12);
+		BooleanFilter f3 = new BooleanFilter();
+		f3.add(f1, Occur.MUST);
+		f3.add(f2, Occur.MUST);
+		assertEquals(getCount(s, f3), 0);
 	}
 
 }

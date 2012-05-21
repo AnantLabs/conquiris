@@ -47,18 +47,17 @@ final class NegatingFilter extends Filter {
 	@Override
 	public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
 		final int n = reader.maxDoc();
-		final int last = n - 1;
 		final FixedBitSet bits = new FixedBitSet(reader.maxDoc());
 		final DocIdSet set = filter.getDocIdSet(reader);
 		if (set == null || set == DocIdSet.EMPTY_DOCIDSET) {
-			bits.set(0, last);
+			bits.set(0, n);
 		} else {
 			DocIdSetIterator i = set.iterator();
 			if (i == null) {
-				bits.set(0, last);
+				bits.set(0, n);
 			} else {
 				bits.or(i);
-				bits.flip(0, last);
+				bits.flip(0, n);
 			}
 		}
 		return bits;
