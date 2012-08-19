@@ -131,7 +131,7 @@ final class DefaultWriter extends AbstractWriter {
 			} else {
 				final IndexReader reader = IndexReader.open(writer, false);
 				try {
-					Map<String, String> data = reader.getCommitUserData();
+					Map<String, String> data = reader.getIndexCommit().getUserData();
 					if (overrideCheckpoint) {
 						final Map<String, String> modified = Maps.newHashMap();
 						if (data != null) {
@@ -174,11 +174,11 @@ final class DefaultWriter extends AbstractWriter {
 		lock.lock();
 		try {
 			indexLock.writeLock().lock();
-			if (result != null) {
-				return result;
-			}
-			result = WriterResult.NORMAL;
 			try {
+				if (result != null) {
+					return result;
+				}
+				result = WriterResult.NORMAL;
 				if (!canContinue()) {
 					log.trace("Writer rolled back");
 					result = WriterResult.ERROR;

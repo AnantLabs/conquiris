@@ -49,7 +49,7 @@ final class DirectoryReaderSupplier extends AbstractReaderSupplier {
 	@Override
 	Reader doGet() throws IOException {
 		try {
-			final IndexReader reader = IndexReader.open(directory, true);
+			final IndexReader reader = IndexReader.open(directory);
 			return Reader.of(reader, true);
 		} catch (IndexNotFoundException e) {
 			return ReaderSuppliers.empty().get();

@@ -42,6 +42,7 @@ public class EmptyIndexTest {
 		try {
 			IndexSearcher s = new IndexSearcher(reader);
 			s.search(new MatchAllDocsQuery(), 5);
+			Closeables.closeQuietly(s);
 		} finally {
 			Closeables.closeQuietly(reader);
 		}
@@ -58,6 +59,7 @@ public class EmptyIndexTest {
 			try {
 				IndexSearcher s = new IndexSearcher(r);
 				s.search(new MatchAllDocsQuery(), 5);
+				Closeables.closeQuietly(s);
 			} finally {
 				Closeables.closeQuietly(r);
 			}
@@ -70,6 +72,7 @@ public class EmptyIndexTest {
 	public void search() throws Exception {
 		IndexSearcher s = new IndexSearcher(EmptyIndex.getInstance().get().get());
 		s.search(new MatchAllDocsQuery(), 5);
+		Closeables.closeQuietly(s);
 	}
 
 }

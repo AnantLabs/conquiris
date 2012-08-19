@@ -37,7 +37,7 @@ abstract class AbstractWriter implements Writer {
 
 	/** Check a property key is valid. */
 	static String checkKey(String key) {
-		checkNotNull("key", "Null user property keys not allowed");
+		checkNotNull(key, "Null user property keys not allowed");
 		checkArgument(!IndexInfo.isReserved(key), "Reserved key");
 		return key;
 	}

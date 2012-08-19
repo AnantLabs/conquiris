@@ -189,7 +189,7 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 			}
 			final IndexReader reader = IndexReader.open(directory);
 			try {
-				return IndexInfo.fromMap(reader.numDocs(), reader.getCommitUserData());
+				return IndexInfo.fromMap(reader.numDocs(), reader.getIndexCommit().getUserData());
 			} finally {
 				Closeables.closeQuietly(reader);
 			}

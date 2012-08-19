@@ -128,7 +128,7 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 	 */
 	@Override
 	public Schema extend(Schema schema) {
-		checkNotNull("The schema must be provided");
+		checkNotNull(schema, "The schema must be provided");
 		if (isEmpty()) {
 			return schema;
 		}
@@ -166,7 +166,7 @@ final class SchemaImpl extends ForwardingMap<String, SchemaItem> implements Sche
 	 */
 	@Override
 	public Schema override(Schema schema) {
-		checkNotNull("The schema must be provided");
+		checkNotNull(schema, "The schema must be provided");
 		if (isEmpty()) {
 			return schema;
 		}

@@ -405,7 +405,7 @@ public final class Hit implements Supplier<Document> {
 
 		@Override
 		public Double apply(Number input) {
-			if (input instanceof Float) {
+			if (input instanceof Double) {
 				return (Double) input;
 			}
 			return input.doubleValue();
