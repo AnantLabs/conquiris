@@ -1,13 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.derquinse</groupId>
 		<artifactId>derquinse-common-project-parent</artifactId>
-		<version>1.0.24</version>
+		<version>1.0.26</version>
 	</parent>
 	<groupId>net.conquiris</groupId>
 	<artifactId>conquiris</artifactId>
-	<version>3.6.0-SNAPSHOT</version>
+	<version>3.6.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
 	<url>http://code.google.com/p/conquiris/</url>
@@ -16,9 +17,6 @@
 		<developerConnection>scm:git:https://code.google.com/p/conquiris/</developerConnection>
 		<url>http://code.google.com/p/conquiris/source/browse/</url>
 	</scm>
-	<properties>
-		<releaseTagBase>https://conquiris.googlecode.com/svn/tags/</releaseTagBase>
-	</properties>
 	<issueManagement>
 		<system>Google Code</system>
 		<url>http://code.google.com/p/conquiris/issues/list</url>
@@ -36,19 +34,21 @@
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<minmemory>256m</minmemory>
-					<maxmemory>512m</maxmemory>
-					<links>
-						<link>http://docs.guava-libraries.googlecode.com/git-history/v11.0.2/javadoc</link>
-						<link>http://joda-time.sourceforge.net/api-release</link>
-						<link>http://jsr311.java.net/nonav/releases/1.1</link>
-						<link>http://jersey.java.net/nonav/apidocs/1.12/jersey</link>
-						<link>http://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs</link>
-						<link>http://lucene.apache.org/java/3_5_0/api/all</link>
-					</links>
-					<version>false</version>
 					<doctitle>Conquiris API (version ${project.version})</doctitle>
 					<windowtitle>Conquiris API</windowtitle>
+					<links>
+						<link>http://docs.guava-libraries.googlecode.com/git-history/v13.0/javadoc</link>
+						<link>http://joda-time.sourceforge.net/api-release</link>
+						<link>http://jsr311.java.net/nonav/releases/1.1</link>
+						<link>http://jersey.java.net/nonav/apidocs/1.13/jersey</link>
+						<link>http://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs</link>
+						<link>http://docs.jboss.org/hibernate/core/3.6/javadocs</link>
+						<link>http://docs.oracle.com/javaee/6/api</link>
+						<link>http://static.springsource.org/spring/docs/3.1.x/javadoc-api</link>
+						<link>http://static.springsource.org/spring-security/site/docs/3.1.x/apidocs</link>
+						<link>http://apis.derquinse.net/derquinse-common/1.0.26</link>
+						<link>http://lucene.apache.org/core/3_6_1/api/all/</link>
+					</links>
 				</configuration>
 			</plugin>
 		</plugins>

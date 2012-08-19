@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>conquiris</artifactId>
 		<groupId>net.conquiris</groupId>
-		<version>3.6.0-SNAPSHOT</version>
+		<version>3.6.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>conquiris-jersey-server</artifactId>
@@ -13,24 +13,24 @@
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-jersey</artifactId>
-			<version>3.6.0-SNAPSHOT</version>
+			<version>3.6.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-jersey-client</artifactId>
-			<version>3.6.0-SNAPSHOT</version>
+			<version>3.6.1-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-core</artifactId>
-			<version>3.6.0-SNAPSHOT</version>
+			<version>3.6.1-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-core</artifactId>
-			<version>3.6.0-SNAPSHOT</version>
+			<version>3.6.1-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
