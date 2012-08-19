@@ -351,7 +351,7 @@ public final class Filters extends SearchSupport {
 
 	/**
 	 * Adds clauses to a boolean filter.
-	 * @param query Boolean filter to which the clauses are added.
+	 * @param filter Boolean filter to which the clauses are added.
 	 * @param occur Specifies how clauses are to occur in matching documents.
 	 * @param filters Filters to use to build the clauses.
 	 * @return The provided boolean filter.
@@ -370,7 +370,7 @@ public final class Filters extends SearchSupport {
 
 	/**
 	 * Adds clauses to a boolean filter.
-	 * @param query Boolean filter to which the clauses are added.
+	 * @param filter Boolean filter to which the clauses are added.
 	 * @param occur Specifies how clauses are to occur in matching documents.
 	 * @param filters Filters to use to build the clauses.
 	 * @return The provided boolean filter.
