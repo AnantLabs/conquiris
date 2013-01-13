@@ -42,7 +42,7 @@ import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
 /**
- * Sort building class. The comparators rovided as arguments MUST support null values.
+ * Sort building class. The comparators provided as arguments MUST support null values.
  * @author Andres Rodriguez
  */
 public final class SortBuilder implements Builder<Sort> {

@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>net.derquinse</groupId>
 		<artifactId>derquinse-common-project-parent</artifactId>
-		<version>1.0.26</version>
+		<version>1.0.27</version>
 	</parent>
 	<groupId>net.conquiris</groupId>
 	<artifactId>conquiris</artifactId>
@@ -25,7 +25,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.derquinse</groupId>
-			<artifactId>derquinse-common-test-support</artifactId>
+			<artifactId>derquinse-common-base</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
