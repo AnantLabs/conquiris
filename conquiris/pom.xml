@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>net.conquiris</groupId>
 	<artifactId>conquiris</artifactId>
-	<version>3.6.2-SNAPSHOT</version>
+	<version>3.6.2</version>
 	<packaging>pom</packaging>
 	<name>Conquiris :: Parent POM</name>
 	<url>http://code.google.com/p/conquiris/</url>
@@ -15,7 +15,7 @@
 		<connection>scm:git:https://code.google.com/p/conquiris/</connection>
 		<developerConnection>scm:git:https://code.google.com/p/conquiris/</developerConnection>
 		<url>http://code.google.com/p/conquiris/source/browse/</url>
-	  <tag>HEAD</tag>
+	  <tag>conquiris-3.6.2</tag>
   </scm>
 	<issueManagement>
 		<system>Google Code</system>
