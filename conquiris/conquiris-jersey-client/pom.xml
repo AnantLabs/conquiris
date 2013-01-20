@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>conquiris</artifactId>
 		<groupId>net.conquiris</groupId>
-		<version>3.6.3-SNAPSHOT</version>
+		<version>3.6.3</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>conquiris-jersey-client</artifactId>
@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-jersey</artifactId>
-			<version>3.6.3-SNAPSHOT</version>
+			<version>3.6.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
