@@ -17,6 +17,7 @@ package net.conquiris.search;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -179,9 +180,9 @@ abstract class AbstractSearcher implements Searcher {
 					HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 					float score = sd.score;
 					T item = map(searcher, sd, highlighted, mapper);
-					return ItemResult.found(docs.totalHits, score, w.elapsedMillis(), item);
+					return ItemResult.found(docs.totalHits, score, w.elapsed(TimeUnit.MILLISECONDS), item);
 				} else {
-					return ItemResult.notFound(w.elapsedMillis());
+					return ItemResult.notFound(w.elapsed(TimeUnit.MILLISECONDS));
 				}
 			}
 		});
@@ -221,12 +222,12 @@ abstract class AbstractSearcher implements Searcher {
 							T item = map(searcher, sd, highlighted, mapper);
 							items.add(item);
 						}
-						return PageResult.found(docs.totalHits, score, w.elapsedMillis(), firstRecord, items);
+						return PageResult.found(docs.totalHits, score, w.elapsed(TimeUnit.MILLISECONDS), firstRecord, items);
 					} else {
-						return PageResult.notFound(docs.totalHits, score, w.elapsedMillis(), firstRecord);
+						return PageResult.notFound(docs.totalHits, score, w.elapsed(TimeUnit.MILLISECONDS), firstRecord);
 					}
 				} else {
-					return PageResult.notFound(w.elapsedMillis(), firstRecord);
+					return PageResult.notFound(w.elapsed(TimeUnit.MILLISECONDS), firstRecord);
 				}
 			}
 		});
@@ -253,7 +254,7 @@ abstract class AbstractSearcher implements Searcher {
 				}
 				searcher.search(query, filter, collector);
 				final float maxScore = score ? scoredCollector.getMaxScore() : 1.0f;
-				return CountResult.of(collector.getTotalHits(), maxScore, w.elapsedMillis());
+				return CountResult.of(collector.getTotalHits(), maxScore, w.elapsed(TimeUnit.MILLISECONDS));
 			}
 		});
 	}

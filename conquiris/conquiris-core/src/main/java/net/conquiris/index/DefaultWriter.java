@@ -130,6 +130,7 @@ final class DefaultWriter extends AbstractWriter {
 				documents = 0;
 			} else {
 				final IndexReader reader = IndexReader.open(writer, false);
+				boolean threw = true;
 				try {
 					Map<String, String> data = reader.getIndexCommit().getUserData();
 					if (overrideCheckpoint) {
@@ -143,8 +144,9 @@ final class DefaultWriter extends AbstractWriter {
 						commitData = data;
 					}
 					documents = reader.numDocs();
+					threw = false;
 				} finally {
-					Closeables.closeQuietly(reader);
+					Closeables.close(reader, threw);
 				}
 			}
 			this.indexInfo = IndexInfo.fromMap(documents, commitData);

@@ -188,10 +188,13 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 				return IndexInfo.empty();
 			}
 			final IndexReader reader = IndexReader.open(directory);
+			boolean threw = true;
 			try {
-				return IndexInfo.fromMap(reader.numDocs(), reader.getIndexCommit().getUserData());
+				IndexInfo info = IndexInfo.fromMap(reader.numDocs(), reader.getIndexCommit().getUserData());
+				threw = false;
+				return info;
 			} finally {
-				Closeables.closeQuietly(reader);
+				Closeables.close(reader, threw);
 			}
 		}
 	}
@@ -245,12 +248,18 @@ public final class DirectoryIndexerService extends AbstractLocalIndexerService {
 
 		void closeWriter() {
 			lock.lock();
+			boolean nullify = false;
 			try {
 				if (indexWriter != null) {
-					Closeables.closeQuietly(indexWriter);
+					Closeables.close(indexWriter, false);
+					nullify = true;
+				}
+			} catch (IOException e) {
+				// TODO log
+			} finally {
+				if (nullify) {
 					indexWriter = null;
 				}
-			} finally {
 				lock.unlock();
 			}
 		}

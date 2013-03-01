@@ -27,7 +27,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.testng.annotations.Test;
 
-import com.google.common.io.Closeables;
+import com.google.common.io.Closer;
 
 /**
  * Tests for EmptyIndex.
@@ -38,13 +38,13 @@ public class EmptyIndexTest {
 	/** Missing index. */
 	@Test(expectedExceptions = IndexNotFoundException.class)
 	public void missingRAM() throws Exception {
-		final IndexReader reader = IndexReader.open(new RAMDirectory());
+		final Closer closer = Closer.create();
 		try {
-			IndexSearcher s = new IndexSearcher(reader);
+			IndexReader reader = closer.register(IndexReader.open(new RAMDirectory()));
+			IndexSearcher s = closer.register(new IndexSearcher(reader));
 			s.search(new MatchAllDocsQuery(), 5);
-			Closeables.closeQuietly(s);
 		} finally {
-			Closeables.closeQuietly(reader);
+			closer.close();
 		}
 	}
 
@@ -59,9 +59,9 @@ public class EmptyIndexTest {
 			try {
 				IndexSearcher s = new IndexSearcher(r);
 				s.search(new MatchAllDocsQuery(), 5);
-				Closeables.closeQuietly(s);
+				s.close();
 			} finally {
-				Closeables.closeQuietly(r);
+				r.close();
 			}
 		} finally {
 		}
@@ -72,7 +72,7 @@ public class EmptyIndexTest {
 	public void search() throws Exception {
 		IndexSearcher s = new IndexSearcher(EmptyIndex.getInstance().get().get());
 		s.search(new MatchAllDocsQuery(), 5);
-		Closeables.closeQuietly(s);
+		s.close();
 	}
 
 }

@@ -18,6 +18,7 @@ package net.conquiris.search;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.conquiris.api.search.ManagedReaderSupplier;
@@ -27,7 +28,6 @@ import net.conquiris.api.search.ReaderSupplier;
 import org.apache.lucene.index.IndexReader;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.io.Closeables;
 
 /**
  * Default managed reader supplier implementation.
@@ -117,7 +117,7 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 					ok = true;
 					return null;
 				}
-			} else if (watch == null || watch.elapsedMillis() > holdTime) {
+			} else if (watch == null || watch.elapsed(TimeUnit.MILLISECONDS) > holdTime) {
 				IndexReader indexReader = reader.get();
 				IndexReader reopened = IndexReader.openIfChanged(indexReader);
 				if (reopened != null) {
@@ -138,7 +138,7 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 				dispose();
 			}
 			if (opened != null && !used) {
-				Closeables.closeQuietly(opened.get());
+				close(opened);
 			}
 		}
 	}
@@ -149,11 +149,26 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 	 */
 	public synchronized void dispose() {
 		if (reader != null) {
-			Closeables.closeQuietly(reader.get());
+			close(reader);
 			reader = null;
 		}
 		if (watch != null) {
 			watch.reset();
+		}
+	}
+
+	private void close(Reader reader) {
+		if (reader == null) {
+			return;
+		}
+		IndexReader ir = reader.get();
+		if (ir == null) {
+			return;
+		}
+		try {
+			ir.close();
+		} catch (Exception e) {
+			// TODO: log
 		}
 	}
 

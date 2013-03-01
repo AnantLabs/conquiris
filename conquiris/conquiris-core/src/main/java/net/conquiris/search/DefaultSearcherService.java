@@ -16,6 +16,9 @@
 package net.conquiris.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.IOException;
+
 import net.conquiris.api.search.ReaderSupplier;
 import net.conquiris.api.search.Searcher;
 import net.conquiris.api.search.SearcherService;
@@ -23,7 +26,6 @@ import net.conquiris.api.search.SearcherService;
 import org.apache.lucene.search.IndexSearcher;
 
 import com.google.common.base.Function;
-import com.google.common.io.Closeables;
 
 /**
  * Default searcher implementation, based on a single index searcher that it's never closed by this
@@ -69,7 +71,15 @@ final class DefaultSearcherService extends AbstractSearcher implements SearcherS
 	 * )
 	 */
 	void disposeIndexSearcher(IndexSearcher searcher) {
-		Closeables.closeQuietly(searcher);
-		Closeables.closeQuietly(searcher.getIndexReader());
+		try {
+			searcher.close();
+		} catch (IOException e) {
+			// TODO: log
+		}
+		try {
+			searcher.getIndexReader().close();
+		} catch (IOException e) {
+			// TODO: log
+		}
 	}
 }
