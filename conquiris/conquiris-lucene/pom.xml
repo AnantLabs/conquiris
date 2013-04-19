@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>conquiris</artifactId>
 		<groupId>net.conquiris</groupId>
-		<version>3.6.6</version>
+		<version>3.6.7-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>conquiris-lucene</artifactId>
@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>net.conquiris</groupId>
 			<artifactId>conquiris-schema</artifactId>
-			<version>3.6.6</version>
+			<version>3.6.7-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
