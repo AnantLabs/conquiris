@@ -67,10 +67,9 @@ public abstract class Result implements Serializable {
 
 	final <T extends Result> T equalsResult(Object obj, Class<T> klass) {
 		if (obj != null && klass.equals(obj.getClass())) {
-			@SuppressWarnings("unchecked")
-			final T r = (T) obj;
+			final Result r = (Result) obj;
 			if (totalHits == r.totalHits && maxScore == r.maxScore && time == r.time) {
-				return r;
+				return klass.cast(obj);
 			}
 		}
 		return null;

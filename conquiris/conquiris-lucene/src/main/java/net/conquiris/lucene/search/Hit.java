@@ -18,7 +18,6 @@ package net.conquiris.lucene.search;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,8 +50,7 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.InputSupplier;
+import com.google.common.io.ByteSource;
 
 /**
  * Object representing a search hit. Public methods never return {@code null}.
@@ -169,7 +167,7 @@ public final class Hit implements Supplier<Document> {
 	}
 
 	/** Returns the values of the binary fields with the given name. */
-	public FieldValues<InputSupplier<ByteArrayInputStream>> binary(String name) {
+	public FieldValues<ByteSource> binary(String name) {
 		return new BinaryValues(name);
 	}
 
@@ -230,7 +228,7 @@ public final class Hit implements Supplier<Document> {
 	}
 
 	/** Returns the values of the fields corresponding to the given schema item. */
-	public FieldValues<InputSupplier<ByteArrayInputStream>> item(BinarySchemaItem item) {
+	public FieldValues<ByteSource> item(BinarySchemaItem item) {
 		return binary(checkName(item));
 	}
 
@@ -430,7 +428,7 @@ public final class Hit implements Supplier<Document> {
 	}
 
 	/** Binary values. */
-	private final class BinaryValues extends AbstractFieldValues<Fieldable, InputSupplier<ByteArrayInputStream>> {
+	private final class BinaryValues extends AbstractFieldValues<Fieldable, ByteSource> {
 		BinaryValues(String name) {
 			super(name);
 		}
@@ -441,10 +439,9 @@ public final class Hit implements Supplier<Document> {
 		}
 
 		@Override
-		public InputSupplier<ByteArrayInputStream> apply(Fieldable input) {
+		public ByteSource apply(Fieldable input) {
 			checkArgument(input.isBinary());
-			return ByteStreams.newInputStreamSupplier(input.getBinaryValue(), input.getBinaryOffset(),
-					input.getBinaryLength());
+			return ByteSource.wrap(input.getBinaryValue()).slice(input.getBinaryOffset(), input.getBinaryLength());
 		}
 	}
 

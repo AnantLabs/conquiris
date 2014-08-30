@@ -29,6 +29,7 @@ import net.conquiris.api.index.IndexerActivationPolicy;
 import net.conquiris.api.index.LocalIndexerService;
 import net.derquinse.common.log.ContextLog;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.util.concurrent.Atomics;
 
@@ -110,7 +111,7 @@ public abstract class AbstractLocalIndexerService implements LocalIndexerService
 	 * @param activationPolicy Policy to use. If {@code null} an always active policy will be used.
 	 */
 	public void setActivationPolicy(@Nullable IndexerActivationPolicy activationPolicy) {
-		this.activationPolicy = Objects.firstNonNull(activationPolicy, alwaysActive());
+		this.activationPolicy = MoreObjects.firstNonNull(activationPolicy, alwaysActive());
 	}
 
 	/* Service name. */

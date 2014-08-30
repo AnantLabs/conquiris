@@ -25,8 +25,9 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -252,7 +253,7 @@ public final class IndexInfo {
 
 	@Override
 	public String toString() {
-		ToStringHelper h = Objects.toStringHelper(this).add(CHECKPOINT_NAME, checkpoint).add("documents", documents)
+		ToStringHelper h = MoreObjects.toStringHelper(this).add(CHECKPOINT_NAME, checkpoint).add("documents", documents)
 				.add(TARGET_CHECKPOINT_NAME, targetCheckpoint).add(TIMESTAMP_NAME, timestamp).add(SEQUENCE_NAME, sequence);
 		if (!properties.isEmpty()) {
 			h.add("properties", properties);

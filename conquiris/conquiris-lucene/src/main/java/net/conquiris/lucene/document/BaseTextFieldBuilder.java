@@ -28,7 +28,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.TermVector;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  * Base class for text field builders. Text fields are indexed, tokenized but not stored by default.
@@ -124,7 +124,7 @@ public abstract class BaseTextFieldBuilder<B extends BaseTextFieldBuilder<B>> ex
 
 	/** Sets whether to store term vectors. They will not be stored if the argument is {@code null}. */
 	public final B vector(@Nullable TermVector vector) {
-		this.vector = Objects.firstNonNull(vector, TermVector.NO);
+		this.vector = MoreObjects.firstNonNull(vector, TermVector.NO);
 		return thisValue();
 	}
 

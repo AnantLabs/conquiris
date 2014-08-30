@@ -55,7 +55,7 @@ final class DefaultManagedReaderSupplier extends AbstractReaderSupplier implemen
 	DefaultManagedReaderSupplier(ReaderSupplier source, long holdTime) {
 		this.source = checkNotNull(source, "The unmanaged reader source must be provided");
 		this.holdTime = Math.max(0, holdTime);
-		this.watch = this.holdTime > 0 ? new Stopwatch() : null;
+		this.watch = this.holdTime > 0 ? Stopwatch.createUnstarted() : null;
 	}
 
 	/*

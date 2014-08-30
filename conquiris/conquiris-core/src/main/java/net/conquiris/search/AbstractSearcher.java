@@ -46,7 +46,7 @@ import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.search.TotalHitCountCollector;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
@@ -172,12 +172,12 @@ abstract class AbstractSearcher implements Searcher {
 			final @Nullable Sort sort, final @Nullable Highlight highlight) {
 		return perform(new Op<ItemResult<T>>() {
 			public ItemResult<T> perform(IndexSearcher searcher) throws Exception {
-				Stopwatch w = new Stopwatch().start();
+				Stopwatch w = Stopwatch.createStarted();
 				Query rewritten = searcher.rewrite(query);
 				TopDocs docs = getTopDocs(searcher, query, filter, sort, 1);
 				if (docs.totalHits > 0) {
 					ScoreDoc sd = docs.scoreDocs[0];
-					HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
+					HighlightedQuery highlighted = MoreObjects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 					float score = sd.score;
 					T item = map(searcher, sd, highlighted, mapper);
 					return ItemResult.found(docs.totalHits, score, w.elapsed(TimeUnit.MILLISECONDS), item);
@@ -207,7 +207,7 @@ abstract class AbstractSearcher implements Searcher {
 		// Normal operation
 		return perform(new Op<PageResult<T>>() {
 			public PageResult<T> perform(IndexSearcher searcher) throws Exception {
-				Stopwatch w = new Stopwatch().start();
+				Stopwatch w = Stopwatch.createStarted();
 				int total = firstRecord + maxRecords;
 				Query rewritten = searcher.rewrite(query);
 				TopDocs docs = getTopDocs(searcher, rewritten, filter, sort, total);
@@ -216,7 +216,7 @@ abstract class AbstractSearcher implements Searcher {
 					float score = docs.getMaxScore();
 					if (n > firstRecord) {
 						final List<T> items = Lists.newArrayListWithCapacity(n - firstRecord);
-						HighlightedQuery highlighted = Objects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
+						HighlightedQuery highlighted = MoreObjects.firstNonNull(highlight, Highlight.no()).highlight(rewritten);
 						for (int i = firstRecord; i < n; i++) {
 							ScoreDoc sd = docs.scoreDocs[i];
 							T item = map(searcher, sd, highlighted, mapper);
@@ -242,7 +242,7 @@ abstract class AbstractSearcher implements Searcher {
 	public CountResult getCount(final Query query, final @Nullable Filter filter, final boolean score) {
 		return perform(new Op<CountResult>() {
 			public CountResult perform(IndexSearcher searcher) throws Exception {
-				final Stopwatch w = new Stopwatch().start();
+				final Stopwatch w = Stopwatch.createStarted();
 				final ScoredTotalHitCountCollector scoredCollector;
 				final TotalHitCountCollector collector;
 				if (score) {
